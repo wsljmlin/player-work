@@ -1,0 +1,347 @@
+2017-4-10 9:20-19:50
+入职
+学习资料，下载代码
+repo init -u git://git.myamlogic.com/playform/manifest -b m-amlogic --repo-url=git://10.8.9.5/tools/repo.git 
+repo sync
+
+2017-4-11 9:00-20；10
+编译7.1代码，烧写
+分析nuplayer
+
+2017-4-12 9:00-20；10
+分析nuplayer的框架
+nuplayer->decoder->mediacodec->acodec->render
+
+2017-4-13 9:12-18:30
+nuplayer
+logcat -c;am start -n com.android.gallery3d/.app.MovieActivity -d  http://10.68.11.54:8000/HLS/rabbit/rabbit.m3u8
+
+分析GenericSource，本地播放
+
+2017-4-14 9:00-19:00
+setprop media.amnuplayer.localplay true
+1.为什么会创建好几个player？
+amsuperplayer->amlogicplayer->anuplayer
+ts,mp4
+acodec->muxomx->omx->...
+
+2017-4-17 9:15-20:10
+
+1.Bug 141324 - {AV} Autobuild20170321开始用Amnuplayer，播放部分16：9的视频没有满屏显示 概率
+setprop media.amnuplayer.localplay false
+cat /sys/class/video/screen_mode
+nuplayer播放本地视频时没有全屏
+
+2.Bug 141326 - {AV} Autobuild20170321开始用Amnuplayer，播放1920x1088分辨率的视频，画面最下方有一条灰色粗线
+提供的视频是.tp，nuplayer当前只支持“.ts”和“mp4”
+
+
+减少探测时间
+AVDictionary* pOptions = NULL;
+????handle->pFormatContext->probesize = 100 *1024;
+????handle->pFormatContext->max_analyze_duration = 5 * AV_TIME_BASE;
+
+
+VSS- Virtual Set Size 虚拟耗用内存（包含共享库占用的内存） 
+RSS- Resident Set Size 实际使用物理内存（包含共享库占用的内存） 
+PSS- Proportional Set Size 实际使用的物理内存（比例分配共享库占用的内存） 
+USS- Unique Set Size 进程独自占用的物理内存（不包含共享库占用的内存） 
+一般来说内存占用大小有如下规律：VSS >= RSS >= PSS >= USS
+1.procrank 显示内存
+2.top ?| grep app名称
+3.dumpsys?[Option]
+?????????????? meminfo 显示内存信息
+?????????????? cpuinfo 显示CPU信息
+?????????????? account 显示accounts信息
+?????????????? activity 显示所有的activities的信息
+?????????????? window 显示键盘，窗口和它们的关系
+?????????????? wifi 显示wifi信息
+
+mount -o rw,remount /dev/block/system  /system;
+killall mediaserver 
+更新后kill下
+setenforce 0    这个是关闭seliux
+
+2017-4-18 9:24-19：40
+debuggerd 3938
+
+15：30 小米
+1. debuggerd 3942, -1
+mediaserver被杀掉,systemserver被杀
+
+2. debuggerd 3932
+
+3. debuggerd 3940 stone3,拔掉硬盘，内存不恢复,stone4
+
+4.去除find_stream_info
+
+
+5.libstagefright打开log，恢复findstreaminfo stone5 stone6
+出现应用无响应，
+
+分析扫描时的内存泄漏
+1.native层
+2.java层
+
+2017-4-19 9：40-20：10
+
+dumpsys meminfo 3953
+
+1.检测map点
+pid 3927，通过smaps没有看出来
+
+2.打开mediaplayservice log
+pid 3934
+
+3.添加打印信息，parse后主动关闭
+pid 3953
+
+4.pid3939,去除3的
+
+5.注释decode_open的申请内存的部分，排除法
+pid 5183，无用
+
+6.去掉find_stream_info
+3956，内存正常
+avformat_find_stream_info消耗内存
+
+7.只关掉find_stream_info
+pid 3936
+
+2017-4-20 9：30-20:05
+今天准备二分法在avformat_find_stream_info查找，直到的泄漏内存的部分
+
+1.avformat_find_stream_info添加打印信息
+添加av_destruct_packet，avformat_find_stream_info打开
+pid 3936
+
+2.avformat_find_stream_info注释掉if (flush_codecs) {后一部分代码
+pid 3939
+
+3.注释ff_check_interrupt之后的
+pid5245，能保持在270M左右，不会再增加，可能是这高的一部分可能是codec没有关闭引起的
+推测问题可能是ff_check_interrupt(&ic->interrupt_callback)这里面的for循环引起的
+
+4.在3的里面加上av_destruct_packet尝试
+pid3955 错误，不行，会引入别错误，不能简单的增加
+
+5.在4的基础上
+free_packet_buffer(&ic->packet_buffer, &ic->packet_buffer_end)
+没效果
+
+6.注释掉ff_check_interrupt所在循环，会维护在270M左右，不变了，再次插入u盘，会到530M左右
+可以推测，每次检测，都没有正常的释放空间
+
+7.添加中断函数
+pid3957
+pid3943
+pid3936
+pid5175
+
+8.编译valgrind，重新boot系统
+
+valgrind --leak-check=full --log-file=/data/valgrind.log 
+/system/bin/surfaceflinger &
+
+2017-4-21 9：15-19：30
+
+1.NOBUFFERFLAG置位
+pid3953
+
+
+2.去掉其中的try_decode_frame
+无用
+
+3.探测的时间和size减少
+ic->probesize = 2048;
+ic->max_analyze_duration = 1000;
+48M左右
+能避免内存的问题，但问题还得继续找
+
+4.
+int kProbeStartBufSize = 2 * 1024;
+	int kProbeMaxBufSize = 512 * 1024;
+	int bufSize = 0;
+for (bufSize = kProbeStartBufSize; bufSize <= kProbeMaxBufSize; bufSize *= 2) {
+	    if (avformat_find_stream_info(mStream.pFormatCtx, NULL) < 0) {
+	        ALOGV("Coundn't find stream information !\n");
+	        //goto err1;
+	        continue;
+	    }
+		break;
+	}
+	if(bufSize >= kProbeMaxBufSize)goto err1;
+会出错
+
+5.分析视频格式，看是否是某一种格式的
+修改StagefrightMediaScanner: processFile
+if(NULL!=strstr(path, ".mp4")) {
+    ALOGV("[wsl] will processfile %s", path);
+    result = processFileInternal(path, mimeType, client);
+    }
+
+5.1 mp4
+pid3962
+pid5177
+稳定24M左右,u盘插拔后38M左右，再次29M左右，只扫描mp4，没有MP4
+
+5.2 avi
+pid3936
+25M左右,插拔后25M左右
+pid3959
+
+5.3 ts
+5.4 mkv
+pid5178
+内存出错
+1》mkv的probeize处理后pid3957,无用，判断不到
+2》排除mkv后，pid5167
+pid5174
+pid5189 35M左右 43M左右 48M左右
+=>确定是mkv格式的解析出的问题
+
+5.5 wav
+5.6 aac
+5.7 amr
+5.8 flac
+5.9 3gp
+5.10 mpg
+5.11 wmv
+5.12 webm
+pid3940
+13M左右，插拔后14M左右
+
+5.13 wka
+
+
+2017-4-24 9：20
+
+1 只处理mkv格式
+打印部分ffmpeg处理mkv的代码
+pid3933
+
+2 把avform_find_stream_info中的解码注释
+pid3931，无效，说明是read出了问题
+
+3.把read的部分去掉
+
+4.read后,在add_to_pktbuf之前continue
+pid5169,内存持续增加
+
+5.read_frame_internal添加打印信息
+pid5166
+pid3935
+pid3947
+
+6.去掉之前的free_packet，应该是没用的
+
+7.先给一个方案
+
+if (!strcmp(ic->iformat->name,"matroska,webm")) {
+		TRACE();
+		ic->probesize = 1024;
+		ic->max_analyze_duration = 1000;
+	}
+	ic->probesize = 20483949
+	ic->max_analyze_duration = 1000;
+
+8。发现只改mkv的probesize还不行
+
+2017-04-25 9：15-20:15
+
+1.确定是mkv的问题
+pid3949
+
+2.带小米硬盘回公司
+
+http://proxy-cn.amlogic.com:8000/download/tools/amlogic.list.bj
+ac3的probe干掉就正常了，但可能是探测失败导致find_stream_info失败，最终导致其退出，不能说是问题。
+valgrind也不正常的找出内存泄漏部分
+
+ valgrind --leak-check=full --log-file=/data/valgrind.log /system/bin/mediaserver &
+ 
+ /system/bin/valgrind --leak-check=full --log-file=/data/valgrind3.log
+ 
+ 
+ 2017-04-26 9：15-
+1.把ffmpeg调用的代码从mediaserver抽出来
+valgrind --leak-check=full --log-file=/data/valgrind——20170426.log 
+此方法不能得出什么结论，没有检测出明显的内存泄露
+
+2.
+setprop  libc.debug.malloc.options leak_track
+setprop libc.debug.malloc.program mediaserver
+
+/mnt/fileroot/shuanglong.wang/n-amlogic/bionic/libc/malloc_debug
+
+setprop  libc.debug.malloc.options leak_track
+setprop  libc.debug.malloc.options backtrace
+setprop libc.debug.malloc.program test_AmlMetadataRetriver
+
+setprop libc.debug.malloc.options "backtrace=1 free_track_backtrace_num_frames=16 leak_track"
+setprop libc.debug.malloc.program mediaserver
+
+/mnt/media_rw/FC98439398434B7A/\$RECYCLE.BIN/S-1-5-21-2556328162-2676643245-466163901-500/\$RK4FVT0.mkv
+
+
+#include <android/log.h>
+__android_log_print(ANDROID_LOG_ERROR, "greatgauss", " %s\n", line)
+
+2017-04-27 8:30-21:10
+
+2017-04-28 8:30-20:30
+AVIO_FLAG_READ
+mStream.pFormatCtx->pb->flag | = AVIO_FLAG_MDIASCAN;
+
+
+modified:   Android.mk
+#       modified:   libavcodec/aac_ac3_parser.c
+#       modified:   libavcodec/aac_parser.c
+#       modified:   libavcodec/ac3_parser.c
+#       modified:   libavcodec/parser.c
+#       modified:   libavformat/avio.h
+#       modified:   libavformat/utils.c
+
+ modified:   AmThumbnail/AmThumbnail.cpp
+#       modified:   AmThumbnail/AmThumbnail.h
+#       modified:   AmlPlayerMetadataRetriever.cpp
+
+
+最终修改
+ modified:   libavformat/avio.h
+#       modified:   libavformat/utils.c
+
+git br -a
+  725  git checkout -b n-amlogic amlogic/n-amlogic
+  726  git st
+  727  git checkout -b amlogic-pd-142712
+  728  git st
+  
+  git ci -m "PD#142712:fix the bug that some err media scan not exit that may consume large memory"
+  
+  git config --global user.name "shuanglong.wang"
+    git config --global user.email shuanglong.wang@amlogic.com
+	
+	 git commit  --amend libavformat/utils.c
+	 
+	 
+	 
+	 chmod 644 libavformat/utils.c
+  862  git add libavformat/utils.c
+  863  git commit --amend 
+  864  git st
+  865  git show 
+  866  git st
+  867  git checkout n-amlogic 
+  868  git log 
+  869  git cherry-pick amlogic-pd-142712 
+  870  git log 
+  871  git show 1e3785bc1e0b2
+  872  git show 1e3785bc1e0b2
+  873  git 
+  874  git st
+  875  repo upload .
+  
+  
+  
+ 

@@ -1,0 +1,85 @@
+diff --git a/libc/malloc_debug/malloc_debug.cpp b/libc/malloc_debug/malloc_debug.cpp
+old mode 100644
+new mode 100755
+index 1ee7689..5580f7e
+--- a/libc/malloc_debug/malloc_debug.cpp
++++ b/libc/malloc_debug/malloc_debug.cpp
+@@ -25,6 +25,8 @@
+  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  * SUCH DAMAGE.
+  */
++#define LOG_NDEBUG 0
++#define LOG_TAG "malloc_debug"
+ 
+ #include <errno.h>
+ #include <inttypes.h>
+@@ -45,6 +47,7 @@
+ #include "debug_log.h"
+ #include "malloc_debug.h"
+ 
++
+ // ------------------------------------------------------------------------
+ // Global Data
+ // ------------------------------------------------------------------------
+@@ -53,6 +56,9 @@ DebugData* g_debug;
+ int* g_malloc_zygote_child;
+ 
+ const MallocDispatch* g_dispatch;
++static int64_t malloc_size = 0;
++static int64_t free_size = 0;
++
+ // ------------------------------------------------------------------------
+ 
+ // ------------------------------------------------------------------------
+@@ -286,7 +292,6 @@ void* debug_malloc(size_t size) {
+   if (size == 0) {
+     size = 1;
+   }
+-
+   size_t real_size = size + g_debug->extra_bytes();
+   if (real_size < size) {
+     // Overflow.
+@@ -307,6 +312,10 @@ void* debug_malloc(size_t size) {
+       return nullptr;
+     }
+     pointer = InitHeader(header, header, size);
++    malloc_size += size;
++    if (size > 500 * 1024)
++    __libc_format_log(ANDROID_LOG_DEBUG, LOG_TAG, "[%s:%d] malloc pointer=[%p,%p], size=%d, size=%lld\n",
++        __FUNCTION__, __LINE__, pointer, header->orig_pointer, size, malloc_size);
+   } else {
+     pointer = g_dispatch->malloc(real_size);
+   }
+@@ -334,6 +343,10 @@ void debug_free(void* pointer) {
+       LogTagError(header, pointer, "free");
+       return;
+     }
++    free_size += header->size;
++    if (header->size > 500 * 1024)
++    __libc_format_log(ANDROID_LOG_DEBUG, LOG_TAG, "[%s:%d] free pointer=[%p,%p], size=%d, allsize=%lld\n",
++        __FUNCTION__, __LINE__, pointer, header->orig_pointer, header->size, free_size);
+     free_pointer = header->orig_pointer;
+ 
+     if (g_debug->config().options & FRONT_GUARD) {
+@@ -426,7 +439,11 @@ void* debug_memalign(size_t alignment, size_t bytes) {
+     value += (-value % alignment);
+ 
+     Header* header = g_debug->GetHeader(reinterpret_cast<void*>(value));
++    malloc_size += bytes;
+     pointer = InitHeader(header, pointer, bytes);
++    if (bytes > 500 * 1024)
++    __libc_format_log(ANDROID_LOG_DEBUG, LOG_TAG, "[%s:%d] memmalloc pointer=[%p:%p], size=%d,size=%lld\n",
++        __FUNCTION__, __LINE__, pointer, header->orig_pointer, header->size, malloc_size);
+   } else {
+     size_t real_size = bytes + g_debug->extra_bytes();
+     if (real_size < bytes) {
+@@ -573,6 +590,9 @@ void* debug_calloc(size_t nmemb, size_t bytes) {
+     if (header == nullptr) {
+       return nullptr;
+     }
++    if (size > 500 * 1024)
++    __libc_format_log(ANDROID_LOG_DEBUG, LOG_TAG, "[%s:%d] malloc pointer=[%p,%p], size=%d, size=%lld\n",
++        __FUNCTION__, __LINE__, header, header->orig_pointer, size, malloc_size);
+     memset(header, 0, g_dispatch->malloc_usable_size(header));
+     return InitHeader(header, header, size);
+   } else {

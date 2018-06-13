@@ -1,0 +1,323 @@
+1.常用的property
+setprop media.amnuplayer.localplay true
+setprop media.omx.single_mode 1 
+setprop media.omx.display_mode 1
+
+/sys/module/amvdec_h264/parameters/error_recovery_mode    // 是否显示错误帧  1表示需要不显示错误帧，0表示显示错误帧   不想看到任何的马赛克，就使用2
+
+检测内存泄漏的工具
+setprop  libc.debug.malloc.options leak_track
+setprop  libc.debug.malloc.options backtrace
+setprop libc.debug.malloc.program test_AmlMetadataRetriver
+setprop libc.debug.malloc.options "backtrace=1 free_track_backtrace_num_frames=16 leak_track"
+setprop libc.debug.malloc.program mediaserver
+
+
+dumpsys meminfo mediaextractor
+valgrind --leak-check=full --log-file=/data/valgrind.log /system/bin/mediaserver &
+VSS- Virtual Set Size 虚拟耗用内存（包含共享库占用的内存） 
+RSS- Resident Set Size 实际使用物理内存（包含共享库占用的内存） 
+PSS- Proportional Set Size 实际使用的物理内存（比例分配共享库占用的内存） 
+USS- Unique Set Size 进程独自占用的物理内存（不包含共享库占用的内存） 
+一般来说内存占用大小有如下规律：VSS >= RSS >= PSS >= USS
+
+添加写文件的权限
+setenforce 0    这个是关闭seliux
+
+autobuild
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android-N/job/Android_N_PATCHBUILD_MBOX_ALL/build?delay=0sec
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android-N/
+http://firmware-sh.amlogic.com/firmware/image/android/Android-N/BOX/
+
+web 打印机
+10.68.19.35:80
+
+
+打印线程调用栈
+debuggerd 3938
+
+cat /sys/class/video/screen_mode
+mount -o rw,remount /dev/block/system  /system;
+
+添加log打印信息
+#include <android/log.h>
+__android_log_print(ANDROID_LOG_ERROR, "greatgauss", " %s\n", line)
+
+代码下载
+repo init -u git://git.myamlogic.com/platform/manifest -b m-amlogic --repo-url=git://10.8.9.5/tools/repo.git 
+repo sync
+repo init -u git://git.myamlogic.com/platform/manifest.git -b o-mr1-amlogic -m amlogic.xml --repo-url=git://10.8.9.5/tools/repo.git
+
+omx下载
+git clone ssh://jian.wang@scgit.amlogic.com:29418/av-restricted/platform/hardware/amlogic/omx
+
+抽帧
+echo 1 > /sys/module/amvideo/parameters/force_vskip_cnt  带宽检测 抽帧1/2
+echo 2 > /sys/module/amvideo/parameters/force_vskip_cnt      3/4
+
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+echo performance > scaling_governor
+
+wanjian 62服务器
+jian.wang
+4Jwang$!
+
+不显示错误帧
+/sys/module/amvdec_h264/parameters/error_recovery_mode    // 是否显示错误帧  1表示需要不显示错误帧，0表示显示错误帧   不想看到任何的马赛克，就使用2
+
+编译apk
+LOCAL_DEX_PREOPT := false
+http://wiki-china.amlogic.com/Reference_Project/Android_7.0/1._Android_7.0_3.14_Kernel(GXL)
+
+启动hls
+logcat -c;am start -n com.android.gallery3d/.app.MovieActivity -d  http://10.68.11.54:8000/HLS/rabbit/rabbit.m3u8
+
+2.提交代码
+git checkout -b n-amlogic amlogic/n-amlogic
+git st
+git checkout -b amlogic-pd-142712
+git commit --amend
+git cherry-pick amlogic-pd-142712
+repo upload .
+
+omx提交
+gitdir=$(git rev-parse --git-dir); scp -p -P 29418 shuanglong.wang@scgit.amlogic.com:hooks/commit-msg ${gitdir}/hooks/
+git commit --amend
+
+git merge xxx
+git push  origin HEAD:refs/for/refs/heads/masters
+
+
+so 编译 先需要pull 到最新 ，然后加你上你改动，find . -type f -exec touch {} \; 再mm -B
+你编译的so 需要按照这个步骤重新编译 提交一下
+代码pull 到最新 ，然后加你上你改动 
+然后把所有生成的so 覆盖到libstagefright lib 目录
+
+
+3.usb burning uboot->update
+
+4.
+在uboot下输入这3条命令即可
+setenv EnableSelinux permissive
+save
+reset
+
+store init 3
+
+5.
+ffprobe -i input_file -show_packets -select_streams v
+
+6.
+查看checkin checkout pts
+echo 7 > /proc/sys/kernel/printk
+echo 1 > /sys/class/tsync/debug_audio_pts
+echo 1 > /sys/class/tsync/debug_video_pts & eecho 1 > /sys/class/tsync/debug_pts_checkin && echo 1 > /sys/class/tsync/debug_pts_checkout
+echo 1 > /sys/class/tsync/debug_video_pts & eecho 1 > /sys/class/tsync/debug_pts_checkin && echo 1 > /sys/class/tsync/debug_pts_checkout
+
+7.
+echo rm default > /sys/class/vfm/map
+echo add default decoder amlvideo amvideo > /sys/class/vfm/map
+chmod 444  /sys/class/vfm/map 可以防止omx改变
+
+
+8.
+http://10.68.11.54:8000/HLS/rabbit/rabbit.m3u8
+
+9
+main_extractorservice.cpp
+11:28:08
+Jmlin 2017/8/22 11:28:08
+limitProcessMemory(
+        "ro.media.maxmem", /* property that defines limit */
+        SIZE_MAX, /* upper limit in bytes */
+        20 /* upper limit as percentage of physical RAM */);
+http://scgit.amlogic.com:8080/#/c/36249
+ro.media.maxmem，这个属性
+
+source  /opt/choose_java_version.sh
+
+10 haibang
+10.28.8.19 6.0
+bang.peng Vn0EfwX
+
+media-doc
+git clone ssh://zhi.zhou@scgit.amlogic.com:29418/av-restricted/media_docs
+
+11
+estimate_timings_from_pts
+echo 11 > /sys/class/codec_mm/debug
+
+setprop media.omx.stream_mode 1
+
+12
+echo 0 > /sys/module/rdma/parameters/enable
+pm disable com.android.bluetooth
+
+setprop sys.videoplayer.debug true
+
+cat /sys/class/mpgpu/cur_freq ;
+cat /sys/class/mpgpu/cur_pp
+
+repo init -m openlinux_m-amlogic_20160907.xml
+
+wiki bugzilla passwd: abc@12345
+ssh passwd: abc@123456
+samba passwd: abc@123456
+original passwd: RpocMiZ
+outlook 20170929 abc@12345 => Rpoc4MiZ
+20171010=》abc@123456
+
+exoplayer
+am start -a com.google.android.exoplayer.demo.action.VIEW -d file:///sdcard/Movies/appple.mp4
+
+
+打印surfacefinger的显示时间
+dumpsys SurfaceFlinger --latency "SurfaceView - com.android.gallery3d/com.android.gallery3d.app.MovieActivity"
+dumpsys SurfaceFlinger --latency "com.droidlogic.videoplayer/com.droidlogic.videoplayer.VideoPlayer"
+
+android O
+dumpsys SurfaceFlinger --latency "com.droidlogic.videoplayer/com.droidlogic.videoplayer.VideoPlayer#0"
+
+dumpsys SurfaceFlinger --latency "org.xbmc.kodi/org.xbmc.kodi.Main#0"
+
+绑定其它cpu
+cat /proc/irq/158/smp_affinity
+cat /proc/interrupts
+
+goole帐号、netflix账号
+ shuanglong.wangwsl@gmail.com
+ iloveyou1314yz
+ cts2.4G
+ @ml4yourlife
+ 
+ testeramologic3@netflix.com
+ testeramologic2@netflix.com
+ am123logic
+ 
+ testvp9@netflix.com 密码1234
+ 
+ #打开O的netflix支持，还没有过netflix
+ vi /system/build.prop 加上ro.nrdp.modelgroup=P212ATV
+ media.amplayer.widevineenable=true
+ ro.nrdp.validation=ninja_5.1
+ mode和devicie改成p212
+ 
+1.看secmem的buffer和count
+input nBufferCountActual
+ 
+查看是否有key：
+keyman query exist prpubkeybox
+keyman query exist prprivkeybox
+keyman query exist widevinekeybox
+keyman query exist hdcp 
+
+Widevien key uboot命令行输入
+usb start;fatload usb 0 12000000  aml-test-p212-008.bin aml-test-p241-181.bin  // widevinekeybox.bin
+keyunify init 0
+keyunify write widevinekeybox 0x12000000 128
+save
+reset
+
+#wifi
+appolo
+Amluser88!!
+
+while true; do echo m > /proc/sysrq-trigger; cat /proc/pagetrace; cat /proc/slabinfo; dumpsys meminfo; sleep 300; done &
+
+while true; do procrank | grep "me"; sleep 300; done &
+
+usb start;fatload usb 0 12000000 hdcp14key.bin
+keyman write hdcp 309 12000000
+
+usb start;fatload usb 0 12000000 hdcp22_fw_private.bin;
+keyman write hdcp22_fw_private 32 12000000
+cd /vendor/etc
+mkdir firmware
+chmod 444 firmware.le
+
+cat /sys/class/amhdmitx/amhdmitx0/hdcp_mode
+cat /sys/module/hdmitx20/parameters/hdmi_authenticated
+oemcrypto_test --gtest_filter=OEMCryptoClientTest.VersionNumber
+
+
+android o 驱动编译
+./device/amlogic/common/quick_build_kernel.sh build-modules
+#decoder module
+/common/include/linux/amlogic/media/utils
+chmod a+x device/amlogic/common/quick_build_kernel.sh
+export TOP=$PWD;
+device/amlogic/common/quick_build_kernel.sh build-modules
+
+rm /data/data/com.android.providers.media/databases/*
+pm disable com.android.providers.media
+stop;start
+插上u盘，等一会再把
+/data/data/com.android.providers.media/databases/external.db copy出来用这个软件看下metadata还是metafile项, 看有没有u盘中的文件
+
+理论总带宽是DDR freq×2× bit width（16/32/64）/ 8 ×efficiency（75%）
+
+张辉解码培训视频文档
+ftp://firmware.reference:Druf_T3t@10.18.11.251/tools/media_training
+
+//stream mode
+media.omx.stream_mode
+
+libplayer
+media.amplayer.loglevel 
+
+ctags -R --c++-kinds=+px --fields=+iaS --extra=+q
+map <F5> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR><CR> :TlistUpdate<CR>  
+imap <F5> <ESC>:!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR><CR> :TlistUpdate<CR>  
+
+android n
+set tags=tags,./hardware/amlogic/omx/tags,./frameworks/av/media/tags,common/drivers/amlogic/tags
+
+android o
+set tags=tags,./hardware/amlogic/omx/tags,./frameworks/av/media/tags,common/drivers/amlogic/media/tags,hardware/amlogic/media_modules
+set tags=tags,../../../hardware/amlogic/media_modules/tags
+
+GTVS版本跳过开机向导：
+pm disable com.google.android.tungsten.setupwraith;settings put secure user_setup_complete 1;settings put secure tv_user_setup_complete 1
+
+ntsstart
+alias	ntsstart='am start -n com.netflix.ninja/com.netflix.ninja.MainActivity'
+alias	killnts='ps -A | grep netflix'
+
+ps -A | grep netflix | sed -n 's/^[0-9a-zA-Z\-_]*  \(.*\)  .*/\1/p' | sed -n 's/.*\([0-9]*\).*/\1/p'
+
+video&osd
+echo 0xd0107400 128 > /sys/kernel/debug/aml_reg/dump
+cat /sys/kernel/debug/aml_reg/dump > ./regs_from_1d00.regs
+echo 0xd0107600 128 > /sys/kernel/debug/aml_reg/dump
+cat /sys/kernel/debug/aml_reg/dump >> ./regs_from_1d00.regs
+echo 0xd0106B80 32 > /sys/kernel/debug/aml_reg/dump
+cat /sys/kernel/debug/aml_reg/dump > ./regs_from_1ae0.regs
+echo 0xd0106940 96 > /sys/kernel/debug/aml_reg/dump
+cat /sys/kernel/debug/aml_reg/dump > ./regs_from_1a50.regs
+echo rv 1a06 > /sys/class/amvecm/reg
+
+1. osd需要先设置节点，才可以关osd
+android 7.1 后要关掉osd,  需要先设置这个节点为1：
+echo 1  > /sys/class/graphics/fb0/osd_display_debug
+echo 1 > /sys/class/graphics/fb0/blank
+
+门禁：
+编号 60
+密码 201804
+
+编译8.0的boot.img
+export BOARD_COMPILE_ATV=true
+
+
+keyman write hdcp 309 12000000
+4.解决的bug
+Bug 142712 - 【Android7.0】盒子连接无源硬盘，盒子响应卡顿，频繁发生crash和anr
+Bug 143532 - [海信-S912-客户反馈-Video]：movieplayer播放文件The.Tai.Chi.Master.1993.Blu-ray.RE.x264.720p.DD.2Audio-HDS.wmv拖动进度条后会卡住较长时间才能播放，概率：100%，对比：海思平台ok
+Bug 141792 - {AV} Amnuplayer播放多视频流的视频，video track无法识别出所有的视频流，切换视频流后音轨没有跟着切换 概率：100% 对比：Amnuplayer关闭后正常
+Bug 144680 - {AV} Trunk autobuild20170517开始，播放部分ts视频，选择audio icon上的video track按ok，movieplayer apk会报停 概率：100％ 对比:trunk20170516正常 
+Bug 144718 - {AV}最新的Trunk版本在平台起来后第一次进MoviePlayer播放任意视频文件，都会出现APK报错退出，无法正常播放。100%复现，对比2017-05-19Trunk正常 
+Bug 143451 - [Stress test]长时间煲机4K视频，煲机到62H,内存泄漏，3台都内存不足自动退出;3/3;比对:无
+Bug 144568 - {AV}:视频封装mkv、avi、asf、mjpeg、wmv、raw，音频mp3、aac、wma、pcm格式 amnuplayer
+Bug 144374 - {HDR}在MoviePlayer播放部分HDR 1000的视频文件，画面有明显卡顿，播放出现掉帧不流畅现象。100%复现，对比LG电视播放正常
+Bug 143674 :{AV} Amnuplayer播放huanzhugege.ts，通过INFO BAR"<<"">>" ICON进行快进退后，系统提示”movieplayer isn't responding” 概率:100% 对比: Amnuplayer关闭后正常, P212 7.1.1正常
+Bug 146517 - {AV} [瑞致达反馈146575]Trunk autobuild20170522开始出现，Amnuplayer下播放23.976/29.97/59.94fps的4K H265视频，开头2秒会有轻微的卡顿 概率：100％ 对比：trunk0715开始出现的，trunk0713是正常的

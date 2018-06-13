@@ -1,0 +1,1683 @@
+20180102 9:15-
+
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
+echo 3 > /sys/class/mpgpu/scale_mode
+echo  3 > /sys/class/mpgpu/cur_freq
+
+1. 查看当前gpu的频率。
+3.0, 3.8, 3.10:   echo clk  > /sys/class/amlogic/debug | grep mali
+
+2. 调整gpu的频率, 250M-510M
+echo 2 > /sys/class/mpgpu/scale_mode
+echo  clk_index > /sys/class/mpgpu/cur_freq
+clk_index     freq
+0             	182Mhz
+1 	318Mhz
+2 	425Mhz
+3 	510Mhz
+
+3. 调整gpu的频率, 637M
+echo 3 > /sys/class/mpgpu/scale_mode
+
+4.调整clock之后，用第一步，检查gpu的clock是否和自己期望的频率相同，如果不同，请咨询zengtao如何关闭温控。
+
+
+error: device/amlogic/: branch o-amlogic is published (but not merged) and is now 8 commits behind
+error: hardware/amlogic/media_modules/: platform/hardware/amlogic/media_modules checkout 63b704ea12605047d25edcde4ebc2ff65a3068e1
+
+cat /sys/class/thermal/thermal_zone0/temp
+while true; do sleep 1; cat /sys/class/thermal/thermal_zone0/temp; done &
+
+1.内存
+while true; do  cat /sys/class/codec_mm/codec_mm_dump;procrank; done &
+
+while true; do  cat /sys/class/codec_mm/codec_mm_dump; done &
+codec mem info:
+        total codec mem size:308 MB
+        alloced size= 21 MB
+        max alloced: 109 MB
+        CMA:21,RES:0,TVP:0,SYS:0 MB
+        [4]CMA size:308 MB:alloced: 21 MB,free:286 MB
+        [1].0:ION.0,addr=0000000020800000,size=3112960,from=4,cnt=1,flags=3,used:2296 ms
+        [2].0:ION.0,addr=0000000020af8000,size=3112960,from=4,cnt=1,flags=3,used:2294 ms
+        [3].0:ION.0,addr=0000000020df0000,size=3112960,from=4,cnt=1,flags=3,used:2293 ms
+        [4].0:ION.0,addr=00000000210e8000,size=3112960,from=4,cnt=1,flags=3,used:2291 ms
+        [5].0:ION.0,addr=00000000213e0000,size=3112960,from=4,cnt=1,flags=3,used:2290 ms
+        [6].0:ION.0,addr=00000000216d8000,size=3112960,from=4,cnt=1,flags=3,used:2288 ms
+        [245].0:ammvdec_h264.65,addr=00000000219d0000,size=2097152,from=4,cnt=1,flags=69633,used:18 ms
+        [246].0:VFRAME_INPUT.0,addr=0000000021bd0000,size=524288,from=4,cnt=1,flags=4099,used:14 ms
+        [247].0:VFRAME_INPUT.0,addr=0000000021c50000,size=524288,from=4,cnt=1,flags=4099,used:13 ms
+        [248].0:VFRAME_INPUT.0,addr=0000000021cd0000,size=524288,from=4,cnt=1,flags=4099,used:13 ms
+                total        used        free      shared     buffers
+Mem:       1033175040   943640576    89534464     2408448     3432448
+-/+ buffers/cache:      940208128    92966912
+Swap:       524283904     1368064   522915840
+
+2.top看cpu占用很高cpu温度
+while true; do sleep 0.2; cat /sys/class/thermal/thermal_zone0/temp; done &
+
+闪动
+1.osd层和video层显示都这问题
+2.提交mali频率
+echo 2 > /sys/class/mpgpu/scale_mode
+echo  3 > /sys/class/mpgpu/cur_freq
+3.调整中断
+  7:      43155          0          0          0     GIC-0 192 Level     Mali_GP
+  8:          0          0          0          0     GIC-0 193 Level     Mali_GP_MMU
+  9:      22956          0          0          0     GIC-0 194 Level     Mali_PP_Broadcast
+4.
+1.vdec urgent 补丁
+2.skip B补丁
+3.抽线：echo 1 > /sys/module/amvideo/parameters/force_vskip_cnt 
+cat /proc/irq/76/smp_affinity
+echo 7 > /proc/irq/7/smp_affinity
+echo 9 > /proc/irq/7/smp_affinity
+
+setenv EnableSelinux permissive
+dts目录“common/arch/arm64/boot/dts/amlogic
+
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+./ddb_v2_n -c 0x1ffff 0x6ffff 0x2010ffff 0x700ffff -t 59768832 -n 600 -f /data/test/ddrBW.csv 
+./ddb -c 0x1ffff 0x6ffff 0x2010ffff 0x700ffff -t 59768832 -n 600 -f /data/test/ddrBW_videodibypass.csv -u   //264
+./ddb -c 0x1ffff 0x6ffff 0x2010ffff 0x700ffff -t 59768832 -n 600 -f /data/test/ddrBW_videodibypass.csv -v //vp9/h265
+
+总线拉死
+具体来说是在外设的clk并关闭后，总线上有访问外设寄存器的现象发生，而外设的ACK迟迟没有返回，下一波的寄存器访问又开始了，导致总线被拉死
+
+
+echo 1 > /sys/module/amvdec_mh264/parameters/wsldbg
+echo 2 > /sys/module/amvdec_mh264/parameters/wsldbg
+echo 1 >/sys/module/di/parameters/bypass_all
+cat /sys/module/di/parameters/bypass_state
+echo 1 > /sys/class/graphics/fb0/blank
+
+dumpsys SurfaceFlinger --latency-clear， dumpsys SurfaceFlinger --latency
+dumpsys SurfaceFlinger --latency-clear
+dumpsys SurfaceFlinger --latency "org.xbmc.kodi/org.xbmc.kodi.Main#0"
+
+chmod 644 /sys/module/mali/parameters/mali_l2_max_reads
+echo 4 > /sys/module/mali/parameters/mali_l2_max_reads
+chmod 400 /sys/module/mali/parameters/mali_l2_max_reads
+
+/sys/module/mali/parameters/mali_l2_max_reads
+/sys/class/mpgpu/l2_max_reads
+
+echo 2 > /sys/class/mpgpu/scale_mode
+chmod 600 /sys/class/mpgpu/scale_mode
+echo 1 > /sys/kernel/debug/mali/pp/num_cores_enabled
+
+while true; do cat /sys/kernel/debug/mali/utilization_pp; cat /sys/kernel/debug/mali/utilization_gp;cat /sys/kernel/debug/mali/utilization_gp_pp;cat /sys/kernel/debug/aml_clkmsr/clkmsr | grep mali;sleep 0.5; done
+
+echo 6 > /sys/module/amvdec_mh264/parameters/wsldbg
+
+error: common/: branch n-amlogic is published (but not merged) and is now 23 commits behind
+error: frameworks/av/: branch n-amlogic is published (but not merged) and is now 13 commits behind
+error: frameworks/native/: branch n-amlogic is published (but not merged) and is now 1 commits behind
+
+tftp -r wangcfg_board.rc -g 10.68.8.68
+
+http://scgit.amlogic.com:8080/36478 
+http://scgit.amlogic.com:8080/36480
+如果ffmpeg没有解析出来音频的channel count，默认设置为2。这个问题是zhulianlian把adts和aac的解码改用softamadec后，针对个别流ffmpeg没解析出channel count才出现的
+
+openlinux_sdk.xml
+
+echo 0x20000 > /sys/module/amvideo/parameters/debug_flag
+echo 0x800000 > /sys/module/amvideo/parameters/debug_flag
+
+20180111 9:15-
+http://scgit.amlogic.com:8080/#/c/36417/ 小米1080p 60fps视频丢帧，增加解码buffer 6->8
+http://scgit.amlogic.com:8080/#/c/36685/ h264 libplayer seek后出现pts和pts_64对应不上了，pts修改有误
+http://scgit.amlogic.com:8080/36568，这个omx m-xiaom-m12分支合了一个master的一个patch，PD#136506: secure input buffer 1900KB * 4 -> 3000KB * 2这个的
+
+echo 0x800000 > /sys/module/amvideo/parameters/debug_flag
+
+dumpsys SurfaceFlinger --latency "org.xbmc.kodi/org.xbmc.kodi.Main#0"
+dumpsys SurfaceFlinger --latency "com.droidlogic.videoplayer/com.droidlogic.videoplayer.VideoPlayer#0"
+
+setprop media.omx.osd_maxwidth 1920
+setprop media.omx.osd_maxheight 1088
+
+git log --committer="Stark Li <stark.li@amlogic.com>"
+
+测试视频为1920x1080@25fps h264，在p241已经为video layer播放，为复现问题，本地做经下尝试
+1.p241和p212分别使用最新openlinux code以及自己编译的trunk代码，p212 hdmi输出切换到1080p@60hz(p241默认最大输出1080p@60hz)，两者相同的现象，没有出现抖、卡顿的现象
+http://firmware.myamlogic.com/shenzhen/image/android/Android-O/Openlinux/BOX/Android_TV/trunk/2018-01-12/p241-user-32-GTVS-133/
+http://firmware.myamlogic.com/shenzhen/image/android/Android-O/Openlinux/BOX/Android_TV/trunk/2018-01-12/p212-user-64-GTVS-133/
+http://firmware.myamlogic.com/shanghai/image/android/Android-O/BOX//patchbuild/2018-01-11/p241-userdebug-64-DRM-1498/
+http://firmware.myamlogic.com/shanghai/image/android/Android-O/BOX//patchbuild/2018-01-11/p212-userdebug-64-DRM-1499/
+2.更新电视和板卡，更换两块p241板卡（v1和v2各1），4k电视更换3个（小米电视、Philips、skyworth），p241上没有复现抖、卡顿现象
+
+tingting尝试
+1.更换2个电视（skyworth、LG），更换p241板卡，问题还是能复现
+2.dibypass、nr disable、rdma disable，没有效果
+3.把视频从u盘copy到mmc，还是能复现
+4.把p212的hdmi输出从2k4k@30HZ切换到108P@60HZ，p212板卡同样出现抖、卡顿的现象
+5.把p241的hdmi输出从1080P@60Z切换到1080P@xxZ
+6.更换hdmi线，还是同样的现象
+7.movieplayer播放也同样的现象
+
+
+Bug 158521 - {GTVS_8.0}[full treble]Netflix播放Moving Art和House Of Cards视频多次卡住之后继续播放。概率：5%，对比：Nexus（8.0）有此问题，shield（7.0）无此问题 
+Bug 158517 - {GTVS_8.0}[full treble]Netflix播放Example Short 24视频抖动，退出再次播放正常。概率：20%，对比：Nexus（8.0）有此问题，shield（7.0）无此问题
+Bug 158453 - {GTVS_8.0}[full treble]Netflix播放El Fuente：25 main视频卡住死机。概率：出现1次，对比：无需对比
+Bug 158456 - {GTVS_8.0}[full treble]Netflix播放El Fuente series视频，起播或播放过程中出现卡住或提示播放错误。概率：30%，对比：Google盒子无此问题，openlinux20171216无此问题
+Bug 158530 - [P256-客户反馈#3892-video]:[Netflix] Unable to play video track, when Netflix is launched after youtube video is played
+
+
+2-180116
+16-1. 出现视频卡住， repeat没用
+
+1.
+Amessage出现异常
+20180117_4.log 
+20180117_5.log 
+
+20180118
+debug gerrit
+http://scgit.amlogic.com:8080/37157
+
+1.patchbuild 
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android_O/job/Android_O_PATCHBUILD_MBOX/1543/console
+
+2.
+
+echo 0x800000 > /sys/module/amvideo/parameters/debug_flag
+echo 0 > /sys/module/amvideo/parameters/debug_flag
+dmesg -c > /dev/null && echo 0x800000 > /sys/module/amvideo/parameters/debug_flag
+
+http://firmware.myamlogic.com/shenzhen/image/android/Android-N/BOX/openlinux/openlinux-0606/2018-01-19/p212-user-64-ATV-414/
+
+20180122
+echo 1 > /sys/module/amvdec_mh264/parameters/wsldbg
+echo 2 > /sys/module/amvdec_mh264/parameters/wsldbg
+
+echo 3 > /sys/module/amvdec_mh264/parameters/wsldbg
+
+
+ddb -c 0x1ffff 0x6ffff 0x2010ffff 0x700ffff -t 59768832 -n 600 -f ddrBW.csv  -v
+
+setprop   debug.stagefright.omx-debug 5
+setprop media.omx.log_levels  255
+ount -o rw,remount /dev/block/system  /system
+
+nts抖动
+1.没有di
+p212:/data/test/20180122 # cat /sys/class/vfm/map                              
+[00]  default { decoder(1) amlvideo(1) amvideo}
+[01]  default_amlvideo2 { vdin1(0) amlvideo2.1}
+[02]  dvhdmiin { dv_vdin(0) amvideo}
+2.pcr pts 显示正常
+
+
+
+[  297.398572@2] W Timeout, but fetch ok,[  297.398673@0] type 4 len=72,wpdiff=-72, isphy 0
+[  298.122608@1] W Timeout, but fetch ok,[  298.122842@3] type 4 len=72,wpdiff=-72, isphy 0
+[  299.374495@0] W Timeout, but fetch ok,[  299.374538@2] type 4 len=72,wpdiff=-72, isphy 0
+[  301.342536@0] W Timeout, but fetch ok,[  301.342612@0] type 4 len=72,wpdiff=-72, isphy 0
+[  301.730563@0] W Timeout, but fetch ok,[  301.730624@3] type 4 len=72,wpdiff=-72, isphy 0
+[  304.722573@1] W Timeout, but fetch ok,[  304.722638@2] type 4 len=72,wpdiff=-72, isphy 0
+[  305.310528@1] W Timeout, but fetch ok,[  305.310594@0] type 4 len=72,wpdiff=-72, isphy 0
+[  307.350492@0] W Timeout, but fetch ok,[  307.350536@1] type 4 len=72,wpdiff=-72, isphy 0
+[  309.346604@3] W Timeout, but fetch ok,[  309.346684@0] type 4 len=72,wpdiff=-72, isphy 0
+[  309.902820@0] W Timeout, but fetch ok,[  309.903053@2] type 4 len=72,wpdiff=-72, isphy 0
+[  314.566516@1] W Timeout, but fetch ok,[  314.566559@2] type 4 len=72,wpdiff=-72, isphy 0
+[  314.898566@0] W Timeout, but fetch ok,[  314.898667@1] type 4 len=72,wpdiff=-72, isphy 0
+[  315.206517@2] W Timeout, but fetch ok,[  315.206556@1] type 4 len=72,wpdiff=-72, isphy 0
+[  315.514525@0] W Timeout, but fetch ok,[  315.514598@0] type 4 len=72,wpdiff=-72, isphy 0
+[  318.750564@1] W Timeout, but fetch ok,[  318.750604@2] type 4 len=72,wpdiff=-72, isphy 0
+[  319.514494@1] W Timeout, but fetch ok,[  319.514529@2] type 4 len=72,wpdiff=-72, isphy 0
+[  321.366816@2] W Timeout, but fetch ok,[  321.366923@3] type 4 len=72,wpdiff=-72, isphy 0
+[  321.950525@3] W Timeout, but fetch ok,[  321.950574@1] type 4 len=72,wpdiff=-72, isphy 0
+[  322.562818@2] W Timeout, but fetch ok,[  322.562928@2] type 4 len=72,wpdiff=-72, isphy 0
+
+	vmh264.c
+	run
+	vh264_work
+	config_buf_specs
+	vh264_isr_thread_fn
+	vh264_init
+	vh264_stop
+	ammvdec_h264_probe
+	hevc_alloc_mmu
+	hevc_mcr_config_canv2axitbl
+	hevc_mcr_config_mc_ref
+	hevc_mcr_config_mcrcc
+	hevc_mcr_sao_global_hw_init
+	hevc_sao_set_pic_buffer
+	hevc_set_unused_4k_buff_idx
+	config_decode_canvas
+	hevc_set_frame_done
+	hevc_sao_wait_done
+	vh264_set_params
+	vui_config
+	check_decoded_pic_error
+	check_timer_func
+	set_aux_data
+	config_decode_mode
+	config_decode_buf
+	config_aux_buf
+	alloc_one_buf_spec
+	vh264_isr
+	
+	vdec.c
+	vdec_sync_input_read
+	vdec_sync_input_write
+	vdec_init
+	vdec_ready_to_run
+	vdec_poweron
+	vdec_poweroff
+	amrisc_regs_show
+	vdec_prepare_input
+	vdec_enable_input
+	vdec_has_more_input
+	vdec_save_input_context
+	vdec_sync_input
+	
+	codec mem info:
+        total codec mem size:120 MB
+        alloced size= 90 MB
+        max alloced: 91 MB
+        CMA:90,RES:0,TVP:0,SYS:0 MB
+        [4]CMA size:120 MB:alloced: 90 MB,free:29 MB
+        [224].0:ammvdec_h264.65,addr=000000002c400000,size=2097152,from=4,cnt=1,flags=69633,used:243 ms
+        [228].0:ammvdec_h264.0,addr=000000002c780000,size=3133440,from=4,cnt=1,flags=69633,used:232 ms
+        [229].0:ammvdec_h264.64,addr=000000002ca80000,size=4702208,from=4,cnt=1,flags=69633,used:230 ms
+        [230].0:ammvdec_h264.1,addr=000000002cf00000,size=3133440,from=4,cnt=1,flags=69633,used:230 ms
+        [231].0:ammvdec_h264.2,addr=000000002d200000,size=3133440,from=4,cnt=1,flags=69633,use[ 
+		[232].0:ammvdec_h264.[   95.621008@0] DI buf[10] page:0xffffffbf00fd7880 no release.
+		[233].0:ammvdec_h264.4,addr=000000002d800000,size=3133440,from=4,cnt=1,flags=69633,used:229 ms
+        [234].0:ammvdec_h264.5,addr=000000002db00000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
+        [235].0:ammvdec_h264.6,addr=000000002de00000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
+        [236].0:ammvdec_h264.7,addr=000000002e100000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
+        [237].0:ammvdec_h264.8,addr=000000002e400000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
+        [238].0:ammvdec_h264.9,addr=000000002e700000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
+        [239].0:ammvdec_h264.10,addr=000000002ea00000,size=3133440,from=4,cnt=1,flags=69633,used:227 ms
+		
+2.codcec_mm内存确认，通过以下两种方法确认内存，应该可以排除内存问题
+1）通过在ammvdec_h264_prober结尾处调用dump_mem_infos查看code_mm内存
+2）while true; do  cat /sys/class/codec_mm/codec_mm_dump;free; done &
+
+最后一次probe时的打印log如下
+[  108.683684@3] codec mem info:
+[  108.683684@3]        total codec mem size:120 MB
+[  108.683684@3]        alloced size= 2 MB
+[  108.683684@3]        max alloced: 91 MB
+[  108.683684@3]        CMA:2,RES:0,TVP:0,SYS:0 MB
+[  108.683684@3]        [4]CMA size:120 MB:alloced: 2 MB,free:118 MB
+[  108.683693@3]        [362].0:ammvdec_h264.65,addr=000000002c400000,size=2097152,from=4,cnt=1,flags=69633,used:2 ms
+
+使用命令抓取的最后一次打印如下
+                total        used        free      shared     buffers
+Mem:       1033097216   998637568    34459648     2547712     9064448
+-/+ buffers/cache:      989573120    43524096
+Swap:       524283904     2441216   521842688
+codec mem info:
+        total codec mem size:120 MB
+        alloced size= 90 MB
+        max alloced: 90 MB
+        CMA:90,RES:0,TVP:0,SYS:0 MB
+        [4]CMA size:120 MB:alloced: 90 MB,free:29 MB
+        [61].0:ammvdec_h264.65,addr=000000002c400000,size=2097152,from=4,cnt=1,flags=69633,used:181 ms
+        [65].0:ammvdec_h264.0,addr=000000002c780000,size=3133440,from=4,cnt=1,flags=69633,used:15
+
+3.top看cpu占用很高，确认下cpu温度，温度没有异常
+while true; do sleep 0.2; cat /sys/class/thermal/thermal_zone0/temp; done &
+log如下
+60000
+60000
+60000
+[  109.677336@3] 0: mb height/widht/total: 44/78/1fe0 level_idc 0 max_ref_num 2
+[  109.734316@1] success set parent gpu_p1_composite rate to 400000000
+
+
+[  470.194162@3] power down and up
+[  470.312427@3] is_reset=1
+[  470.374866@3] internal phy init
+[  470.374903@3] reset phy
+
+4.尝试把vmh264.c和vdec.c中其它可能操作寄存器的函数添加debug信息，没有发现死在其中的地方。
+5.由于是osd和video layer层播放会有死机的问题，可以排除amvideo和deinterlace模块的问题。
+6.vmh264和vh264，frame和stream mode都会这死机的问题，还有就是解码器的头已经解出来，拉死总线的就不一定是解码器的，还需要确认下其它模块
+
+am start -n com.android.gallery3d/com.android.gallery3d.app.MovieActivity http://10.18.11.251/tv_qatest/dash/h264_mp4/mp4-main-multi-mpd-AV-BS.mpd
+
+setprop media.hls.read_pts 1
+
+sourcesight 3.5 SI3US-361500-17409
+
+
+1.把昨天ABuffer的patch去掉
+2.setprop media.hls.ptsdebug 4
+  setprop media.omx.log_levels 255
+ 
+ 
+ setprop media.omx.log_levels 255
+ setprop media.hls.ptsdebug 4
+ logcat -v time | grep -v "Layer"
+ 
+ while [ true ];do procrank; sleep 20; done &
+ 
+ http://scgit.amlogic.com:8080/38478
+ http://scgit.amlogic.com:8080/37963
+ 
+ 
+ 
+ 
+ 02-08 03:03:01.061  4274  4440 I AmFFmpegExtractor: 0  0  0  1 40  1
+02-08 03:03:01.061  4274  4440 I AmFFmpegExtractor:  c  1 ff ff  1 60
+02-08 03:03:01.061  4274  4440 I AmFFmpegExtractor:  0  0  3  0 80  0
+02-08 03:03:01.061  4274  4440 I AmFFmpegExtractor:  0  3  0  0  3  0
+02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: 78 95 c0 90  0  0
+02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor:  0  1 42  1  1  1
+02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: 60  0  0  3  0 80
+02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor:  0  0  3  0  0  3
+02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor:  0 78 a0  3 c0 80
+02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: 10 e5 96 57 92 4d
+02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: ac 80  0  0  0  1
+02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: 44  1 c1 f3 d9 89
+02-08 03:42:49.349  2958  4187 E HVCCFormatter: data=0xf1c4a640,size=22
+02-08 03:42:49.349  2958  4187 E HVCCFormatter: data=0xf1c32380,size=28
+02-08 03:42:49.349  2958  4187 E HVCCFormatter: data=0xf1c32582,size=6
+logcat | grep -v "BluetoothAdapter"
+
+
+10.28.8.19
+xiaojing.huang
+2@Logon123 如果密码不对那就：%k0dTIP
+件夹登录的话：
+10.28.8.3
+xiaojing.huang
+%k0dTIP
+2018/2/7 10:23:33
+aml 2018/2/7 10:23:33
+客户的代码路径是pbs-6.0
+编译方法是 
+. 1.0x_cn_env.sh
+make otapackage
+
+
+logcat | grep -v AM_DEBUG | grep -v readMessage
+
+android O
+add more format support [1/12]  				http://scgit.amlogic.com:8080/#/c/35028/ 
+add more format support for o [2/12]  			http://scgit.amlogic.com:8080/#/c/35027/
+avs : fix omx+avs seek problem [3/12]			http://scgit.amlogic.com:8080/#/c/35024/
+add mediaext3 [4/12] 							http://scgit.amlogic.com:8080/#/c/34875/
+add mediaext3 [5/12] 							http://scgit.amlogic.com:8080/#/c/34469/
+fix compile error at sometime [6/12] 			http://scgit.amlogic.com:8080/#/c/34877/
+mediaext: add for media extensions [7/12] 		http://scgit.amlogic.com:8080/#/c/33194/
+mediaext: add for media extension [8/12] 		http://scgit.amlogic.com:8080/#/c/33776/
+mediaext: add media ext [9/12] 					http://scgit.amlogic.com:8080/#/c/34470/
+add more format support for o [10/12] 			http://scgit.amlogic.com:8080/#/c/34885/
+add more format support [11/12] 				http://scgit.amlogic.com:8080/#/c/34881/
+add some format support [12/12] 				http://scgit.amlogic.com:8080/#/c/34882/
+mediaext: add amnuplayer avenhancements 		http://scgit.amlogic.com:8080/#/c/34139/
+update for o bringup 							http://scgit.amlogic.com:8080/#/c/34123/
+add o media bringup 							http://scgit.amlogic.com:8080/#/c/34444/
+
+android O amnuplayer
+mediaext: add amnuplayer avenhancements 		http://scgit.amlogic.com:8080/#/c/34139/		vendor/amlogic/prebuilt/libmedia
+mediaext: add for media extensions [7/12] 		http://scgit.amlogic.com:8080/#/c/33194/		platform/frameworks/av
+add mediaext3 [5/12] 							http://scgit.amlogic.com:8080/#/c/34469/		device/amlogic-o
+mediaext: add for media extension [8/12] 		http://scgit.amlogic.com:8080/#/c/33776/		platform/manifest
+mediaext: add media ext [9/12] 					http://scgit.amlogic.com:8080/#/c/34470/		platform/manifest
+add more format support for o [2/12]  			http://scgit.amlogic.com:8080/#/c/35027/		vendor/amlogic/prebuilt/libstagefrighthw
+add more format support [1/12]  				http://scgit.amlogic.com:8080/#/c/35028/		vendor/amlogic/prebuilt/libmedia
+fix compile error at sometime [6/12] 			http://scgit.amlogic.com:8080/#/c/34877/		vendor/amlogic/frameworks/av
+add mediaext3 [4/12] 							http://scgit.amlogic.com:8080/#/c/34875/		platform/hardware/amlogic/media
+avs : fix omx+avs seek problem [3/12]			http://scgit.amlogic.com:8080/#/c/35024/		platform/hardware/amlogic/media_modules
+
+源码
+add more format support for o [10/12] 			http://scgit.amlogic.com:8080/#/c/34885/		av-restricted/platform/hardware/amlogic/omx
+add more format support [11/12] 				http://scgit.amlogic.com:8080/#/c/34881/		av-restricted/platform/vendor/amnuplayer
+add some format support [12/12] 				http://scgit.amlogic.com:8080/#/c/34882/		av-restricted/platform/vendor/AmFFmpegAdapter
+
+
+
+
+android O-mr1
+http://scgit.amlogic.com:8080/#/c/38520/
+http://scgit.amlogic.com:8080/#/c/38247/
+http://scgit.amlogic.com:8080/#/c/38244/
+http://scgit.amlogic.com:8080/#/c/38519/
+源码：
+http://scgit.amlogic.com:8080/#/c/38484/
+http://scgit.amlogic.com:8080/#/c/38553/
+
+
+0112
+  0115
+  0118
+  0122
+  0129
+* 0209
+  1222
+  1227
+  mediaext
+  mediaext3
+  o_dev
+  
+  
+  cp: cannot stat 鈥榦ut/target/product/p212/obj/KERNEL_OBJ/drivers/usb/dwc3/dwc3.ko鈥 No such file or directory
+cp: cannot stat 鈥榦ut/target/product/p212/obj/KERNEL_OBJ/drivers/amlogic/usb/dwc_otg/310/dwc_otg.ko鈥 No such file or directory
+
+
+out/target/product/p212/obj/lib/libamffmpeg.so.toc
+build out/target/product/p212/obj_arm/SHARED_LIBRARIES/libamffmpeg_intermediates/libamffmpeg.so.toc
+
+
+
+20180226 9:10-
+
+Bug 160710 - {Dolby Vision}平台连接任意DV电视，在DV模式下循环播放个别认证片源，概率出现绿屏现象。20%左右，无需对比
+
+这两个是dv的
+Bug 160699 - {AV}本地MoviePlayer播放部分Dolby Lab官方认证视频文件，播放中途会自动退出，无法正常播放。100%复现，对比LG电视播放正常。
+[Bug 160332] [Foxconn-CCC]Dolby Vision 2.4 Certification视频会卡住或者出现马塞克
+
+煲机的3个
+Bug 158593 - [鹏博士-S905X-客户反馈-System]:轮播808频道进行煲机老化一晚，第二天会画面卡住，概率：50%
+Bug 158171 - [天午-S905X-客户反馈-Video]:4K265煲机退出播放
+Bug 159163 - [乐视-S905X-客户反馈-Video]：播放本地4K视频出现画面卡住的现象，概率：高
+
+logcat | grep -v AM_DEBUG
+
+/sys/module/amvdec_h265/parameters/nal_skip_policy
+echo 3 > /sys/module/amvdec_h265/parameters/nal_skip_policy
+
+[2018-02-25 06:40:29] 01-02 21:34:19.021 E/ion     ( 7432): ioctl c0204900 failed with code -1: No such device
+[2018-02-25 06:40:29] 01-02 21:34:19.021 E/ion     ( 7432): ioctl c0204900 failed with code -1: Invalid argument
+[2018-02-25 06:40:29] 01-02 21:34:19.021 D/gralloc ( 7432): (-22) Failed to alloc ion cma mem, alloc from system ion buffer.
+author:aml.sh multi-media team
+
+In file included from hardware/amlogic/omx/ComponentPeers/libOmxAudio/AmlogicAudioFFMPEGDecoder.cpp:24:
+In file included from hardware/amlogic/omx/ComponentPeers/libOmxAudio/../../libOmxBase/AmlogicPeer.h:29:
+In file included from hardware/amlogic/omx/ComponentPeers/libOmxAudio/../../libOmxBase/AmlogicPeerBufferWrapper.h:21:
+hardware/amlogic/omx/ComponentPeers/libOmxAudio/../../include/omx_framework/BufferWrapper.h:21:10: fatal error: 'system/window.h' file not found
+#include <system/window.h>
+./frameworks/native/libs/nativewindow/include/system/window.h
+
+weekly report
+Bug 158367 - {CVT客户反馈}AMLT960X-2082 多媒体通道下，播放任意歌曲，info信息中比特率显示为unknown
+	--年前已经解了，27号被reopen了，原因还未追踪
+Bug 159765 - {AV} S905X 8.0 播放H.265 MKV黑屏，seek或者resume play后画面黑屏，声音正常 概率：100％
+	--目前还有一个流异常，需添加特殊处理
+
+煲机的3个仍在分析中,不好复现或者log还不完全，已提供debug的patch
+Bug 158593 - [鹏博士-S905X-客户反馈-System]:轮播808频道进行煲机老化一晚，第二天会画面卡住，概率：50%
+Bug 158171 - [天午-S905X-客户反馈-Video]:4K265煲机退出播放
+Bug 159163 - [乐视-S905X-客户反馈-Video]：播放本地4K视频出现画面卡住的现象，概率：高
+
+gl2a DV功能支持
+
+扫描添加音频bitrate的识别 http://scgit.amlogic.com:8080/38522
+amnuplayer设置输入buffer size，http://scgit.amlogic.com:8080/39801
+上面两个的提交的so http://scgit.amlogic.com:8080/39868
+
+
+http://scgit.amlogic.com:8080/39809
+http://scgit.amlogic.com:8080/39870
+
+http://scgit.amlogic.com:8080/40002 有些hevc mkv没有keyframe index，不能seek，采用与libplayer相同的方法
+http://scgit.amlogic.com:8080/39996 有些的流的extradata（放的是nals）不符合android支持的format，转换成android支持的
+http://scgit.amlogic.com:8080/40008
+
+
+20180305 9；20-
+160408 {CVT客户反馈}AMLT960X-2311 升级后，进入多媒体通道下，然后播放某视频，出现视频黑了20s才出画面的情况
+160929 {CVT客户反馈}AMLT960X-2377 多媒体通道下，播放某视频3s左右，然后按退出键退出播放，再次点击播放，发现视频一直在加载不会播放
+161276 {CVT客户反馈}AMLT960X-2378 多媒体通道下，播放MP3歌曲，提示不支持，出问题前执行的是AMLT960X-2377操作
+160403 {CVT客户反馈}AMLT960X-2264 多媒体通道下，播放某视频，然后一直按右键，发现一直卡在某个地方不会继续播
+
+上周：
+Bug 159765 - {AV} S905X 8.0 播放H.265 MKV黑屏，seek或者resume play后画面黑屏，声音正常 概率：100％ 对比：S905X 7.1也存在
+	---另一个异常流的处理已添加
+Bug 158593 - [鹏博士-S905X-客户反馈-System]:轮播808频道进行煲机老化一晚，第二天会画面卡住，概率：50%
+	---新添加的patch已不能复现
+Bug 160699 - {AV}本地MoviePlayer播放部分Dolby Lab官方认证视频文件，播放中途会自动退出，无法正常播放。100%复现，对比LG电视播放正常
+	---已解决，还需要在amnuplayer端添加设置video 输入buffer size的初始化设置
+Bug 158367 - {CVT客户反馈}AMLT960X-2082 多媒体通道下，播放任意歌曲，info信息中比特率显示为unknown
+	---完善个别audio流没有检测出bitrate的问题
+
+Bug 159163 - [乐视-S905X-客户反馈-Video]：播放本地4K视频出现画面卡住的现象，概率：高
+	---已更新debug patch，需要进一步分析
+Bug 158171 - [天午-S905X-客户反馈-Video]:4K265煲机退出播放
+	---已提供最新的debug patch
+Bug 160332 - [Foxconn-CCC]Dolby Vision 2.4 Certification视频会卡住或者出现马塞克
+	---辉哥说是流的LCU有丢失，等待dolby lab的反馈
+	
+本周：
+	cvt的下面几个处理
+		160408 {CVT客户反馈}AMLT960X-2311 升级后，进入多媒体通道下，然后播放某视频，出现视频黑了20s才出画面的情况
+		160929 {CVT客户反馈}AMLT960X-2377 多媒体通道下，播放某视频3s左右，然后按退出键退出播放，再次点击播放，发现视频一直在加载不会播放
+		161276 {CVT客户反馈}AMLT960X-2378 多媒体通道下，播放MP3歌曲，提示不支持，出问题前执行的是AMLT960X-2377操作
+	上周未完成的问题
+	公版8.1煲机flow
+
+
+while [ true ];do procrank|grep media; done &
+
+
+setprop libc.debug.malloc 1
+setprop libc.debug.malloc.options   backtrace
+setprop libc.debug.malloc.program  mediaserver
+$dumpsys media.player -m > dump2
+$diff dump1 dump2 > diff
+$./addr2func.py --root-dir=<AOSP_dir> --maps-file=maps --product=<product_name_of_your_build> diff > mem_trace
+
+1. 8.0上的没有内存问题，extractor创建在mediaserver中，会很大，便退出会释放
+2. 7.1上使用non-ffmpeg extractor，不会很大，退出会释放一些，看不出是否有有问题，因为media.extractor不大
+
+
+1. 7.1上audio和video各申请一个MediaBuffer，内存问题不太可能是MediaBuffer引起的。
+2. 7.1上300Mbps的视频，由于解码比较慢，导致一直在video late，缓存在ffmpegextractor中的视频一直在累加。统计累积的缓存大小，基本与media.extractor增加的内存相符，二者的变化趋势也是相同的
+3. 7.1上退出播放后media.extractor内存没有恢复，但再次播放时，media.extractor内存并没有大之前的基础上累加，而是又从一个小值开始继续增加，应该不是内存泄漏
+4. 8.0上是在mediaserver中创建的ffmpegextractor，退出播放后，mediaserver的内存会恢复
+5. 7.1的ffmegextractor是在media.extractor service创建的，修改成和8.0一样创建在mediaserver，退出播放后，mediaserver的内存没有恢复
+6. 7.1退出播放时，缓存在ffmpegextractor中的视频packets，一个个free或者不free，media.extractor的内存都不恢复，这个问题比较奇怪
+
+
+
+am start -n com.android.gallery3d/com.android.gallery3d.app.MovieActivity http://10.18.11.251/tv_qatest/chromecast_hw_test/other/vp9/%5b4KVP9_60.000fps_15.5Mbps%5dWetek-Astra-2m.webm
+
+setprop edia.stagefright.cache-params "30720/51200/15"
+setprop edia.stagefright.cache-params "61440/102400/15"
+
+setprop media.stagefright.cache-params "65536/81920/5"
+setprop media.stagefright.cache-params "12310/122880/5"
+
+
+160408 {CVT客户反馈}AMLT960X-2311 升级后，进入多媒体通道下，然后播放某视频，出现视频黑了20s才出画面的情况
+Bug 160403 - {CVT客户反馈}AMLT960X-2264 多媒体通道下，播放某视频，然后一直按右键，发现一直卡在某个地方不会继续播 
+	-------media.extractor出现crash
+Bug 161276 - {CVT客户反馈}AMLT960X-2378 多媒体通道下，播放MP3歌曲，提示不支持，出问题前执行的是AMLT960X-2377操作
+Bug 160929 - {CVT客户反馈}AMLT960X-2377 多媒体通道下，播放某视频3s左右，然后按退出键退出播放，再次点击播放，发现视频一直在加载不会播放
+	-------media.extractor出现out of memory，然后或者crash或者出现mediaplayer的报错
+	
+http://firmware.myamlogic.com/firmware/image/android/Android-N/BOX/openlinux/openlinux-0606/2018-03-12/p212-user-64-DRM-469/
+http://firmware.myamlogic.com/firmware/image/android/Android-O/BOX/trunk/2018-03-12/p212-userdebug-64-AOSP-378/
+http://firmware.myamlogic.com/firmware/image/android/Android-O/BOX/trunk/2018-03-10/p212-userdebug-64-AOSP-376/
+
+wplay http://10.68.11.62:8800/4kvp9/4KVP9_60.000fps_15.5Mbps]Wetek-Astra-2m.webm
+
+
+
+上周
+Bug 160408 - {CVT客户反馈}AMLT960X-2311 升级后，进入多媒体通道下，然后播放某视频，出现视频黑了20s才出画面的情况
+Bug 160403 - {CVT客户反馈}AMLT960X-2264 多媒体通道下，播放某视频，然后一直按右键，发现一直卡在某个地方不会继续播 
+Bug 161276 - {CVT客户反馈}AMLT960X-2378 多媒体通道下，播放MP3歌曲，提示不支持，出问题前执行的是AMLT960X-2377操作
+Bug 160929 - {CVT客户反馈}AMLT960X-2377 多媒体通道下，播放某视频3s左右，然后按退出键退出播放，再次点击播放，发现视频一直在加载不会播放
+	---jemalloc的缓存机制导致的内存问题，相关的修改方法已提供，目前还没有再复现问题
+
+Bug 158171 - [天午-S905X-客户反馈-Video]:4K265煲机退出播放
+	---可能是之前处理异常流引入的线程竞争，已提供最新的debug patch
+
+本周：
+Bug 161238 - {AV}平台播放大部分Dolby Vision相关测试片源，视频正常播放中概率出现画面卡住，之后未响应的情况。20%左右，对比7.1正常
+Bug 154690 - {AV} Android 8.0 播放HTTP 4KVP9视频流，画面卡顿，不流畅 概率：100％ 对比：S905X 7.1正常 (edit)
+项目及公版上煲机问题
+
+bugzila上与QA描述不是同一个问题
+1.bug上描述的seek卡死（放开右键不会继续播放），现在测到的是连续seek不成功（seek的时间太短，感觉没有seek成功，放开右键会继续播放）
+2.造成上面感觉seek成功的原因是，这个流的I帧间隔太长，若向前（播放方向）seek时间太短，seek查找一定量帧后找不到I帧，会向后找I帧，所以从现象上就感觉是没有seek成功
+3.yunmin的建议是，连续按SEEK,就上面UI进度条动,等不SEEK了,才真正设下来SEEK位置.如果改右键SEEK值,有些片源I帧间隔小,就会跳过很多,SEEK精度又不够了
+
+omxpts/apts/vpts/pcr
+cat /sys/module/amvideo/parameters/omx_pts && cat /sys/class/tsync/pts_audio && cat /sys/class/tsync/pts_video && cat /sys/class/tsync/pts_pcrscr
+
+/bin/hw/android.hardware.drm@1.0-service.widevine &
+
+setprop media.omx.log_levels 255
+while true; do sleep 0.02; cat  /sys/class/tsync/mode;cat /sys/class/tsync/pts_audio && cat /sys/class/tsync/pts_video && cat /sys/class/tsync/pts_pcrscr; done &
+
+echo 0x10 > /sys/module/amvdec_vp9/parameters/debug   //VP9_DEBUG_OUT_PTS
+echo 1 > /sys/class/tsync/debug_video_pts && echo 1 > /sys/class/tsync/debug_pts_checkin
+echo 1 > /sys/class/tsync/debug_video_pts && echo 1 > /sys/class/tsync/debug_pts_checkout
+
+echo 1 > /sys/class/tsync/debug_audio_pts && echo 1 > /sys/class/tsync/debug_pts_checkin
+echo 1 > /sys/class/tsync/debug_audio_pts && echo 1 > /sys/class/tsync/debug_pts_checkout
+
+ro.nrdp.validation=ninja_5.0
+
+/mnt/fileroot/shuanglong.wang/o-amlogic-openlinux/out/target/product/p212/vendor/lib/hw/audio.primary.amlogic.so
+
+20180319 9:40-
+上周：
+Bug 160403 - {CVT客户反馈}AMLT960X-2264 多媒体通道下，播放某视频，然后一直按右键，发现一直卡在某个地方不会继续播
+	--特殊流，I帧间隔长，个别流先不修改seek机制
+Bug 161008 - {AV}需求：需要支持播放AVS2.0流
+	--ffmpeg识别avs2的ts格式，其它未做
+Bug 161942 - [Ref#161895-客户反馈-NTS]：部分case播放视频音画不同步。概率：100%，对比：无需对比	
+	--audio的pts gap过重新reset下pcr
+Bug 161944 - [Ref#161887-P252-客户反馈-NTS]:PLAY-101-TC8,Swim to half the movie failed with error: "Expected time needs to be between 734 and 754 but got 48464.783"
+	--获取vpts error的异常处理
+
+本周：
+nts问题：
+	Bug 162413 - [P252-客户反馈-NTS]：NTS测试HDR-001-TC3 视频无法播放出来，声音和OSD显示正常，100%
+	Bug 162414 - [P252-客户反馈-NTS]：NTS测试PLAY-103-TC5项vp9视频播放，音频先出来视频后出来，大概能延迟1s，100%
+煲机问题
+
+
+setprop media.omx.display_mode 1  //强制走video层
+cat /sys/class/vfm/map	
+echo dump decoder > /sys/class/vfm/map
+cat /sys/class/video/disable_video
+
+echo 0 > /sys/class/tsync/enable
+
+echo 1  > /sys/class/graphics/fb0/osd_display_debug
+echo 1 > /sys/class/graphics/fb0/blank
+
+
+1.查看videolayer的状态
+cat /sys/class/video/disable_video
+cat /sys/class/video/vframe_states
+
+echo 1 > /sys/class/video/disable_video
+echo 2 > /sys/class/video/disable_video
+echo 0 > /sys/class/video/disable_video
+echo d  >  /sys/class/graphics/fb0/debug 
+
+2.查看vfm的链路状态
+cat /sys/class/vfm/map
+echo 0 > /sys/class/tsync/enable
+echo 1 > /sys/class/video/slowsync_repeat_enable
+echo 0x20000> /sys/module/amvideo/parameters/debug_flag
+cat /sys/module/amvideo/parameters/underflow
+cat /sys/class/video/freerun_mode
+echo 1 > /sys/class/video/freerun_mode
+
+echo d  >  /sys/class/graphics/fb0/debug 
+
+
+3.关掉osd看是否出图像
+echo 1  > /sys/class/graphics/fb0/osd_display_debug;echo 1 > /sys/class/graphics/fb0/blank
+echo 1 > /sys/class/graphics/fb0/blank
+
+4.osd
+echo 0xd0107400 128 > /sys/kernel/debug/aml_reg/dump
+cat /sys/kernel/debug/aml_reg/dump > ./regs_from_1d00.regs
+echo 0xd0107600 128 > /sys/kernel/debug/aml_reg/dump
+cat /sys/kernel/debug/aml_reg/dump >> ./regs_from_1d00.regs
+echo 0xd0106B80 32 > /sys/kernel/debug/aml_reg/dump
+cat /sys/kernel/debug/aml_reg/dump > ./regs_from_1ae0.regs
+echo 0xd0106940 96 > /sys/kernel/debug/aml_reg/dump
+cat /sys/kernel/debug/aml_reg/dump > ./regs_from_1a50.regs
+另外,黑屏的时候, 读一下1a06和1a07
+echo rv 1a06 > /sys/class/amvecm/reg
+
+
+Total 12 (delta 7), reused 0 (delta 0)
+remote: Resolving deltas: 100% (7/7)
+remote: Processing changes: new: 2, updated: 2, refs: 4, done    
+remote: Missing issue-id in commit message
+remote: Commit c008a0de52f79c4d2664d8ddc957b228b2e3ccdb not associated to any issue
+remote: 
+remote: Hint: insert one or more issue-id anywhere in the commit message.
+remote:       Issue-ids are strings matching [pP][dD]\s?[#-]\s?([0-9]{5,6})
+remote:       and are pointing to existing tickets on its-bugzilla Issue-Tracker
+remote: (W) 4db326a: no files changed, message updated
+remote: 
+remote: New Changes:
+remote:   http://scgit.amlogic.com:8080/41222 PD#161966 libOmxAudio: add audio/ffmpeg decoder api[3/5]                     ...
+remote:   http://scgit.amlogic.com:8080/41223 fix android8.0 compile error
+remote: 
+remote: 
+remote: Updated Changes:
+remote:   http://scgit.amlogic.com:8080/41216 PD#160811 update libOmxAudio         1.fix audio stuck problem         2.add ...
+remote:   http://scgit.amlogic.com:8080/41220 omx: add get AMSTREAM_GET_VPTS error handle
+remote: 
+To ssh://shuanglong.wang@scgit.amlogic.com:29418/av-restricted/platform/hardware/amlogic/omx
+ * [new branch]      HEAD -> refs/for/refs/heads/o-amlogic-openlinux-20171215
+
+
+ 
+ ommit 4e8e78b6478f86a19a4d293051decbca7711f7f2
+Author: qi.yuan <qi.yuan@amlogic.com>
+Date:   Thu Feb 8 21:35:52 2018 +0800
+
+    PD#159902 1.add libHwAudio_dcvdec.so for OMX audio dd dd+ decoder and passthrough
+              2.[libOmxAudio] fix the pcm out noise
+              3.[libOmxAudio] fix 8ch dd+ passthrough
+    
+    Change-Id: I20a36c4630f9b6a13a946ef8947c0abf16a93cee
+
+HDR	
+ cat /sys/class/amvecm/hdr_dbg
+ cat /sys/module/am_vecm/parameters/hdr_mode
+ cat /sys/class/amhdmitx/amhdmitx0/hdr_cap
+ cat /sys/class/switch/hdmi_hdr
+ 
+ 
+目前的情况：NTS测试HDR-001-TC3 视频无法播放出来，声音和OSD显示正常，解码有输了，video_layer没有disable,osd没有遮挡
+
+
+http://scgit.amlogic.com:8080/41222
+http://scgit.amlogic.com:8080/41223
+http://scgit.amlogic.com:8080/41216
+http://scgit.amlogic.com:8080/41220
+http://scgit.amlogic.com:8080/41225
+
+
+echo 0x43> /sys/module/amvideo/parameters/skip_policy
+
+1.RDMA
+cat /sys/module/rdma/parameters/enable
+echo 1 > /sys/module/rdma/parameters/enable
+
+2.
+cat /sys/module/di/parameters/di_vscale_skip_count_real &&
+cat /sys/module/di/parameters/di_vscale_skip_count &&
+cat /sys/module/di/parameters/di_vscale_skip_enable
+
+3.
+t962x_r311:/ # cat /sys/class/vfm/map
+[00]  default { decoder(0) ppmgr(0) deinterlace(0) amvideo}
+[01]  default_amlvideo2 { vdin1(0) amlvideo2.1}
+[02]  dvblpath { dvbldec(0) amvideo}
+[03]  dvelpath { dveldec(0) dvel}
+[04]  dvhdmiin { dv_vdin(0) amvideo}
+[05]  tvpath { vdin0(0) amlvideo2.0(0) ppmgr(0) deinterlace(0) amvideo}
+[06]  vdec-map-0 { vdec.h264.00(1) amlvideo(1) deinterlace(1) amvideo}
+
+cat /sys/module/di/parameters/bypass_state
+echo 0/1 > /sys/module/di/parameters/nr2_en
+echo state > /sys/class/deinterlace/di0/debug
+cat /sys/module/di/parameters/same_field_bot_count &&
+cat /sys/module/di/parameters/same_field_top_count
+
+4.
+cat /sys/class/video/video_state
+
+5.
+echo 0x43 > /sys/module/amvideo/parameters/skip_policy
+echo 0x43 > /sys/module/amvideo/parameters/skip_policy
+
+
+
+while true; do cat /sys/class/video/axis; done &
+
+main264
+0 0 1919 1079
+0 0 1919 1079
+99 56 1911 1075             echo "99 56 1911 1075" > /sys/class/video/axis
+812 462 1852 1047			echo "812 462 1852 1047" > /sys/class/video/axis
+1326 755 1810 1027			echo "1326 755 1810 1027" > /sys/class/video/axis
+1366 777 1806 1024			echo "1366 777 1806 1024" > /sys/class/video/axis
+1367 778 1807 1025
+1367 778 1807 1025
+
+0 0 1919 1079
+0 0 1919 1079
+23 13 1917 1078				echo "23 13 1917 1078" > /sys/class/video/axis
+412 234 1885 1063			echo "412 234 1885 1063" > /sys/class/video/axis
+1077 613 1831 1036			echo "1077 613 1831 1036" > /sys/class/video/axis
+1309 745 1812 1027			echo "1309 745 1812 1027" > /sys/class/video/axis
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1372 783 1472 839			echo "1372 783 1472 839" > /sys/class/video/axis    花屏
+1367 778 1807 1025
+1367 778 1807 1025
+
+0 0 1919 1079
+5 3 1919 1079
+176 100 1905 1072			echo "176 100 1905 1072" > /sys/class/video/axis
+818 466 1852 1047			echo "818 466 1852 1047" > /sys/class/video/axis
+1133 645 1826 1034			echo "1133 645 1826 1034" > /sys/class/video/axis
+1286 732 1814 1028			echo "1286 732 1814 1028" > /sys/class/video/axis
+1340 763 1809 1026			echo "1340 763 1809 1026" > /sys/class/video/axis
+1366 777 1807 1025			echo "1366 777 1807 1025" > /sys/class/video/axis
+1367 778 1807 1025
+1367 778 1807 1025
+1372 783 1472 839			echo "1372 783 1472 839" > /sys/class/video/axis	花屏
+1372 783 1472 839
+1367 778 1807 1025
+1367 778 1807 1025
+
+
+0 0 1919 1079
+5 3 1919 1079
+176 100 1905 1072
+818 466 1852 1047
+1133 645 1826 1034
+1286 732 1814 1028
+1340 763 1809 1026
+1366 777 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1372 783 1472 839
+1372 783 1472 839
+1367 778 1807 1025
+1367 778 1807 1025
+
+
+0 0 1919 1079
+0 0 1919 1079
+21 12 1917 1078				echo "21 12 1917 1078" > /sys/class/video/axis
+176 100 1905 1072			echo "176 100 1905 1072" > /sys/class/video/axis
+693 394 1862 1052			echo "693 394 1862 1052" > /sys/class/video/axis
+818 466 1852 1047			echo "818 466 1852 1047" > /sys/class/video/axis
+1133 645 1826 1034			echo "1133 645 1826 1034" > /sys/class/video/axis
+1225 697 1819 1031			echo "1225 697 1819 1031" > /sys/class/video/axis
+1340 763 1809 1026			echo "1340 763 1809 1026" > /sys/class/video/axis
+1366 777 1807 1025			echo "1366 777 1807 1025" > /sys/class/video/axis
+1367 778 1807 1025
+1367 778 1807 1025
+1372 783 1472 839			echo "1372 783 1472 839" > /sys/class/video/axis
+1372 783 1472 839
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+
+
+4k265_lg
+0 0 1919 1079
+0 0 1919 1079
+0 0 1919 1079
+0 0 1919 1079
+17 10 1918 1078			echo "17 10 1918 1078" > /sys/class/video/axis
+43 25 1915 1077			echo "43 25 1915 1077" > /sys/class/video/axis
+1062 604 1832 1037		echo "1062 604 1832 1037" > /sys/class/video/axis
+1337 761 1809 1026		echo "1337 761 1809 1026" > /sys/class/video/axis
+1365 777 1807 1025		echo "1367 778 1807 1025" > /sys/class/video/axis
+1367 778 1807 1025		echo "1367 778 1807 1025" > /sys/class/video/axis
+1367 778 1807 1025
+1372 783 1472 839
+1372 783 1472 839		echo "1372 783 1472 839" > /sys/class/video/axis
+1367 778 1807 1025
+1367 778 1807 1025		echo "1367 778 1807 1025" > /sys/class/video/axis
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+
+0 0 1919 1079
+0 0 1919 1079
+52 30 1915 1077
+412 234 1885 1063
+693 394 1862 1052
+693 394 1862 1052
+818 466 1852 1047
+1225 697 1819 1031
+1286 732 1814 1028
+1352 769 1808 1026
+1366 777 1807 1025
+1367 778 1807 1025
+1372 783 1472 839
+1372 783 1472 839
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 102
+
+
+[4k264——23.976fps——10bit]
+0 0 1919 1079
+0 0 1919 1079
+0 0 1919 1079
+103 58 1911 1075
+412 234 1885 1063
+1077 613 1831 1036
+1184 674 1822 1032
+1309 745 1793 1017
+1367 778 1807 1025
+1372 783 1472 839
+1367 778 1807 1025
+1367 778 1807 1025
+
+
+0 0 1919 1079
+0 0 1919 1079
+5 3 1919 1079
+99 56 1911 1075
+280 159 1896 1068
+916 522 1844 1043
+1286 732 1814 1028
+1340 763 1809 1026
+1366 777 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1372 783 1472 839
+1367 778 1807 1025
+1367 778 1807 1025
+
+[4k265_16.9m 589.994 workcup]
+0 0 1919 1079
+0 0 1919 1079
+0 0 1919 1079
+5 3 1919 1079
+103 58 1911 1075
+693 394 1862 1052
+1077 613 1831 1036
+1133 645 1826 1034
+1358 773 1808 1025
+1366 777 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+1372 783 1472 839
+1372 783 1472 839
+1372 783 1472 839
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+
+0 0 1919 1079
+0 0 1919 1079
+0 0 1919 1079
+23 13 1917 1078
+693 394 1862 1052
+1286 732 1814 1028
+1340 763 1809 1026
+1367 778 1807 1025
+1367 778 1807 1025
+1372 783 1472 839
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+
+[4kvp9_23.976_26.5
+0 0 1919 1079
+0 0 1919 1079
+21 12 1917 1078
+280 159 1896 1068
+812 462 1852 1047
+916 522 1844 1043
+1286 732 1814 1028
+1366 777 1807 1025
+1367 778 1807 1025
+1372 783 1472 839
+1372 783 1472 839
+1367 778 1807 1025
+1367 778 1807 1025
+1367 778 1807 1025
+
+
+
+ftp://firmware.reference:Druf_T3t@ftp-china.amlogic.com
+
+北京市西城区金融街23号平安大厦9层理赔柜面尚晓雨
+
+
+source $android_top/device/amlogic/common/quick_build_kernel.sh build-modules
+modified:   drivers/stream_input/amports/amstream.c
+        modified:   drivers/stream_input/parser/esparser.c
+
+		
+echo rv 1a50 > /sys/class/amvecm/reg 
+[ 1738.943698@2] VPU[0x1a50]=0x188a0043
+
+1)kernel打印underflow情况
+while true;do cat /sys/module/amvideo/parameters/underflow;sleep 1;done &
+echo 3 > /sys/module/amvideo/parameters/video_dbg_vf
+echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
+echo 0 > /sys/module/amvideo/parameters/debug_flag
+echo 0x20000 > /sys/module/amvideo/parameres/debug_flag   //per frame
+echo 1 > /sys/class/video/slowsync_repeat_enable
+echo 1 > /sys/class/video/slowsync_repeat_enable
+/sys/module/amvideo/parameters/omx_pts_interval_lower
+/sys/module/amvideo/parameters/omx_pts_interval_upper
+
+1.视频（1080p 264）卡的时候，音频不卡
+2.omx的inputs与outpts没有异常
+3.omx的打印有大量的下面的dropped frame pts,reset pcr
+	03-30 09:47:38.594  2755  3126 D AmlogicVideoDecoderAwesome: dropped frame pts=1007589000, mInputTimeStampChanged=0, need_reset_omx_pts=1, frame_num=110
+3.underflow时打印vfm链路（decoder amlvideo amvideo）的情况以及pcr的调整的打印，但统计omx的in和out的平均个数，应该不是解码慢
+	03-30 09:50:25.728     0     0 I Kernel  : <6>[  684.172563@0] decoder_pool_size=64
+	03-30 09:50:25.729     0     0 I Kernel  : <6>[  684.172569@0] decoder buf_free_num=63
+	03-30 09:50:25.729     0     0 I Kernel  : <6>[  684.172572@0] decoder buf_avail_num=0
+	03-30 09:50:25.730     0     0 I Kernel  : <6>[  684.172575@0] amlvideo_pool_size=16
+	03-30 09:50:25.730     0     0 I Kernel  : <6>[  684.172577@0] amlvideo buf_free_num=16
+	03-30 09:50:25.730     0     0 I Kernel  : <6>[  684.172579@0] amlvideo buf_avail_num=0
+	03-30 09:51:29.475     0     0 I Kernel  : <6>[  747.922561@0] system_time=2250, omx_pts=0, diff=2250
+	03-30 09:51:29.592     0     0 I Kernel  : <6>[  748.039222@0] system_time=2250, omx_pts=0, diff=2250
+	03-30 09:51:29.609     0     0 I Kernel  : <6>[  748.055893@0] system_time=2250, omx_pts=0, diff=2250
+	03-30 09:51:29.660     0     0 I Kernel  : <6>[  748.105889@0] system_time=2250, omx_pts=0, diff=2250
+	03-30 09:51:29.710     0     0 I Kernel  : <6>[  748.155898@0] system_time=2250, omx_pts=0, diff=2250
+4.增加omx输出buffer个数，从6->8,没有效果
+5.下面的log，第一个大量的dropped frame pts是在09:46:21，inpts和outpts在09:46:16和09:46:21之间是断的，没有了输入输出，log像是暂停了，09:46:21再次播放时就出现大量的dropped frame pts
+这个原因不知道，log里dropped frame pts基本都是这样情况，具体原因还不知道
+2071:03-30 09:46:21.648  2755  2812 D AmlogicVideoDecoderAwesome: dropped frame pts=1008132000, mInputTimeStampChanged=0, need_reset_omx_pts=1, frame_num=123
+2078:03-30 09:46:21.652  2755  2812 D AmlogicVideoDecoderAwesome: dropped frame pts=1008173000, mInputTimeStampChanged=0, need_reset_omx_pts=1, frame_num=124
+2083:03-30 09:46:21.653  2755  2812 D AmlogicVideoDecoderAwesome: dropped frame pts=1008215000, mInputTimeStampChanged=0, need_reset_omx_pts=1, frame_num=125
+2088:03-30 09:46:21.656  2755  2812 D AmlogicVideoDecoderAwesome: dropped frame pts=1008257000, mInputTimeStampChanged=0, need_reset_omx_pts=1, frame_num=126
+2113:03-30 09:46:21.687  2755  2812 D AmlogicVideoDecoderAwesome: dropped frame pts=1008298000, mInputTimeStampChanged=0, need_reset_omx_pts=1, frame_num=127
+2117:03-30 09:46:21.689  2755  2812 D AmlogicVideoDecoderAwesome: dropped frame pts=1008340000, mInputTimeStampChanged=0, need_reset_omx_pts=1, frame_num=128
+
+1904:03-30 09:46:15.914  2755  6024 D AmlogicVideoDecoderAwesome: In PTS 1007965000,	nFilledLen=6963, bufferHdr.pBuffer=ecb0f0b0
+1913:03-30 09:46:15.944  2755  6024 D AmlogicVideoDecoderAwesome: In PTS 1008132000,	nFilledLen=8228, bufferHdr.pBuffer=ece98f50
+1923:03-30 09:46:15.994  2755  6024 D AmlogicVideoDecoderAwesome: In PTS 1008048000,	nFilledLen=6734, bufferHdr.pBuffer=ecb0f0b0
+1934:03-30 09:46:16.027  2755  6024 D AmlogicVideoDecoderAwesome: In PTS 1008090000,	nFilledLen=6634, bufferHdr.pBuffer=ece98f50
+1948:03-30 09:46:16.082  2755  6024 D AmlogicVideoDecoderAwesome: In PTS 1008257000,	nFilledLen=7339, bufferHdr.pBuffer=ecb0f0b0
+2035:03-30 09:46:21.428  2755  6024 D AmlogicVideoDecoderAwesome: In PTS 1008173000,	nFilledLen=6295, bufferHdr.pBuffer=ece98f50
+2042:03-30 09:46:21.437  2755  6024 D AmlogicVideoDecoderAwesome: In PTS 1008215000,	nFilledLen=6429, bufferHdr.pBuffer=ecb0f0b0
+2046:03-30 09:46:21.441  2755  6024 D AmlogicVideoDecoderAwesome: In PTS 1008382000,	nFilledLen=7005, bufferHdr.pBuffer=ece98f50
+2051:03-30 09:46:21.450  2755  6024 D AmlogicVideoDecoderAwesome: In PTS 1008298000,	nFilledLen=5940, bufferHdr.pBuffer=ecb0f0b0
+
+1906:03-30 09:46:15.915  2755  6014 D AmlogicVideoDecoderAwesome:   		  Out PTS: 1007881000..vf.fd=0, mOutBufferNo=136, frame_num=117
+1915:03-30 09:46:15.948  2755  6014 D AmlogicVideoDecoderAwesome:   		  Out PTS: 1007923000..vf.fd=0, mOutBufferNo=137, frame_num=118
+1925:03-30 09:46:16.002  2755  6014 D AmlogicVideoDecoderAwesome:   		  Out PTS: 1007965000..vf.fd=0, mOutBufferNo=138, frame_num=119
+1926:03-30 09:46:16.003  2755  6014 D AmlogicVideoDecoderAwesome:   		  Out PTS: 1008007000..vf.fd=0, mOutBufferNo=139, frame_num=120
+1950:03-30 09:46:16.086  2755  6014 D AmlogicVideoDecoderAwesome:   		  Out PTS: 1008048000..vf.fd=0, mOutBufferNo=140, frame_num=121
+2048:03-30 09:46:21.446  2755  6014 D AmlogicVideoDecoderAwesome:   		  Out PTS: 1008090000..vf.fd=0, mOutBufferNo=141, frame_num=122
+2050:03-30 09:46:21.448  2755  6014 D AmlogicVideoDecoderAwesome:   		  Out PTS: 1008132000..vf.fd=0, mOutBufferNo=142, frame_num=123
+2053:03-30 09:46:21.452  2755  6014 D AmlogicVideoDecoderAwesome:   		  Out PTS: 1008173000..vf.fd=0, mOutBufferNo=143, frame_num=124
+
+
+ce3(1080p)测试项出现卡顿不同步的现象，卡顿的时候音频是正常的，且打印大量的AmlogicVideoDecoderAwesome: dropped frame pts和调整pcr system_time=90693511, omx_pts=90709291, diff=-15780这样的打印，看dropped frame pts的时间点，像是暂停再播放时现大量的dropped frame，
+
+
+grep -rnI "Out PTS" all-logcat-ce3-short-1 > 3_out.log
+grep -rnI "In PTS" all-logcat-ce3-short-1 > 3_input.log
+grep -rnI "dropped frame pts" all-logcat-ce3-short-1 > 3_drop.log
+
+echo 3 > /sys/module/aml_vfm/parameters/vfm_trace_enable
+echo 100 > /sys/module/aml_vfm/parameters/vfm_trace_num
+echo 0 > /proc/sys/kernel/printk
+dmesg -c > /dev/null
+dmesg
+
+setprop media.omx.log_levels 255
+echo 0 > /proc/sys/kernel/printk
+echo 3 > /sys/module/amvideo/parameters/video_dbg_vf
+while true;do echo dump decoder > /sys/class/vfm/map; echo dump amlvideo > /sys/class/vfm/map; sleep 0.5;done &
+
+setprop   debug.stagefright.omx-debug 5
+
+
+setprop media.omx.log_levels 255
+echo 0 > /proc/sys/kernel/printk
+echo 3 > /sys/module/amvideo/parameters/video_dbg_vf
+
+2)
+修改omx decoder输出个数
+编译的有so
+setprop media.omx.out_buffer2 8
+
+amlvideo  这边消耗是受上层apk 同步控制的
+apk 同步完 提交sf 显示 hwc 那边设置omx 到amvideo 更新系统时间
+
+Bug 155373 - [P355-客户反馈-Video]：本地播放dropframe.mp4片源严重掉帧，概率：必现 (edit) 
+
+
+yuwentengbo 62服务器
+3Cxq1Xa
+
+
+1 secm 3m->1.6
+
+2 dpb
+static u32 dpb_size_adj = 6;
+DPB buffer大小
+cat /sys/module/amvdec_h264/parameters/dpb_size_adj 6
+echo 4 > /sys/module/amvdec_h264/parameters/dpb_size_adj
+/sys/module/amvdec_mh264/parameters/h264_debug_flag
+
+3 setprop   debug.stagefright.omx-debug 5
+抓一段logcat的打印
+grep -rnI "decrypt.*take" all-logcat-more-log-ce3-short-2 > 4_decrypt.log
+sed -n 's/.*decrypt \(.*\)\]/\1/p' 4_decrypt.log > 4_decrypt_timeus.log
+sed -n 's/.*decrypt.*take \(.*\) us.*/\1/p' 4_decrypt.log > 4_decrypt_taketime.log
+
+grep -rnI "In PTS"  all-logcat-0042-101-tc5 > 5_input.log
+grep -rnI "Out PTS" all-logcat-0042-101-tc5 > 5_out.log
+grep -rnI "dropped frame pts" all-logcat-0042-101-tc5 > 5_drop.log
+
+grep "queueInputBuffer@OMX.google"  all-logcat-3 > all-logcat-3_audio_queue.log
+grep "queueSecureInputBuffer@OMX.amlogic" all-logcat-3 > all-logcat-3_video_queue.log
+grep "dequeueOutputBuffer@OMX.google"  all-logcat-3 > all-logcat-3_audio_dequeue.log
+grep "dequeueOutputBuffer@OMX.amlogic"  all-logcat-3 > all-logcat-3_video_dequeue.log
+
+20180402 
+1.换板子
+2.北京想办法复现，保持完全一致的环境
+3.
+echo 6 > /sys/module/amvdec_mh264/parameters/reference_buf_margin
+echo 8 > /sys/module/amvdec_mh264/parameters/reorder_dpb_size_margin
+6->8 omx outbuffer 
+
+04-01 00:41:40.849  2744  7486 D AmlogicVideoDecoderAwesome:   		  Out PTS: 1006630000..vf.fd=0, mOutBufferNo=106, frame_num=87
+04-01 00:41:40.855  7064  7484 I MediaCodec: [dequeueOutputBuffer@OMX.amlogic.avc.decoder.awesome.secure] dequeue -1@systemtime 740246043 us
+04-01 00:41:40.855  7064  7478 I MediaCodec: [kWhatDequeueOutputBuffer1@OMX.amlogic.avc.decoder.awesome.secure] timeus -1 @systemtime 740246174 us
+04-01 00:41:40.855  7064  7478 I MediaCodec: [kWhatDequeueOutputBuffer2@OMX.amlogic.avc.decoder.awesome.secure] timeus:-1 @systemtime 740246245 us
+04-01 00:41:40.855  7064  7478 I MediaCodec: [kWhatDequeueOutputBuffer3@OMX.amlogic.avc.decoder.awesome.secure] timeus:-1 @systemtime 740246301 us
+04-01 00:41:40.855  7064  7478 I MediaCodec: [kWhatDequeueOutputBuffer4@OMX.amlogic.avc.decoder.awesome.secure] timeus:-1 @systemtime 740246344 us
+
+04-01 00:41:41.073  7064  7484 I MediaCodec: [dequeueOutputBuffer@OMX.amlogic.avc.decoder.awesome.secure] timeUs:1006630000, dequeue take 218165 us
+
+
+20180402 
+audiotrack->gettime(), gettimestamp();....打印一下。
+
+status_t MediaCodec::renderOutputBufferAndRelease(size_t index, int64_t timestampNs) 
+status_t MediaCodec::renderOutputBufferAndRelease(size_t index)
+status_t MediaCodec::releaseOutputBuffer(size_t index)
+
+1. 小米8.0 nts vp9播放慢
+	--vp9的triger引起video送数据慢、pcr置位、时序乱等问题，没有找到好的修改方法，目前修改为tunnel模式时，关闭trigger
+2. 小米8.0 nts av卡顿不同步问题（tunnel 和non-tunnel切换）
+	--tunnel mode播放，如果这时候有系统音混进来，需要更新系统音这路的时间戳，framework会根据这个算后面普通播放的时间戳
+3. focc dv认证个别流黑屏无输出
+	--mime里没有识别AV_CODEC_ID_DVVIDEO的处理，作MEDIA_MIMETYPE_VIDEO_HEVC处理，已提供patch，还没有提交上trunk
+4. 播放个别HLG片源TravelXP_4K_HDR_HLG.ts，起播画面卡顿,播放中间歇性掉帧卡顿
+	--之前的提交code已处理掉该问题，tv上已无此问题，box上需要确认下
+	
+
+	
+这里总结下：vp9的trig会引起nts测试的两类测试问题
+1）vp9播放视频比音频晚出来1s左右
+2）vp9播放av不同步问题，差3s左右，是由于trig reset引起pcr、apts被置位，并发现VIDEO_STOP event，使时序错乱，导致av不同步
+
+最新tengbo提供给小米的code是干掉了vp9 tunnel的trig功能，没有这个问题了，fixed
+先在项目里支持此功能相关的omx源码
+Change proposed: 'omx: close ，trig for vp9 tunnel mode' (av-restricted/platform/hardware/amlogic/omx o-amlogic-openlinux-20171215)
+http://scgit.amlogic.com:8080/41751
+
+
+1.腾讯播放器播放正片audio没有走MediaCodec，只有视频走了MediaCodec，播放有“突突突”的声音
+2.libplayer也能复现问题，有类似“codec:[1103]reset apts:0xb9833b-->0xb957df”的log，但没有“突突突”的声音
+	2.1) echo 0 > /sys/class/tsync/enable，关闭同步，还是会出现卡顿
+	2.2) cat /sys/class/amstream/bufs 卡顿时没有下溢，audio和video的level都是ok的，只是video的space有点小
+	2.3) 统计卡顿时每秒的frames，大概24帧率/秒，速度还可以，但也不排除瞬间变慢的可能性
+	2.4）audio和video的pts问题，没有细看，可以追踪看下
+
+	
+假设某通道的音频信号是采样率为8kHz，位宽为16bit，20ms一帧，双通道，则一帧音频数据的大小为：
+int size = 8000 x 16bit x 0.02s  x 2 = 5120 bit = 640 byte	
+
+getDurationUsIfPlayedAtSampleRate(mNumFramesWritten) - t
+t = getDurationUsIfPlayedAtSampleRate(numFramesPlayed) + nowUs - (ts.mTime.tv_sec * 1000000LL + ts.mTime.tv_nsec / 1000)
+getDurationUsIfPlayedAtSampleRate(mNumFramesWritten) - (getDurationUsIfPlayedAtSampleRate(numFramesPlayed) + nowUs - (ts.mTime.tv_sec * 1000000LL + ts.mTime.tv_nsec / 1000))
+
+
+cp: cannot stat 鈥榦ut/target/product/p212/obj/KERNEL_OBJ/drivers/usb/dwc3/dwc3.ko鈥 No such file or directory
+cp: cannot stat 鈥榦ut/target/product/p212/obj/KERNEL_OBJ/drivers/amlogic/usb/dwc_otg/310/dwc_otg.ko鈥 No such file or directory
+
+error: common/: branch amlogic-4.9-dev is published (but not merged) and is now 1 commits behind
+error: vendor/amlogic/prebuilt/libmedia/: vendor/amlogic/prebuilt/libmedia checkout 8cc2992bd1cf76d9e9c6cadf0a21171b00474914 
+
+
+20180410
+echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
+	 0x4000000
+
+echo 180000 > /sys/module/amvideo/parameters/omx_pts_return_difference
+echo 1 > /sys/class/video/slowsync_repeat_enable
+
+#检查目录下磁盘空间
+du . -d 1 -h -x
+
+
+抓hdcp的情况
+setprop media.wv.printhdcp 1
+
+20180417 9:10
+1.
+Bug 164176 - Dolby Vision 認證: 播放No.531認證片源,一開始的畫面沒有顯示(0秒~1秒), 並且播放過程中有小閃爍 (edit) 
+Bug 162413 - [P252-客户反馈-NTS]：NTS测试HDR-001-TC3 视频无法播放出来，声音和OSD显示正常，100%
+
+
+#pengbang ca,ta的存储位置
+ca 在verdor/lib
+ta 在/verdor/lib/teetz
+
+setprop   debug.stagefright.omx-debug 5
+dumpsys SurfaceFlinger --latency "com.netflix.ninja/com.netflix.ninja.MainActivity"
+8.0以下加大输出buffer数需要设置下面的属性
+setprop media.omx.out_buffer2 8
+
+
+sed -n 's/.*n.pts=\(.*\), scr.*/\1/p' kernel.log > npts.log
+sed -n 's/.*scr = \(.*\), omxpts.*/\1/p' kernel.log > scr.log
+sed -n 's/.*omxpts=\(.*\)/\1/p' kernel.log >omxpts.log
+getsfrdpts logcat.log
+grep "render____time" logcat.log > render.log
+
+echo 0x20000 > /sys/module/amvideo/parameters/debug_flag
+echo 0x420000 > /sys/module/amvideo/parameters/debug_flag
+
+
+7.1:
+	Widevine CDM version version: 	v4.1.0-android 
+	OEMCrypto version:				V11
+8.0:
+	Widevine CDM version version: 	v5.1.0-android
+	OEMCrypto version:				V13
+	
+	alias set_androidtop='export android_top='
+	export android_top="/mnt/fileroot/shuanglong.wang/o-amlogic"
+	
+ modified:   frame_provider/decoder/utils/vdec.c
+        modified:   frame_provider/decoder/utils/vdec.h
+        modified:   stream_input/parser/esparser.c
+
+
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80015468?source=99'
+
+libOmxAudio.so   libdatachunkqueue_alt.so   libomx_timed_task_queue_alt.so  libOmxBase.so    libfpscalculator_alt.so    libomx_worker_peer_alt.so       libOmxCore.so    libomx_av_core_alt.so      libstagefrighthw.so             libOmxCoreSw.so  libomx_clock_utils_alt.so  libthreadworker_alt.so          libOmxVideo.so   libomx_framework_alt.so
+8189es.ko            amvdec_mh264.ko   amvdec_vc1.ko      encoder.ko       8822bu.ko            amvdec_mjpeg.ko   amvdec_vp9.ko      firmware.ko      amvdec_avs.ko        amvdec_mmjpeg.ko  audio_data.ko      media_clock.ko   amvdec_h264.ko       amvdec_mmpeg4.ko  bcmdhd.ko          modules.dep      amvdec_h264_4k2k.ko  amvdec_mpeg12.ko  ddr_window_64.ko   stream_input.ko  amvdec_h264mvc.ko    amvdec_mpeg4.ko   decoder_common.ko  amvdec_h265.ko       amvdec_real.ko    dhd.ko
+
+#decoder module
+/common/include/linux/amlogic/media/utils
+chmod a+x device/amlogic/common/quick_build_kernel.sh
+export TOP=$PWD;
+device/amlogic/common/quick_build_kernel.sh build-modules
+
+
+show_nopowerdown
+store_nopowerdown
+int nopowerdown1;
+
+echo 0x4000000 > /sys/module/amvideo/parameters/debug_flag
+	 0x4000000
+	 
+	 
+pr_info("[wsl] amports_gate_clk 0 nopowerdown=%d, ptsregval=%d\n", nopowerdown, READ_PARSER_REG(AUDIO_PTS));
+			
+pr_info("[wsl] amporte_init 0 nopowerdown=%d, ptsregval=%d\n",
+            nopowerdown, READ_PARSER_REG(AUDIO_PTS));
+
+一个是我们4.9 kernel本身的通过 APTS节点来动态纠正系统时间的通路在4.9上被#if 0掉了，这个不知道历史
+另外一个是因为vp9 reset的关系，原来设置好的pcrscr的系统时间，在VIDEO_STOP的时候被清掉了，
+导致正式的码流过来第二次 VIDEO_START触发的时候，认为系统没有设置系统时间，
+从而设了一个比第一个video pts晚3秒的系统时间，又因为前一个动态纠正的机制失效的问题，导致video额外晚三秒才播出，而且无法恢复
+在netflix上面的播放表现是开始播放的时候，声音已经出来了，但是video因为没有有效的vpts(还在等那个3秒到了才能把第一帧放出来），
+UI上面显示就是转圈三秒后，video出来
+这个改法有个隐患就是如果VIDEO_STOP不去清掉audio建立了系统时间的flag的话，下一次播放，如果VIDEO_START先来，
+它辉认为当前的系统时间是有效的，就不去打开系统时间了
+所以我前面加了个在设置enable的时候来清掉，这个假定是比较危险的
+
+			
+这个是利用vp9 reset前面小码流的特殊性
+这个reset虽然没法避免vfm path建立的过程，但是有个特点就是前面用来reset的帧是不会去显示的
+所以实际上前面reset的时候，是没有VIDEO_START event的
+我们可以利用这个特性，所以我第二个改法是在video.c这边，如果前面没有发过VIDEO_START那unregister的时候也没必要去发VIDEO_STOP了，
+这样等到正式码流过来的时候，原来的VIDEO_START/STOP的逻辑还能存在
+
+error: unpack failed: error Missing tree 898323312ab622fda3ee2b45de70e15b509b4ba6
+fatal: Unpack error, check server log
+To ssh://shuanglong.wang@scgit.amlogic.com:29418/kernel/common
+ ! [remote rejected] HEAD -> refs/for/refs/heads/amlogic-4.9-dev (n/a (unpacker error))
+error: failed to push some refs to 'ssh://shuanglong.wang@scgit.amlogic.com:29418/kernel/common'
+
+echo 0x4000002 > /sys/module/amvideo/parameters/debug_flag
+
+
+mega
+ssh mega.wu@114.34.7.135
+4Mgao$$$
+ssh mega.wu@droid01-tw
+4Mgao$$$
+/mnt/fileroot2/mega.wu/Foxconn/CCC/myam_n_openlinux-sdk/
+lunch q201-userdebug-64
+
+dv一帧一帧的显示
+echo 0x4000002 > /sys/module/amvideo/parameters/debug_flag
+echo 0x80 > /sys/module/am_vecm/parameters/debug_dolby
+echo 0x4 > /sys/module/am_vecm/parameters/dolby_vision_flags
+
+echo r 1d26 > /sys/class/graphics/fb0/debug
+echo 0 > /sys/class/video/disable_video
+echo r 1d26 > /sys/class/graphics/fb0/debug
+07fc10b0
+
+1ae0和1d26
+echo 0 > /sys/module/amvideo/parameters/debug_flag
+echo rv 1ae0 > /sys/class/amvecm/reg
+
+
+echo 0x4 > /sys/module/am_vecm/parameters/dolby_vision_flags;
+echo 0x4000002 > /sys/module/amvideo/parameters/debug_flag;
+sleep 1;
+echo 0 > /sys/module/amvideo/parameters/debug_flag;
+echo r 1d26 > /sys/class/graphics/fb0/debug;
+
+
+echo 0x4 > /sys/module/am_vecm/parameters/dolby_vision_flags
+
+echo r 1d26 > /sys/class/graphics/fb0/debug
+
+[ 1241.732679@5] VPU[0x1ae0]=0x00001700
+[ 1251.093665@6] fb: reg[0x1d26]: 0x07fc54b0
+
+[   63.045074@7] VPU[0x1ae0]=0x00001700
+[   69.257165@7] fb: reg[0x1d26]: 0x000054b0
+
+Bug 147365 - {Android TV}widevine L1不工作，导致playmovies&TV、netflix、Cast等涉及到L1加密的应用无法使用。100%，对比：不需要
+setprop media.wv.dbglevel 0x87
+
+上周
+1. Dolby Vision 認證: 播放No.531認證片源,一開始的畫面沒有顯示(0秒~1秒), 並且播放過程中有小閃爍
+	--流特殊，el的dts与bl的dts不对应，按照相同的dts merge bl和el导致解码器丢了48 frames，需要验证patch对其它的dv的影响，有风险
+2.Bug 163540 - {NTS}CRYPTO-003-TC1-WV提示：On-device test execution terminated:com.netflix.nts.exception.NtsFrameworkException: Restart Handler: ERROR java.lang.NullPointerException
+	--8.1新版本已不能复现
+3.Bug 164568 - {NTS}Android8.1 ampere版本，测试PLAY-001-TC22，error: Expected time needs to be between 35 and 55 but got 47766.033
+	---8.0上解决过，已提供gerry提交及so待验证
+4.Bug 165355 - {NTS}S805X测试DRS-001-TC8 PLAY-001-TC25 SYNC-002-TC5 SYNC-002-TC7 VIDEO-004-TC6现象声音比画面先出现
+  Bug 164395 - {NTS}ampere版本，SYNC-002-TC5测试，声音和画面不同步
+  ---已提供Tim 修改vp9不同步的patch，待验证，164395这个可能还有audio的问题，需要验证确认
+
+本周：
+ 8.1 ref其它nts问题
+ 
+myboot: netflix不能启动
+otherboot:
+
+OMX_ERRORTYPE OmxVideoDecoder::allocateBuffer(
+        OMX_INOUT OMX_BUFFERHEADERTYPE **ppBufferHdr,
+		
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80125514?source=99'
+
+csd_phyaddr=0x6700010, csd_len=50703
+
+
+Bug 165355 - {NTS}S805X测试DRS-001-TC8 PLAY-001-TC25 SYNC-002-TC5 SYNC-002-TC7 VIDEO-004-TC6现象声音比画面先出现 概率：100%
+sync-002-tc5  hdr10  265，没有看出不同步
+VIDEO-004-TC4 hdr10  265，没有看出不同步
+	---这两没有复现不同步
+
+DRS-001-TC8 vp9 hdr 能复现不同步
+play-103-tc5 vp9 different framerate，复现一次不同步
+	---这两个是vp9的trig慢了一些，并且reset还触发了a-discontinue,变成vmaster，触发不同步，不去调整了
+[ 2776.341846@3] A-discontinue,pcr=6000,vpts=0,apts=0,diff_pts=16191990,jump_Pts=16197990
+[ 2776.348729@3] discontinue-tsync_mode:V->V,state:S->S,jiffies=25c900[ 2776.354236@3] debugcnt=0x0,diff_pts=16191990,tsync_mode=0
+
+
+Bug 164395 - {NTS}ampere版本，SYNC-002-TC5测试，声音和画面不同步
+	这个在bug165355里更新，在这暂无更新
+	
+	
+
+05-11 07:58:38.833  2736  6640 D OmxComponent: getExtensionIndex 1101 name="OMX.google.android.index.storeMetaDataInBuffers"
+05-11 07:58:38.833  2736  6640 D[ 2776.375663@3] A-discontinue,pcr=9000,vpts=0,apts=0,diff_pts=16192110,jump_Pts=16201110
+[ 2776.381183@3] discontinue-tsync_mode:V->V,state:S->S,jiffies=25c920[ 2776.387750@3] debugcnt=0x0,diff_pts=16192110,tsync_mode=0
+ OmxVideoDecoder: setParameter 789 0x7f000002
+05-11 07:58:38.833  2736  6640 D OmxVideoDecoder:[ 2776.401333@1] success set parent gpu_p0_composite rate to 400000000
+ setParameter 1269 OMX_IndexAndroidStoreMetadataInBuffers
+05-11 07:58:38.833  2736  6640 E OMXNodeInstance: setParameter(0xf418[ 2776.418699@3] A-discontinue,pcr=12000,vpts=0,apts=0,diff_pts=16192950,jump_Pts=16204950
+[ 2776.426007@3] discontinue-tsync_mode:V->V,state:S->S,jiffies=25c950[ 2776.432025@3] debugcnt=0x0,diff_pts=16192950,tsync_mode=0
+
+
+
+
+
+Bug 164395 - {NTS}ampere版本，SYNC-002-TC5测试，声音和画面不同步
+Bug 165355 - {NTS}S805X测试DRS-001-TC8 PLAY-001-TC25 SYNC-002-TC5 SYNC-002-TC7 VIDEO-004-TC6现象声音比画面先出现 概率：100%
+	av不同步问题，vp9和hdr10 265不同步，vp9的能复现到，hdr10 265的还没有复现到
+
+Bug 165361 - {NTS}测试PROF-006-TC3 Failed:Load the JS test, (Unavailable Video Profiles - VP9 HDR - 1080p)
+	--可能与vp9的level有关
+Bug 165448 - {NTS}S805X测试PLAY-101-TC7 提示 Load and verify media playback of movie ID: 80015467 and restrict streams to 'CE4' resolution(s). failed
+	--可能与环境有关
+	
+Bug 166042 - ｛Netflix反馈问题}{NTS}S805X测试VIDEO-004-TC7 Video Resize - VP9 HDR test case failing with DRM failure
+	--本地出现花屏，现象还需要与QA确认，还没有回复
+[ 1177.913691@1] Skip search next start code
+[ 1178.025703@1] Skip search next start code
+[ 1178.173689@1] Skip search next start code
+[ 1178.257751@1] Skip search next start code
+[ 1178.465695@1] Skip search next start code
+[ 1178.633715@1] Skip search next start code
+[ 1178.833626@1] Skip search next start code
+[ 1179.005578@1] Skip search next start code
+[ 1179.205659@1] Skip search next start code
+[ 1179.205967@1] resize_context_buffers (1280,720)=>(1280,720)
+[ 1179.373321@1] success set parent gpu_p1_composite rate to 400000000
+[ 1179.473233@1] [0]timeout_process decoder timeout
+[ 1179.677222@1] [0]timeout_process decoder timeout
+[ 1179.889221@1] [0]timeout_process decoder timeout
+[ 1180.105231@1] [0]timeout_process decoder timeout
+	
+Bug 166111 - ｛Netflix反馈问题}{NTS}S805X 测试 PLAY-104-TC11 : Frame drop and audio loss while transitioning between content with different DRM keys
+Bug 166020 - ｛Netflix反馈问题}{NTS}S805X Playback stops while playing any content using AVR and seeking by few seconds 对比:无需
+	--可能DRM相关的，看drm有报错
+	
+
+Bug 165355 - {NTS}S805X测试DRS-001-TC8 PLAY-001-TC25 SYNC-002-TC5 SYNC-002-TC7 VIDEO-004-TC6现象声音比画面先出现 概率：100%
+play-103-tc5帮忙抓个log
+sync-002-tc5和VIDEO-004-TC4我这没有复现，帮忙抓个log，告诉怎么好的复现
+
+Bug 166042 - ｛Netflix反馈问题}{NTS}S805X测试VIDEO-004-TC7 Video Resize - VP9 HDR test case failing with DRM failure
+	--本地出现花屏，过一会应该是出现了视频卡住，这个帮忙确认下现象，如果相同现象就不用抓log了
+
+
+20180514
+1.编译8.0的boot.img
+export BOARD_COMPILE_ATV=true
+
+	
+Bug 165746 - {Full_treble_NTS} PLAY-013-TC2 播放过程中画面不流畅，会瞬间卡顿 概率：100% 对比：无需对比 (edit) 
+	--看着像audio pasue后resume error引起的 
+Bug 165745 - {Full_treble_NTS} PLAY-001-TC4/PLAY-001-TC22视频播放时音画不同步，声音比画面快1.5秒 概率：100% 对比
+	--应该是vp9的问题
+	
+PLAY-001-TC4: 加载失败，测不起来
+PLAY-001-TC22: 测试同步
+play-103-tc5：测试同步
+DRS-001-TC7:  测试同步
+AUDIO-025-TC10：看不出同步问题，我这没有画面，超时或者出现不能测试起来的情况
+SYNC-001-TC7：测试同步
+SYNC-002-TC7：测试同步
+play-101-tc8:测试同步
+	
+Bug 165744 - {Full_treble_NTS} PLAY-001-TC1/PLAY-001-TC4/PLAY-001-TC22 测试过程中视频画面卡顿，画面中移动的物体有残影 概率：100% 对比：无需对比
+	--原因不清楚，需要确认
+Bug 165748 - {Full_treble_NTS} PLAY-001-TC1/PLAY-002-TC2/PLAY-002-TC3/SYNC-001-TC1/SYNC-002-TC1 画面跳帧 概率：100% 对比：无需对比
+	--需要确认，p241是ok的
+	play-001-tc1 没看出有跳帧,第一段比较模糊(walk road)，there is not crying in baseball;谈话也有一段比较模糊，
+	PLAY-002-TC2：不太明显
+	PLAY-002-TC3：
+	play-001-tc4: step6 load,起不来 4k with5.1
+	play-001-tc22: 80015473 vp9, 80006791 vp9
+	
+Bug 165755 - {Full_treble_NTS} PERF-006-TC1 视频播放不流畅，有卡顿 概率：100% 对比：无需对比
+	--p241是ok的，需要确认，可能是网络的问题 ok
+	
+vp9不同步及其它tunnel mode的不同步（可能是tsync mode），使用下面的两个patch，应该就好了
+http://scgit.amlogic.com:8080/43553
+http://scgit.amlogic.com:8080/44149
+
+Note：http://scgit.amlogic.com:8080/43553这个gerrit提交在openlinux-1215上是可以cherry-pick的，但在4.9最新的trunk code是有冲突的（有其它的新的提交）
+这个patch更新的提交是http://scgit.amlogic.com:8080/#/c/44165/（基于最新的trunk code）
+但如果使用1215的openlinux，请还使用http://scgit.amlogic.com:8080/43553，否则编译不过去
+
+目前8.0有1215分支
+commit 7fe0612767fd8a2ac710e155f155e0ae079c96fd
+Author: Rongrong Zhou <rongrong.zhou@amlogic.com>
+Date:   Thu Aug 31 13:56:49 2017 +0800
+
+    DRM &  TDK to 2.4 [2/4]
+    
+    PD# 150073
+    
+       Widevine: oemcrypto-11 Android O tdk2.4 support
+    
+    CA: 12daec8bc37406bcf6e82906383c88de3d722064
+    TA: b363dac59983e1ce6e1050627091022a199969c4
+    
+    Change-Id: I0ca9d1cf9633407a440903e1fe11273caa2c168a
+
+commit 12daec8bc37406bcf6e82906383c88de3d722064
+Author: Rongrong Zhou <rongrong.zhou@amlogic.com>
+Date:   Wed Aug 30 15:55:06 2017 +0800
+
+    PD#150073: Widevine-oemcrypto11 android O support & remove proprietary
+    
+    Change-Id: I3644de8877965a8e2897a1fae45bb134722d6b71
+
+commit b363dac59983e1ce6e1050627091022a199969c4
+Author: Rongrong Zhou <rongrong.zhou@amlogic.com>
+Date:   Wed Aug 30 16:25:31 2017 +0800
+
+    PD#150073: Widevine-oemcrypto11 Android O support & remove wv_optee
+    
+    Change-Id: Ie6df052a5ae7e3098790f7d1c0cd16f5135bf99c	
+
+	
+libOmxBase.so  libomx_clock_utils_alt.so libOmxCore.so  libomx_framework_alt.so  libOmxCoreSw.so libomx_timed_task_queue_alt.so  libOmxVideo.so libomx_worker_peer_alt.so libdatachunkqueue_alt.so  libstagefrighthw.so libfpscalculator_alt.so   libthreadworker_alt.so      libomx_av_core_alt.so
+
+
+
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80125514?source=99'
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80216729?source=99'
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80156943?source=99'
+
+
+
+echo 0x800000 > /sys/module/amvideo/parameters/debug_flag
+echo 0 > /sys/module/amvideo/parameters/debug_flag
+
+bug165744
+PLAY-001-TC1 Boardwalk Twirl Ride : step25，试了4次，没有出现抖动，上周还出现过
+PLAY-001-TC4 Tears of Steel:12 min:  3次没有启动测试成功
+
+bug165748
+PLAY-002-TC2 
+
+165746 
+PLAY-013-TC2 step17 人物移动切换的时候可以看到卡顿
+
+pk0 && echo 0x800000 > /sys/module/amvideo/parameters/debug_flag;dmesg -c > /dev/null; logcat -c && logcat > now_logcat.log
+
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80125514?source=99'
+
+1.看log是第一次换key后，audio一直在skip frame，并用一个无声的frame (muted frame)替换，skip audio frame的依据是什么? 是和什么时候比较的？
+20180523_15:04:19||05-23 07:04:07.378  5417  5527 I MediaDecoder2Audio: Handle PTS Gaps. ptsInMsThisFrame: 1382826, mostRecentSamplePts: 1382804
+20180523_15:04:19||05-23 07:04:10.931  5417  5527 I MediaDecoder2Audio: Replace with muted package ptsInMsThisFrame: 1389866, mostRecentSamplePts: 1389887
+20180523_15:04:19||05-23 07:04:10.931  5417  5527 D MediaDecoder2Audio: skipped frame 1389866
+
+2.能否简单的介绍下同步机制
+
+
+Bug 165744 - {Full_treble_NTS} PLAY-001-TC1/PLAY-001-TC4/PLAY-001-TC22/PLAY-103-TC5 测试过程中视频画面卡顿，画面中移动的物体有残影 
+Bug 165748 - {Full_treble_NTS} PLAY-001-TC1/PLAY-002-TC2 画面跳帧
+Bug 165746 - {Full_treble_NTS} PLAY-013-TC2 播放过程中画面不流畅，会瞬间卡顿
+Bug 165745 - {Full_treble_NTS} PLAY-001-TC4/PLAY-001-TC22视频播放时音画不同步，声音比画面快1.5秒
+Bug 166042 - ｛Netflix反馈问题}{NTS}S805X测试VIDEO-004-TC7 Video Resize - VP9 HDR test case failing with DRM failure 概率：100% 对比：S905X/S805X共存问题
+
+PLAY-001-TC1: 跳帧，卡顿，有残影，有跳帧
+PLAY-001-TC4/PLAY-001-TC22: 跳帧，卡顿，有残影
+PLAY-002-TC2:有跳帧
+PLAY-013-TC2:瞬间播放不流畅
+
+Bug 166787 - {Full_treble_NTS}PLAY-101-TC8 Fail:Expected time needs to be between 734 and 754 but got 48464.757 
+Bug 166782 - {Full_treble_NTS}AUDIO-025-TC9 Fail:Expected time needs to be between 405 and 425 but got 48135.951
+Bug 166781 - {Full_treble_NTS}AUDIO-025-TC17 Fail:Expected time needs to be between 405 and 425 but got 48136.413 
+	---reset过程中，获取vpts error
+	
+Bug 166795 - {Full_treble_NTS}PLAY-253-TC4 Fail:測試過程中畫面停住不動	
+Bug 166785 - {Full_treble_NTS}PLAY-001-TC1 Failed:測試時畫面會停住不動
+	--seek drop引起大量丢帧卡合住
+		
+Bug 166786 - {Full_treble_NTS}PLAY-101-TC5 Fail:測試過程中畫面黑屏
+	--secmem增大到12M，gralloc，bl32等不匹配问题
+
+Bug 166800 - {Full_treble_NTS}SYNC-001-TC7 Fail:測試過程中沒有聲音 概率：100% 对比：8.0此项Pass 
+	---与vp9无关吧，没有声音，可能与音频解码有关，dolby digital plus 5.1
+Bug 166794 - {Full_treble_NTS}PLAY-103-TC6 Fail:測試過程中沒有聲音
+	--与vp9无关吧，没有声音
+	
+	
+am start -n com.android.gallery3d/.app.MovieActivity -d  "file:////storage//wsl//LegoDemo_withAudio.mp4"
+am start -n com.android.gallery3d/.app.MovieActivity -d "http://10.68.11.54:8888/dump.m3u8"
+
+
+	
+Bug 166795 - {Full_treble_NTS}PLAY-253-TC4 Fail:測試過程中畫面停住不動 概率：100%
+   Tony：8.0 805X&905X   都Pass
+Bug 166785 - {Full_treble_NTS}PLAY-001-TC1 Failed:測試時畫面會停住不動 概率：100%
+    Tony：805X  Pass， 905X Fail
+
+Bug 166786 - {Full_treble_NTS}PLAY-101-TC5 Fail:測試過程中畫面黑屏
+    Tony：805X NA， 905X Pass
+	
+	
+165748 	{Full_treble_NTS} PLAY-001-TC1/PLAY-002-TC2 画面跳帧 概率：100% 对比：无需对比 	Fri 20:47
+165744 	{Full_treble_NTS} PLAY-001-TC1/PLAY-001-TC4/PLAY-001-TC22/PLAY-103-TC5 测试过程中视频画面卡顿，画面中移动的物体有残影 概率：100% 对比：无需对比 	2018-05-23
+165746 	{Full_treble_NTS} PLAY-013-TC2 播放过程中画面不流畅，会瞬间卡顿 概率：100% 对比：无需对比 
+165745 	{Full_treble_NTS} PLAY-001-TC4/PLAY-001-TC22视频播放时音画不同步，声音比画面快1.5秒 概率：100% 对比：无需对比 	2018-05-21
+
+
+
+
+
+1.使用下面code本地确认的结果
+http://firmware.myamlogic.com/shenzhen/image/android/Android-O/BOX/Openlinux//Android_TV/patchbuild/2018-05-29/p212-userdebug-32-GTVS-354/
+PLAY-001-TC4: 加载失败，测不起来，应该是北京上不了4k的原因
+PLAY-001-TC22: 测试同步，只有traffic车流量大那段感觉有轻微顿顿的感觉， boardwalk twirl ride这一段游乐园这段有点轻微的抖动
+play-103-tc5：测试同步,没有异常
+DRS-001-TC7:  测试同步，没有异常
+AUDIO-025-TC10：看不出同步问题，视频没有异常，step17不知道音频是否异常
+SYNC-001-TC7：测试同步，没有异常
+SYNC-002-TC7：测试同步，没有异常
+PLAY-101-TC8：测试同步，没有异常
+2.确认同步问题时，要先用“cat /sys/class/tsync/mode” ，确认是“1: amaster”，否则使用“echo 1 > /sys/class/tsync/mode”后并cat确认生效后，再确认同步问题
+3.若出现同步问题时，使用“cat /sys/class/tsync/mode”是否是amaster模式，若不是是按照2中再测试下，否则请抓对应的log（setprop media.omx.log_levels 255，测试之前设置），并录下视频方便确认问题
+4.为方便确认问题，请出问题要录个视频和抓log（setprop media.omx.log_levels 255，测试之前设置）
+
+
+play-001-tc1（264） traffic这一段有轻微的顿顿的感觉，但应该不是跳帧，与play-001-tc22（vp9）差不多的感觉，只是两个是不同的视频格式
+PLAY-002-TC2：step7有点不流畅的感觉（流水声开始的地方，就是一开始的地方）
+本地有录像，ftp地方，，需要QA确认下跳帧的现象是否是我录像的位置，若不是请帮忙录下像，确认下位置
+
+echo 0 > /proc/sys/kernel/printk && echo 1 > /sys/class/tsync/debug_video_pts && echo 1 > /sys/class/tsync/debug_pts_checkin && echo 1 > /sys/class/tsync/debug_pts_checkout;dmesg -c > /dev/null; logcat -c && logcat > now_logcat.log
+
+获取vfm的pts
+sed -n 's/.*pts:\(.*\) \\x09d.*/\1/p'   pts
+sed -n 's/.*\\x09t:\(.*\)Us/\1/p'       time
+sed -n 's/.*\] \(.*\): \\x09vf.*/\1/p'  num
+
+libOmxBase.so             libomx_clock_utils_alt.so       libOmxCore.so             libomx_framework_alt.so libOmxCoreSw.so           libomx_timed_task_queue_alt.so  libOmxVideo.so            libomx_worker_peer_alt.so  libdatachunkqueue_alt.so  libstagefrighthw.so    libfpscalculator_alt.so   libthreadworker_alt.so libomx_av_core_alt.so 
+
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80015468?source=99'
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent>.action.VIEW -d 'https://www.netflix.com/watch/80015474?source=99'
+
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d '[图片]https://www.netflix.com/watch/80015468?source=99'
+
+pk0 && echo 0x800000 > /sys/module/amvideo/parameters/debug_flag;dmesg -c > /dev/null; logcat -c && logcat > now_logcat.log
+
+待烧写的boot.img copy到u盘，备份的bootimg也将保存到u盘，下面的操作cd到u盘目录操作
+1.备份boot.img
+cat /dev/block/boot > bootbak.img
+
+2.烧写编译的boot.img，确认问题
+cat boot.img > /dev/block/boot && sync && reboot
+-
+3.确认完问题后，可以恢复boot.img
+cat bootbak.img > /dev/block/boot && sync && reboot
+
+
+echo 0 > /proc/sys/kernel/printk && dmesg -c > /dev/null && echo 0x800000 > /sys/module/amvideo/parameters/debug_flag
+
+
+8M->12M相关提交
+1.omx so
+http://scgit.amlogic.com:8080/45932  
+
+2.bl32,trunk上的提交
+http://scgit.amlogic.com:8080/#/c/45064/
+commit 33ba3c6c97207c5ba04dfeba8beef81db09a7b0f (HEAD, m/o-mr1-amlogic, m/o-amlogic, amlogic/tdk-v2.4)
+Author: Pengguang Zhu <pengguang.zhu@amlogic.com>
+Date:   Mon May 28 11:27:51 2018 +0800
+
+    secueos: udpate G12A/GX/TXLX/AXG bl32 firmware
+
+    PD#167143
+
+    1. use small page for user TA
+
+    Secure OS:
+    commit: 0704d5b5561a2230f19658e05944bbcff435db22
+
+3. wv
+http://scgit.amlogic.com:8080/#/c/45947/
+

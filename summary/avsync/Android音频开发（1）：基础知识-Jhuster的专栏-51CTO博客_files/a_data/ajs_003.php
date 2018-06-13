@@ -1,0 +1,3 @@
+var OX_74aff72b = '';
+OX_74aff72b += "<"+"a href=\'//gg.51cto.com/www/delivery/ck.php?oaparams=2__bannerid=7257__zoneid=621__cb=77bb34ca8e__oadest=http%3A%2F%2Fclub.51cto.com%2Fact%2Fcto%2Fcaff%2Fpage%2Fdetail%2Factivity_id%2F21%3Fsw\' target=\'_blank\'>「北京」架构设计的N个原则<"+"/a><"+"div id=\'beacon_77bb34ca8e\' style=\'position: absolute; left: 0px; top: 0px; visibility: hidden;\'><"+"img src=\'//gg.51cto.com/www/delivery/lg.php?bannerid=7257&amp;campaignid=1534&amp;zoneid=621&amp;loc=1&amp;referer=http%3A%2F%2Fwww.51cto.com%2F&amp;cb=77bb34ca8e\' width=\'0\' height=\'0\' alt=\'\' style=\'width: 0px; height: 0px;\' /><"+"/div>\n";
+document.write(OX_74aff72b);

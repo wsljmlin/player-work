@@ -1,0 +1,3 @@
+var OX_13e9e92d = '';
+OX_13e9e92d += "<"+"a href=\'//gg.51cto.com/www/delivery/ck.php?oaparams=2__bannerid=3769__zoneid=620__cb=029f24ac77__oadest=http%3A%2F%2Fedu.51cto.com%2Fpx%2Ftrain%2F248%3Fwwwzt\' target=\'_blank\'>Python3.6版上线，报名5折优惠<"+"/a><"+"div id=\'beacon_029f24ac77\' style=\'position: absolute; left: 0px; top: 0px; visibility: hidden;\'><"+"img src=\'//gg2.51cto.com/www/delivery/lg.php?bannerid=3769&amp;campaignid=778&amp;zoneid=620&amp;loc=1&amp;referer=http%3A%2F%2Fwww.51cto.com%2F&amp;cb=029f24ac77\' width=\'0\' height=\'0\' alt=\'\' style=\'width: 0px; height: 0px;\' /><"+"/div>\n";
+document.write(OX_13e9e92d);

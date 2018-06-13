@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="favicon" rel="shortcut icon" href="http://blog.51cto.com/favicon.ico">
+        <title>Android音频开发（1）：基础知识-Jhuster的专栏-51CTO博客</title>
+    <meta name="keywords" content="基础知识,开发,音频">
+<meta name="description" content="本文主要以问答的形式，介绍许多音频开发的基础常识，对于从事Android音频的开发，非常基础，非常重要。">    <link href="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/header.css" rel="stylesheet"><link href="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/other.css" rel="stylesheet"><link href="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/right.css" rel="stylesheet"><link href="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/blog_details.css" rel="stylesheet"><link href="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/highlight.css" rel="stylesheet">
+    <script type="text/javascript" async="" src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/vds.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/push.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/hm.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/jquery.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/cookie.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/login.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/common.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/mbox.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/follow.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/vip.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/share.js"></script><link rel="stylesheet" href="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/share_style0_16.css"></head>
+<body>
+<img src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/share_default.jpg" style="width:0; height:0; position:absolute;" border="0">
+<div class="Header">
+  <div class="Page ">
+    <h1 class="Logo"><a href="http://blog.51cto.com/">Logo</a></h1>
+    <ul class="Navigates fl">
+      <li><a href="http://blog.51cto.com/">首页</a></li>
+      <li><a href="http://blog.51cto.com/original">文章</a></li>
+            <li class="">
+        <a href="http://blog.51cto.com/expert">专家</a>
+      </li>
+            <li><a href="http://blog.51cto.com/blogger/index">我的博客</a></li>
+    </ul>
+    <ul class="Navigates Navigates-right fr">
+      <li class="more maps">
+        <a href="javascript:void(0);">网站导航</a>
+        <div>
+            <a href="http://edu.51cto.com/" target="_blank">学院</a>
+            <a href="http://blog.51cto.com/" target="_blank">博客</a>
+            <a href="http://down.51cto.com/" target="_blank">下载</a>
+            <a href="http://home.51cto.com/" target="_blank">家园</a>
+            <a href="http://bbs.51cto.com/" target="_blank">论坛</a>
+            <a href="http://x.51cto.com/" target="_blank">CTO训练营</a>
+            <a href="http://club.51cto.com/?blog" target="_blank">CTO俱乐部</a>
+            <a href="http://wot.51cto.com/" target="_blank">WOT</a>
+            <a href="http://www.51cto.com/" target="_blank">51CTO</a>
+            <i class="arrow"></i>
+        </div>
+      </li>
+                <li><a href="http://home.51cto.com/user/register?reback=http%253A%252F%252Fblog.51cto.com%252Fticktick%252F1748506" target="_self">注册</a></li>
+          <li class="login"><a href="http://blog.51cto.com/user/login?reback=http%3A%2F%2Fblog.51cto.com%2Fticktick%2F1748506" target="_self">登录</a></li>
+                        <li class="mRead">
+          <a href="javascript:;">手机阅读</a>
+          <div>
+            <img src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/blog_qr.png">
+            <p>扫一扫体验手机阅读</p>
+            <i class="arrow"></i>
+          </div>
+        </li>
+            <li class="search"><a href="http://blog.51cto.com/search/index" target="_self">搜索</a></li>
+                  <li class="write"><a href="javascript:;" onclick="Login()">写文章</a></li>
+                  </ul>
+          <div class="clear"></div>
+  </div>
+</div>
+<script>
+    var isLogin = '0';
+    var userId = '';
+    var imgpath = 'http://i2.51cto.com/';
+    var BLOG_URL = 'http://blog.51cto.com/';
+    var msg_num_url = '/index/ajax-msg-num';
+    setTimeout(function(){
+            $.ajax({
+                url:msg_num_url,
+                type:"get",
+                dataType:'json',
+                success:function(res){
+                    if(res.status == '0'){
+                       //
+                       var hasNewMsg = false;
+                       if(res.data.msgNum > 0 && !$('#myMsg i').hasClass('dot')){
+                            $('#myMsg i').addClass('dot');
+                            hasNewMsg = true;
+                       }
+                       if(res.data.notifyNum > 0 && !$('#myNotify i').hasClass('dot')){
+                           $('#myNotify i').addClass('dot');
+                           hasNewMsg = true;
+                       }
+                       if(res.data.recommend_new > 0 && !$('#myRecommend i').hasClass('dot')){
+                           $('#myRecommend i').addClass('dot');
+                           hasNewMsg = true;
+                       }
+                       if(hasNewMsg && !$('#myAllMsg i').hasClass('dot')){
+                           $('#myAllMsg i').addClass('dot');
+                       }
+                    }
+                    
+                }
+            });
+    },70);
+</script><div class="Content-box" style="min-height: 391px;">
+    	<link rel="stylesheet" href="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/fck_editorarea.css">
+	<link rel="stylesheet" href="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/shCoreDefault.css">
+<div class="Content Index" style="padding-bottom: 50px;">
+	<div class="Page">
+		<!-- left start -->
+		<div class="Left fl">
+			<div class="artical-Left">
+				<div class="crumbs">
+                													<span><a href="http://blog.51cto.com/ticktick">Jhuster的专栏</a></span>
+                							<em>&gt;</em>						<span><a href="http://blog.51cto.com/ticktick/category15.html">音视频/多媒体开发</a></span>
+                							<em>&gt;</em>						<span>正文</span>
+                						<div class="clear"></div>
+				</div>
+				<h1 class="artical-title">Android音频开发（1）：基础知识					<span><i></i>推荐</span>				</h1>
+				<div class="artical-title-list">
+										<a href="javascript:;" class="tab original fl">原创</a>
+					<a href="http://blog.51cto.com/ticktick" class="name fl">Jhuster</a>
+					<span class="fl"></span>
+					<a href="javascript:;" class="time fl">2016-03-07 19:10:08</a>
+					<span class="fl"></span>
+					<a href="#comment" class="comment fl">评论(5)</a>
+					<a href="javascript:;" class="read fr">23186人阅读</a>
+					<div class="clear"></div>
+				</div>
+									<div class="artical-content-bak main-content editor-side-new">
+						<div class="con editor-preview-side"><p>先来点闲言碎语，前段时间我有一段感悟：Android开发，本身并不是一个可以走得多远的方向，它只是一个平台，提供了许多封装好的API，让大家能够快速开发出针对特定业务的应用。</p><p><br></p><p>真正有价值的地方就在于Android与具体的业务方向结合，比如：Android与音视频技术，Android与智能硬件交互，Android与前端技术的融合与探索，Android信息安全，Android源码深度定制等等。</p><p><br></p><p>我一直比较看好音视频/多媒体方向，希望在此能够深入积累和探索，前段时间我发布了一款Android VoIP网络电话应用“飞鸽电话”，并写了一篇分析其整体架构的文章<a href="http://ticktick.blog.51cto.com/823160/1746136" title="" style="white-space: normal; color: rgb(66, 133, 244);" target="_blank">《PigeonCall：一款Android VoIP网络电话App架构分析》</a>，欢迎有兴趣的小伙伴们先看一看。</p><p><br></p><p>在这个应用的开发过程中学到的东西还蛮多的，因此想写一些文章分享分享，本文作为开篇，主要以问答的形式，介绍一些音频开发的基础常识，非常重要，因为不了解这些常识，很多Android API或者第三方库的参数，你都不知道该怎么配置。</p><p><br></p><p><strong>1. 音频开发的主要应用有哪些？</strong></p><p><br></p><p>音频播放器，录音机，语音电话，音视频监控应用，音视频直播应用，音频编辑/处理软件，蓝牙耳机/音箱，等等。</p><p><br></p><p><strong>2. 音频开发的具体内容有哪些？</strong></p><p><br></p><p>（1）音频采集/播放</p><p>（2）音频算法处理（去噪、静音检测、回声消除、音效处理、功放/增强、混音/分离，等等）</p><p>（3）音频的编解码和格式转换</p><p>（4）音频传输协议的开发（SIP，A2DP、AVRCP，等等）</p><p><br></p><p><strong>3. 音频应用的难点在哪？</strong></p><p><br></p><p>延时敏感、卡顿敏感、噪声抑制（Denoise）、回声消除（AEC）、静音检测（VAD）、混音算法，等等。</p><p><br></p><p><strong>4. 音频开发基础概念有哪些？</strong></p><p><br></p><p>在音频开发中，下面的这几个概念经常会遇到。</p><p><br></p><p><strong>（1） 采样率（samplerate）</strong></p><p><br></p><p>采样就是把模拟信号数字化的过程，不仅仅是音频需要采样，所有的模拟信号都需要通过采样转换为可以用0101来表示的数字信号，示意图如下所示：</p><p><br></p><p><a href="http://s4.51cto.com/wyfs02/M02/7C/F6/wKioL1bdXQviw_TBAAAVYm_x3gk862.gif" target="_blank" style="color: rgb(66, 133, 244);"><img src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/wKioL1bdXQviw_TBAAAVYm_x3gk862.gif" title="8a53c81e-88d0-4766-b5cc-49c9efcc7090.gif" alt="wKioL1bdXQviw_TBAAAVYm_x3gk862.gif" style="cursor: pointer;"></a></p><p><br></p><p>蓝色代表模拟音频信号，红色的点代表采样得到的量化数值。</p><p><br></p><p>采样频率越高，红色的间隔就越密集，记录这一段音频信号所用的数据量就越大，同时音频质量也就越高。</p><p><br></p><p>根据奈奎斯特理论，采样频率只要不低于音频信号最高频率的两倍，就可以无损失地还原原始的声音。</p><p><br></p><p>通
+常人耳能听到频率范围大约在20Hz～20kHz之间的声音，为了保证声音不失真，采样频率应在40kHz以上。常用的音频采样频率有：8kHz、
+11.025kHz、22.05kHz、16kHz、37.8kHz、44.1kHz、48kHz、96kHz、192kHz等。</p><p><br></p><p><strong>（2） 量化精度（位宽）</strong></p><p><br></p><p>上图中，每一个红色的采样点，都需要用一个数值来表示大小，这个数值的数据类型大小可以是：4bit、8bit、16bit、32bit等等，位数越多，表示得就越精细，声音质量自然就越好，当然，数据量也会成倍增大。</p><p><br></p><p>常见的位宽是：8bit 或者 16bit</p><p><br></p><p><strong>（3） 声道数（channels）</strong></p><p><br></p><p>由于音频的采集和播放是可以叠加的，因此，可以同时从多个音频源采集声音，并分别输出到不同的扬声器，故声道数一般表示声音录制时的音源数量或回放时相应的扬声器数量。</p><p><br></p><p>单声道（Mono）和双声道（Stereo）比较常见，顾名思义，前者的声道数为1，后者为2</p><p><br></p><p><strong>（4） 音频帧（frame）</strong></p><p><br></p><p>这个概念在应用开发中非常重要，网上很多文章都没有专门介绍这个概念。</p><p><br></p><p>音频跟视频很不一样，视频每一帧就是一张图像，而从上面的正玄波可以看出，音频数据是流式的，本身没有明确的一帧帧的概念，在实际的应用中，为了音频算法处理/传输的方便，一般约定俗成取2.5ms~60ms为单位的数据量为一帧音频。</p><p><br></p><p>这个时间被称之为“采样时间”，其长度没有特别的标准，它是根据编解码器和具体应用的需求来决定的，我们可以计算一下一帧音频帧的大小：</p><p><br></p><p>假设某通道的音频信号是采样率为8kHz，位宽为16bit，20ms一帧，双通道，则一帧音频数据的大小为：</p><p><br></p><p>int size = 8000 x 16bit x 0.02s &nbsp;x 2&nbsp;= 5120 bit = 640 byte</p><p><br></p><p><strong>5. 常见的音频编码方式有哪些？</strong></p><p><br></p><p>上
+面提到过，模拟的音频信号转换为数字信号需要经过采样和量化，量化的过程被称之为编码，根据不同的量化策略，产生了许多不同的编码方式，常见的编码方式
+有：PCM 和 
+ADPCM，这些数据代表着无损的原始数字音频信号，添加一些文件头信息，就可以存储为WAV文件了，它是一种由微软和IBM联合开发的用于音频数字存储
+的标准，可以很容易地被解析和播放。</p><p><br></p><p>我们在音频开发过程中，会经常涉及到WAV文件的读写，以验证采集、传输、接收的音频数据的正确性。</p><p><br></p><p><strong>6. 常见的音频压缩格式有哪些？</strong></p><p><br></p><p>首先简单介绍一下音频数据压缩的最基本的原理：因为有冗余信息，所以可以压缩。</p><p><br></p><p>（1） 频谱掩蔽效应： 人耳所能察觉的声音信号的频率范围为20Hz～20KHz，在这个频率范围以外的音频信号属于冗余信号。</p><p><br></p><p>（2） 时域掩蔽效应： 当强音信号和弱音信号同时出现时，弱信号会听不到，因此，弱音信号也属于冗余信号。</p><p><br></p><p>下面简单列出常见的音频压缩格式：</p><p><br></p><p>MP3，AAC，OGG，WMA，Opus，FLAC，APE，m4a，AMR，等等</p><p><br></p><p><strong>7. Adndroid VoIP相关的开源应用有哪些 ？</strong></p><p><br></p><p>imsdroid，sipdroid，csipsimple，linphone，WebRTC 等等</p><p><br></p><p><strong>8. 音频算法处理的开源库有哪些 ？</strong></p><p><br></p><p>speex、ffmpeg，webrtc audio module（NS、VAD、AECM、AGC），等等</p><p><br></p><p><strong>10. Android提供了哪些音频开发相关的API？</strong></p><p><br></p><p>音频采集： &nbsp;MediaRecoder，AudioRecord</p><p>音频播放： &nbsp;SoundPool，MediaPlayer，AudioTrack （它们之间的区别可以参考<a href="http://www.wiseandroid.com/post/2010/07/13/Intro-to-the-three-Android-Audio-APIs.aspx" title="" target="_blank" style="color: rgb(66, 133, 244);">这篇</a>文章）</p><p>音频编解码： MediaCodec</p><p>NDK API： &nbsp; &nbsp; OpenSL ES</p><p><br></p><p><strong>11. 音频开发的延时标准是什么？</strong></p><p><br></p><p>ITU-TG.114规定，对于高质量语音可接受的时延是300ms。一般来说，如果时延在300～400ms，通话的交互性比较差，但还可以接受。时延大于400ms时，则交互通信非常困难。</p><p><br></p><p><strong>12. 小结</strong></p><p><br></p><p>音频开发的知识点其实挺多的，一篇文章也无法详细地展开叙述，因此，不够全面和详尽的地方，请大家搜索专业的资料进行深入了解。文章中有不清楚的地方欢迎留言或者来信 lujun.hust@gmail.com 交流，或者关注我的新浪微博 <a href="http://weibo.com/lujunblog" title="" target="_blank" style="color: rgb(66, 133, 244);">@卢_俊</a> 或者 微信公众号 @Jhuster 获取最新的文章和资讯。</p><p><a href="http://s2.51cto.com/wyfs02/M01/7C/F7/wKiom1bdXr-BXKLtAACb8XAe6Uo863.jpg" target="_blank" style="color: rgb(66, 133, 244);"><img src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/wKiom1bdXr-BXKLtAACb8XAe6Uo863.jpg" title="weixin_jhuster.jpg" alt="wKiom1bdXr-BXKLtAACb8XAe6Uo863.jpg" style="cursor: pointer;"></a><br></p></div>
+					</div>
+																	<div class="artical-copyright">版权声明：原创作品，如需转载，请注明出处。否则将追究法律责任</div>
+												<div class="for-tag">
+											<span><a href="http://blog.51cto.com/search/result?q=%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86" target="_blank">基础知识</a></span>
+											<span><a href="http://blog.51cto.com/search/result?q=%E5%BC%80%E5%8F%91" target="_blank">开发</a></span>
+											<span><a href="http://blog.51cto.com/search/result?q=%E9%9F%B3%E9%A2%91" target="_blank">音频</a></span>
+										<div class="clear"></div>
+				</div>
+								<div class="more-list">
+					<p class="praise fl "><span type="1" blog_id="1748506" userid="823160">9</span></p>
+					<div class="share-box fr">
+						<p class="share">分享</p>
+						<div class="bdsharebuttonbox bdshare-button-style0-16" data-bd-bind="1522732717026">
+						  <span></span>
+						  <a href="javascript:;" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友">QQ分享</a>
+						  <a href="javascript:;" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博">微博分享</a>
+						  <a href="javascript:;" class="bds_weixin" data-cmd="weixin" title="分享到微信">微信扫一扫</a>
+						  <img src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/qr-url.png">
+						</div>
+					</div>
+					<p class="favorites fr">收藏</p>
+										<div class="clear"></div>
+				</div>
+									<div class="artical-list">
+                    						<a class="fl" href="http://blog.51cto.com/ticktick/1746136" title="PigeonCall：一款Android VoIP网络电话App架构分析">上一篇：PigeonCall：一款Android VoIP网络电话App架构分析</a>
+                                        						<a class="fr" href="http://blog.51cto.com/ticktick/1749719" title="Android音频开发（2）：如何采集一帧音频">下一篇：Android音频开发（2）：如何采集一帧音频</a>
+                    						<div class="clear"></div>
+					</div>
+							</div>
+						<h2 class="artical-other-title">猜你喜欢</h2>
+			<div class="artical-Left artical-border">
+				<ul class="you-like-list">
+											<li><a href="http://blog.51cto.com/13591594/2083466" target="_blank">Android ORC文字识别之识别身份 证号等（附源码）</a></li>
+											<li style="margin-left: 10%;"><a href="http://blog.51cto.com/13591594/2084627" target="_blank">Android  音视频深入 十九 使用ijkplayer做个视频播放器(附源码下载)</a></li>
+										<div class="clear"></div>
+				</ul>
+			</div>
+						<h2 class="artical-other-title" id="comment">发表评论</h2>
+			<div class="artical-Left artical-border">
+				<!-- 发布评论 -->
+				<div class="comment-creat">
+                <div class="is-vip-bg fl">
+					<a href="javascript:;" class="header-img">
+                        <img src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/noavatar_middle.gif">
+					</a>
+                </div>   
+					<div class="first-publish fr publish_user_id">
+						<textarea class="textareadiv textareadiv-publish" name="" id="" placeholder="用心的评论会被更多人看到和认可" maxlength="500"></textarea>
+						<div class="comment-push">
+							<p class="msg fl">Ctrl+Enter&nbsp;发布</p>
+															<p class="publish-btn blue-btn fr" flag="1">发布</p>
+														<p class="cancel-btn cancel-btn-1 fr">取消</p>
+							<div class="clear"></div>
+						</div>
+						<input class="user_id" value="823160" type="hidden">
+						<input class="reply_id" value="1748506" type="hidden">
+						<input class="first_pid" value="" type="hidden">
+					</div>
+					<div class="clear"></div>
+				</div>
+									<div class="comment-number" id="comment_pl">
+						<p class="number fl"><span class="comment_number">5</span>条评论</p>
+						<a class="time-last time fr comment-sort" id="sort-desc" flag="desc" page="1" href="javascript:;">按时间倒序</a>
+					    <a class="time-first time fr comment-sort on" id="sort-asc" flag="asc" page="2" href="javascript:;">按时间正序</a>
+					    <div class="clear"></div>
+					</div>
+								<div class="commentList"><div class="commentList-box cbox-660360" id="660360"><div class="comment-1 publish_user_id reply_id_box comment_number-list" rid="660360"><div class="top"><div class="is-vip-bg-6 fl"><a href="http://blog.51cto.com/11473508" class="header-img"><img class="is-vip-img-bg is-vip-img-4" src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/wKioL1cgyMGiyes3AAAjm9DfqSM485_middle.jpg"></a></div><div class="fl"><p class="name"><a href="http://blog.51cto.com/11473508">DQfish99</a></p><p class="time">1楼&nbsp;&nbsp;2016-04-18 21:21:50</p></div><div class="clear"></div></div><div class="con">谢谢博主分享，对于Android初学者很有帮助</div><div class="bot"><p class="zan" blog_id="660360" type="2" userid="11463508">0</p><p class="answer reply-btn"><span class="comment_number_1">0</span>人回复</p><div class="clear"></div></div><input class="reply_id" value="660360" type="hidden"><input class="user_id" value="11463508" type="hidden"><input class="first_pid" value="660360" type="hidden"></div><div class="comment-2"><ul class="comment-2-list" flag="660360"></ul><div class="new-comment"><div class="top"><div class="clear"></div></div></div></div></div><div class="commentList-box cbox-661661" id="661661"><div class="comment-1 publish_user_id reply_id_box comment_number-list" rid="661661"><div class="top"><div class="is-vip-bg-6 fl"><a href="http://blog.51cto.com/indexcqq" class="header-img"><img class="is-vip-img-bg is-vip-img-4" src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/wKioL1LOBAaRwvXwAAAhw3ODxhw537_middle.jpg"></a></div><div class="fl"><p class="name"><a href="http://blog.51cto.com/indexcqq">indexcqq</a></p><p class="time">2楼&nbsp;&nbsp;2016-05-09 15:00:01</p></div><div class="clear"></div></div><div class="con">感谢分享~转走啦~</div><div class="bot"><p class="zan" blog_id="661661" type="2" userid="5342992">0</p><p class="answer reply-btn"><span class="comment_number_1">0</span>人回复</p><div class="clear"></div></div><input class="reply_id" value="661661" type="hidden"><input class="user_id" value="5342992" type="hidden"><input class="first_pid" value="661661" type="hidden"></div><div class="comment-2"><ul class="comment-2-list" flag="661661"></ul><div class="new-comment"><div class="top"><div class="clear"></div></div></div></div></div><div class="commentList-box cbox-665784" id="665784"><div class="comment-1 publish_user_id reply_id_box comment_number-list" rid="665784"><div class="top"><div class="is-vip-bg-6 fl"><a href="http://blog.51cto.com/11858529" class="header-img"><img class="is-vip-img-bg is-vip-img-4" src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/noavatar_middle.gif"></a></div><div class="fl"><p class="name"><a href="http://blog.51cto.com/11858529">zjandroid2016</a></p><p class="time">3楼&nbsp;&nbsp;2016-07-15 09:27:46</p></div><div class="clear"></div></div><div class="con">有音频转码跟压缩的文章吗</div><div class="bot"><p class="zan" blog_id="665784" type="2" userid="11848529">0</p><p class="answer reply-btn"><span class="comment_number_1">0</span>人回复</p><div class="clear"></div></div><input class="reply_id" value="665784" type="hidden"><input class="user_id" value="11848529" type="hidden"><input class="first_pid" value="665784" type="hidden"></div><div class="comment-2"><ul class="comment-2-list" flag="665784"></ul><div class="new-comment"><div class="top"><div class="clear"></div></div></div></div></div><div class="commentList-box cbox-667658" id="667658"><div class="comment-1 publish_user_id reply_id_box comment_number-list" rid="667658"><div class="top"><div class="is-vip-bg-6 fl"><a href="http://blog.51cto.com/elesos" class="header-img"><img class="is-vip-img-bg is-vip-img-4" src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/wKioL1ey_y7DpvUEAAAKwWiXZ5I506_middle.jpg"></a></div><div class="fl"><p class="name"><a href="http://blog.51cto.com/elesos">hnraysir</a></p><p class="time">4楼&nbsp;&nbsp;2016-08-16 17:20:07</p></div><div class="clear"></div></div><div class="con">先踩再看，七牛的啊。</div><div class="bot"><p class="zan" blog_id="667658" type="2" userid="360789">0</p><p class="answer reply-btn"><span class="comment_number_1">0</span>人回复</p><div class="clear"></div></div><input class="reply_id" value="667658" type="hidden"><input class="user_id" value="360789" type="hidden"><input class="first_pid" value="667658" type="hidden"></div><div class="comment-2"><ul class="comment-2-list" flag="667658"></ul><div class="new-comment"><div class="top"><div class="clear"></div></div></div></div></div><div class="commentList-box cbox-697056" id="697056"><div class="comment-1 publish_user_id reply_id_box comment_number-list" rid="697056"><div class="top"><div class="is-vip-bg-6 fl"><a href="http://blog.51cto.com/9385036" class="header-img"><img class="is-vip-img-bg is-vip-img-4" src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/noavatar_middle.gif"></a></div><div class="fl"><p class="name"><a href="http://blog.51cto.com/9385036">88486969</a></p><p class="time">5楼&nbsp;&nbsp;2018-01-17 15:57:45</p></div><div class="clear"></div></div><div class="con">是一个好DEMO，把安卓上的音频讲完了</div><div class="bot"><p class="zan" blog_id="697056" type="2" userid="9375036">0</p><p class="answer reply-btn"><span class="comment_number_1">0</span>人回复</p><div class="clear"></div></div><input class="reply_id" value="697056" type="hidden"><input class="user_id" value="9375036" type="hidden"><input class="first_pid" value="697056" type="hidden"></div><div class="comment-2"><ul class="comment-2-list" flag="697056"></ul><div class="new-comment"><div class="top"><div class="clear"></div></div></div></div></div></div>
+				<!-- page -->
+				<div class="act_pageList_box"></div>
+			</div>
+
+		</div>
+		<!-- end left -->
+		<!-- right start -->
+		<div class="Right artical-Right fr">
+			<!-- 博客名称 -->
+			<div class="Box articles blogger-name">
+				<div class="list">	
+					<h4 class="BoxTil2 fl"><a class="BoxTil2-right-tit" href="http://blog.51cto.com/ticktick">Jhuster的专栏</a></h4>
+					<div class="BoxTil2-box fr">
+						<span></span>
+						<div>
+			              <img src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/qr.png">
+			              <p>分享到朋友圈</p>
+						</div>
+					</div>
+					<div class="clear"></div>
+					<ul class="number-list">
+						<li>
+							<a class="num" href="javascript:;">166</a>
+							<p>文章</p>
+						</li>
+                        <li>
+                            <a class="num" href="javascript:;">320W+</a>
+                            <p>人气</p>
+                        </li>
+						<li>
+							<a class="num" href="javascript:;">393</a>
+							<p>评论</p>
+						</li>
+                                                    <li>
+                                <a class="num" href="http://blog.51cto.com/ticktick?type=3">37</a>
+                                <p>粉丝</p>
+                            </li>
+                        
+						<div class="clear"></div>
+					</ul>
+				</div>
+			</div>
+			<!-- 博主信息 -->
+			<div class="Box articles">
+				<div class="list blogger">
+					<div class="top">
+						<div class="is-vip-bg-4">
+							<a class="left" href="http://blog.51cto.com/ticktick">
+								<img class="is-vip-img is-vip-img-4" data-uid="823160" src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/wKiom1WJUODQUj_UAABxxJ6C9F4899_middle.jpg">
+                                
+							</a>
+						</div>
+						<div class="right">
+							<div class="name-box">
+								<a href="http://blog.51cto.com/ticktick" class="tit fl">Jhuster</a>
+	                            								<p class="icon-a icon5 fl"><span class="last"><i></i>推荐博主</span></p>																																<div class="clear"></div>
+							</div>
+							<div class="name-btn">
+                                                                                                            <a id="checkFollow_823160" class="follow-1 checkFollow-btn on" href="javascript:;">关注</a>
+                                                                    								<a href="http://home.51cto.com/space?uid=823160" class="name-msg gray-btn">私信</a>
+							</div>
+						</div>
+						<div class="clear"></div>
+					</div>
+					<div class="bottom">
+						<div class="msg-title"><i class="l"></i>好的文章，和好友一起分享<i class="r"></i></div>
+						<h4 class="title"><a href="javascript:;">TA的其他文章</a></h4>
+						<ul class="seven-list">
+							        						<li class="s2"><a href="http://blog.51cto.com/ticktick/1771239">Android音频开发（7）：使用 OpenSL ES API（下）</a></li>
+        					        						<li class="s2"><a href="http://blog.51cto.com/ticktick/1764778">Android音频开发（6）：使用 OpenSL ES API（上）</a></li>
+        					        						<li class="s2"><a href="http://blog.51cto.com/ticktick/1760191">Android音频开发（5）：音频数据的编解码</a></li>
+        					        						<li class="s2"><a href="http://blog.51cto.com/ticktick/1752947"> Android音频开发（4）：如何存储和解析wav文件</a></li>
+        					        						<li class="s2"><a href="http://blog.51cto.com/ticktick/1750593">Android音频开发（3）：如何播放一帧音频</a></li>
+        					      					</ul>
+					</div>	
+				</div>
+			</div>
+			<!-- 七日热门 -->
+            			<h3 class="BoxTil">七日热门</h3>
+		    <div class="Box articles">
+		        <div class="list">
+		        <ul class="seven-list">
+	            	            <li class="s1"><a href="http://blog.51cto.com/ityouknow/2091874" target="_blank">Spring Boot 2.0(五)：感受 Docker 魅力， 排解决多应用部署之疼</a></li>
+	            	            <li class="s2"><a href="http://blog.51cto.com/youerning/2092113" target="_blank">面子工程之IP数据可视化</a></li>
+	            	            <li class="s3"><a href="http://blog.51cto.com/11623741/2092726" target="_blank">python爬去妹子网整个图片资源教程（最详细版）</a></li>
+	            	            <li class="s4"><a href="http://blog.51cto.com/wangchunhai/2092711" target="_blank">IBM DS3500存储添加控制器</a></li>
+	            	            <li class="s5"><a href="http://blog.51cto.com/11784929/2092097" target="_blank">MySQL主从复制报错  Errno 1205</a></li>
+	                
+	            </ul>
+	            </div>
+	        </div>
+	        	        <div class="update-top"></div>
+		</div>
+		<!-- end right  -->
+		<div class="clear"></div>
+	</div>
+</div>
+
+<!-- 老博文美观处理 -->
+	<script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/shCores.js"></script>
+<script>
+	var praise_url = 'http://blog.51cto.com/praise/praise'
+	var addReply_url = 'http://blog.51cto.com/comments/add'
+	var removeUrl = 'http://blog.51cto.com/comments/del'
+	var blog_id = '1748506'
+	var rid = '0'
+	var is_comment = '0'
+	var comment_list = '/blog/ajax-comment-list'
+	var comment_sort = "asc"
+	var index_url = 'http://blog.51cto.com/ticktick';
+    var uc_url = 'http://ucenter.51cto.com/'
+    var blog_url = 'http://blog.51cto.com/'
+    var img_url = 'http://static1.51cto.com/edu/blog/'
+    var i_user_id = ''
+    var c_user_id ='823160'
+	var collect_url = 'http://blog.51cto.com/collect/add'
+	var is_old = '1'
+	var nicknameurl = 'http://blog.51cto.com/ticktick'
+	var nickname = 'Jhuster'
+	var myself = window.location.href
+	$('.you-like-list li:odd').css({'margin-left': '10%'});
+	function FollowBtnSucc(e){//1:未关注,2:已关注,3:互相关注
+	    if(e==2||e==3){
+	        $.post('/index/wxbind',{uid:userId},function(res){
+	            if(getCookie('follow1') || getCookie('follow2'))return false;
+	            if(res.status==1){
+	                if(res.data.wxBind == 0){//没绑定
+	                    box1()
+	                }else{
+	                    box2()
+	                }
+	            }
+	        },'json')
+	    }
+	}
+	FollowBtn = new Follow($('#checkFollow_823160'),'823160','1',['on','in','mutual','off'])
+	FollowBtn.success=FollowBtnSucc
+	window._bd_share_config={
+    "common":{
+      "bdText":"Android音频开发（1）：基础知识",
+      "bdDesc":$("#abstract_bdshare").text(),
+      "bdMini":"2",
+      "bdMiniList":false,
+      "bdPic":"https://s1.51cto.com/images/201710/25/bd540a4f14d822f6e69087758699358b.jpg",
+      "bdStyle":"0",
+      "bdSize":"16"
+    },
+    "share":{}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+</div>
+<script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/marked.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/highlight.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/detail_mp.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/detail.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/copy.js"></script><div class="Footer">
+    <p class="copy tc">Copyright © 2005-2018 <a href="http://www.51cto.com/" target="_blank">51CTO.COM</a> 版权所有 京ICP证060544号</p>
+  </div>
+<div class="rightTools">
+      <a href="http://blog.51cto.com/blogger/publish" class="aa">写文章</a>
+    <a href="http://wpa.qq.com/msgrd?v=3&amp;uin=3591348659&amp;site=qq&amp;menu=yes" class="qq"></a>
+  <a href="http://blog.51cto.com/51ctoblog/2057444" class="yy" target="_blank"></a>
+  <a href="javascript:void(0);" class="gotop"></a>
+</div>
+<div style="display:none">
+<iframe scrolling="no" src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/pageview.html" width="0" height="0" frameborder="0"></iframe>
+</div>
+<script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/pvlog.js"></script>
+<script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/count.js"></script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/count.html"></script>
+<script>
+  $(".gotop").click(function(){$(window).scrollTop(0)})
+</script>
+<iframe src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/a.html" style="display: none" width="0px" height="0px"></iframe>
+    <script type="text/javascript">
+    //百度统计代码
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2283d46608159c3b39fc9f1178809c21";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+
+    //自动推送链接
+    (function(){
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        }
+        else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+      var _vds = _vds || [];
+      window._vds = _vds;
+      (function(){
+        _vds.push(['setAccountId', '8c51975c40edfb67']);
+        (function() {
+          var vds = document.createElement('script');
+          vds.type='text/javascript';
+          vds.async = true;
+          vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'assets.growingio.com/vds.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(vds, s);
+        })();
+      })();
+      document.write(decodeURI("%3Cscript src='https://tongji.51cto.com/frontend/tj.gif' type='text/javascript'%3E%3C/script%3E"));
+    </script><script src="Android%E9%9F%B3%E9%A2%91%E5%BC%80%E5%8F%91%EF%BC%881%EF%BC%89%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86-Jhuster%E7%9A%84%E4%B8%93%E6%A0%8F-51CTO%E5%8D%9A%E5%AE%A2_files/tj.html" type="text/javascript"></script>
+    
+<script>
+    (function(){
+        var wh=$(window).height(),fh=$('.Footer').outerHeight(true),hh=$('.Header').outerHeight(true)
+        $('.Content-box').css({'min-height': wh-fh-hh})
+    })()
+</script>
+
+
+</body></html>
