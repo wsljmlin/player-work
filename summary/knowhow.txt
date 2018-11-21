@@ -56,7 +56,9 @@ echo 1 > /sys/module/amvideo/parameters/force_vskip_cnt  带宽检测 抽帧1/2
 echo 2 > /sys/module/amvideo/parameters/force_vskip_cnt      3/4
 
 cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+
 echo performance > scaling_governor
+echo 1 > /sys/module/amvideo/parameters/force_vskip_cnt
 
 wanjian 62服务器
 jian.wang
@@ -85,7 +87,7 @@ gitdir=$(git rev-parse --git-dir); scp -p -P 29418 shuanglong.wang@scgit.amlogic
 git commit --amend
 
 git merge xxx
-git push  origin HEAD:refs/for/refs/heads/masters
+git push  origin HEAD:refs/for/refs/heads/master
 
 
 so 编译 先需要pull 到最新 ，然后加你上你改动，find . -type f -exec touch {} \; 再mm -B
@@ -167,6 +169,8 @@ original passwd: RpocMiZ
 outlook 20170929 abc@12345 => Rpoc4MiZ
 20171010=》abc@123456
 
+20180925=>Rpoc4MiZ1
+
 exoplayer
 am start -a com.google.android.exoplayer.demo.action.VIEW -d file:///sdcard/Movies/appple.mp4
 
@@ -190,17 +194,42 @@ goole帐号、netflix账号
  cts2.4G
  @ml4yourlife
  
+ input text amltesters1@gmail.com  
+ input text @aml4yourlife
+
  testeramologic3@netflix.com
  testeramologic2@netflix.com
  am123logic
  
+ #显示netflix app 网络信息
+ input keyevent 138
+ 
  testvp9@netflix.com 密码1234
  
+ google帐号：
+ netwang88@gmail.com   Amlqa?9a
+ 
+ HBO账号：
+ netwang88@gmail.com
+Amlqa?6a
+
+netflix parter nts账号
+shuanglong.wang@amlogic.com
+Amlogic123!
+
+关掉红外
+echo 0x02 > /sys/class/remote/amremote/protocol
+ 
  #打开O的netflix支持，还没有过netflix
+  media.amplayer.widevineenable=true
  vi /system/build.prop 加上ro.nrdp.modelgroup=P212ATV
- media.amplayer.widevineenable=true
  ro.nrdp.validation=ninja_5.1
  mode和devicie改成p212
+ 
+netflix 6.0
+ro.vendor.nrdp.audio.mixer.buffersize=512
+ro.vendor.nrdp.modelgroup=P212
+ro.vendor.nrdp.validation=ninja_6
  
 1.看secmem的buffer和count
 input nBufferCountActual
@@ -212,11 +241,22 @@ keyman query exist widevinekeybox
 keyman query exist hdcp 
 
 Widevien key uboot命令行输入
-usb start;fatload usb 0 12000000  aml-test-p212-008.bin aml-test-p241-181.bin  // widevinekeybox.bin
+usb start;fatload usb 0 12000000  aml-test-p212-008.bin aml-test-r321-120.bin aml-test-p212-008.bin aml-test-p241-181.bin  // widevinekeybox.bin
 keyunify init 0
 keyunify write widevinekeybox 0x12000000 128
 save
 reset
+
+pr key 烧写
+keyunify init 0 
+usb start 
+fatload usb 0 12000000  bgroupcert.dat
+keyunify write prpubkeybox 0x12000000  1284
+fatload usb 0 12000000  zgpriv.dat
+keyunify write prprivkeybox 0x12000000  32
+save
+reset
+
 
 #wifi
 appolo
@@ -259,6 +299,14 @@ stop;start
 张辉解码培训视频文档
 ftp://firmware.reference:Druf_T3t@10.18.11.251/tools/media_training
 
+
+autobuild ftp-china
+server:    10.28.8.22
+account:   firmware.autobuild
+password:  78Vsh$!!
+port:      22
+
+
 //stream mode
 media.omx.stream_mode
 
@@ -277,7 +325,7 @@ set tags=tags,./hardware/amlogic/omx/tags,./frameworks/av/media/tags,common/driv
 set tags=tags,../../../hardware/amlogic/media_modules/tags
 
 GTVS版本跳过开机向导：
-pm disable com.google.android.tungsten.setupwraith;settings put secure user_setup_complete 1;settings put secure tv_user_setup_complete 1
+pm disable com.google.android.tungsten.setupwraith;settings put secure user_setup_complete 1;settings put secure tv_user_setup_complete 1;settings put global device_provisioned 1
 
 ntsstart
 alias	ntsstart='am start -n com.netflix.ninja/com.netflix.ninja.MainActivity'
@@ -298,8 +346,11 @@ echo rv 1a06 > /sys/class/amvecm/reg
 
 1. osd需要先设置节点，才可以关osd
 android 7.1 后要关掉osd,  需要先设置这个节点为1：
+
 echo 1  > /sys/class/graphics/fb0/osd_display_debug
 echo 1 > /sys/class/graphics/fb0/blank
+
+echo 1 > /sys/module/amvideo/parameters/force_vskip_cnt
 
 门禁：
 编号 60
@@ -308,6 +359,178 @@ echo 1 > /sys/class/graphics/fb0/blank
 编译8.0的boot.img
 export BOARD_COMPILE_ATV=true
 
+server: ftp-china.amlogic.com   ( 10.18.11.251:21)
+account: firmware.reference
+password: Druf_T3t
+port:  21
+
+看内存踩踏
+1. 用usrdebug版本：setprop libc.debug.malloc.options "backtrace guard"
+2. setprop libc.debug.malloc.program mediaserver
+3. kill掉mediaserver进程
+
+dts目录
+common/arch/arm64/boot/dts/amlogic
+
+codec_mm debug
+codec_mm调试开关煲机 echo 0x30 > /sys/module/codec_mm/parameters/debug_mode
+
+patchbuild找不到：
+上海IP:[图片]10.18.11.97
+深圳IP:[图片]10.28.8.100 
+改固定地址
+
+dump secmem
+setprop media.omx.dumpSecure true
+setprop media.omx.SecureDir /data/tmp
+setprop media.omx.SecureName es_aml_secure.es
+setenforce 0
+mkdir -p /data/tmp
+chmod 777 /data/tmp
+
+S905X -> Ampere(Andre-Marie Ampere)
+S905D -> Braun(Wernher von Braun)
+S805X -> Curie(Marie Curie) 
+T962E -> Darwin(Charles Robert Darwin) 
+T962X -> Einstein(Albert.Einstein) 
+S905X2 -> Franklin(Benjamin Franklin)
+S905D2 -> Galilei(Galileo Galilei)
+S912 -> Hertz(Heinrich Rudolf Hertz) 
+
+netflix在线播放视频，帧率播放情况
+25fps 	2 3 2 2 3
+23.976/24  2 3 2 3 2 3
+30/29.976 2 2 2 2
+50 1 1 1 1 2
+如果是hdmi是59.94的clock的话，那么29.97，59.94.23.976可均匀输出，其它都不能均匀输出
+1500 1
+60   90000
+Mpeg-2规定的系统时钟频率为27MHz，PTS就是以系统时钟的300分频为单位的计数值。
+所以PTS的单位换算成秒就是： 1 / ( 27M/300 ) = 1 / 90k.
+一般编码器会以27MHZ的时钟来进行编码
+目前视频的帧率主要有25fps、29.97fps、30fps等，而90k刚好是它们的倍数，所以就采用了90k
+
+android p上的frame av patch提交
+git://git.myamlogic.com/vendor/amlogic/tools/DroidlogicPatch
+
+media.omx.latency
+
+kernel修改dmesg buffer size
+common/arch/arm64/configs/meson64_defconfig
+CONFIG_LOG_BUF_SHIFT=19
+17 => 128KB
+
+netflix 查看解码能力
+CodecCapHelper
+
+netflix
+getprop|egrep "nrdp|model|t.dev|manu"
+
+uboot替换
+usb_update bootloader bootloader.img
+usb start && fatload usb 0 12000000 u-boot.bin && store rom_write 12000000 0 150000
+or
+uboot命令行下：
+usb start
+fatload usb 0 1080000 u-boot.bin
+store rom_write 1080000 0 100000
+
+QA-王静 2018/12/24 14:26:34
+uboot命令行下：
+usb start && fatload usb 0 1080000 u-boot.bin && mmc dev 1 && mmc write 1080000 0 1000
+
+uboot编译
+./mk --config
+
+bypass hdr
+echo 0 > /sys/module/am_vecm/parameters/csc_en
+
+#9.0编译32bit bootimg ko
+export?KERNEL_A32_SUPPORT=true
+
+
+dump ge2d reg: 设置下面命令，再执行一次ge2d操作
+echo 1 >/sys/class/ge2d/dump_reg_enable
+echo 200 >/sys/class/ge2d/dump_reg_cnt
+
+
+#tee
+出现绿屏时
+./vendor/bin/tee_debug dump secmem
+/vendor/bin/tee_debug ef set 地址如0xff63889c 0xfffffff （每一位）
+
+
+blue screen
+	[0xff6388cc]=0x2aa0aaaa DMC_VPU_SEC_WRITE_CTRL
+	[0xff6388c8]=0x6aaabaa5 DMC_VPU_SEC_READ_CTRL
+non-screen
+	[0xff6388cc]=0x55555555 DMC_VPU_SEC_WRITE_CTRL
+	[0xff6388c8]=0xffffffff DMC_VPU_SEC_READ_CTRL
+
+[0xff63889c]=0xffffffff DMC_VPU_EF0_PROT
+./tee_debug.debug ef set 0xff63889c 0xffffffef  => right
+
+
+./tee_debug.debug ef set 0xff63889c 0xfff0fff0
+./tee_debug.debug ef set 0xff63889c 0xff0fff0f   => find the right
+./tee_debug.debug ef set 0xff63889c 0xf0fff0ff
+./tee_debug.debug ef set 0xff63889c 0x0fff0fff
+
+./tee_debug.debug ef set 0xff63889c 0xff0fffff
+./tee_debug.debug ef set 0xff63889c 0xffffff0f  => right
+./tee_debug.debug ef set 0xff63889c 0xffffffcf  => right
+./tee_debug.debug ef set 0xff63889c 0xffffffdf
+./tee_debug.debug ef set 0xff63889c 0xffffffef  => right
+
+
+//sys trace
+kernel
+atrace -z -b 20000 sched irq freq idle load memreclaim  -t 10 > /data/trace_output1
+
+
+netflix常测试的视频
+stet he chimera
+
+audio的pts计算
+44k * 2 * ch    bytes
+10000000        x
+mediatimeus = bytes * 1000000 / (samplerate * 2 * channel)
+
+音频帧的概念
+int size = 采样率（44k） x 位宽 （2b） x 采样时间 x 通道数
+framesize=44k * 2 * 0.02 * 4 = 7040
+
+音频帧的播放时间 = 一个AAC帧对应的采样样本的个数 / 采样频率(单位为s)
+
+假设某通道的音频信号是采样率为 8 kHz，位宽为16 bit，20 ms 一帧，双通道，则一帧音频数据的大小为：
+int size = 8000 x 16bit x 0.02s  x 2 = 5120 bit = 640 byte
+1s的数据量 = 8000 * 2 * 2 = 32000 bytys
+
+8482 x framesize = 210056
+0.022676
+
+内存问题绿屏
+cat /sys/class/codec_mm/codec_mm_scatter_dump 
+cat /sys/class/decoder_mmu_box/box_dump
+cat /sys/class/codec_mm/codec_mm_dump
+echo codec_mm.default_tvp_4k_size=201326592 > /sys/class/codec_mm/config 
+
+
+测温度
+cnt=0
+while true; do
+	cat /sys/class/mpgpu/cur_freq
+	cat /sys/kernel/debug/aml_clkmsr/clkmsr | grep mali
+	cat /sys/class/thermal/thermal_zone0/mode
+	cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+	cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+	cat /sys/devices/system/cpu/online
+	cat /sys/class/thermal/thermal_zone0/temp
+	let "cnt=$cnt+1"
+	echo ------------ cnt=$cnt -----------
+    sleep 1
+done;
 
 keyman write hdcp 309 12000000
 4.解决的bug

@@ -1,0 +1,38 @@
+
+omx_framework目录
+OmxComponentManagerImpl.cpp
+	管理组件module的，会load audio与video的module的，getEntryByName可以方便的获取到组件entry
+OmxComponent.cpp
+	创建组件时，会构造OmxHandle
+OmxHandle.cpp
+	OmxHandle: public OMX_COMPONENTTYPE
+	这里各种接口会设置到handle中，比如proxyGetParameter，proxyEmptyThisBuffer，proxyFillThisBuffer等；
+	proxyEmptyThisBuffer里会调用OmxComponent的emptyThisBufferProxy，OmxComponent的emptyThisBuffer会调用会调用peer的emptyThisBuffer；
+	
+
+
+libOmxCore目录
+omx_core.cpp
+	omx的对外接口处理，如OMX_GetHandle，OMX_SetupTunnel等
+	OmxCoreInit中libOmxVideo.so和libOmxAudio.so库的加载，显示so的commit信息
+
+libstagefright_core目录 libstagefrighthw.so
+AmlogicOMXPlugin.cpp
+	load libOmxCore.so库，获取库中定义的接口，OMX_Init，OMX_ComponentNameEnum，OMX_SetupTunnel等
+	其中的makeComponentInstance，enumerateComponents，setupTunnel，getRolesOfComponent，这些都是对外的接口；
+AmlogicSoftOMXPlugin.cpp 与 AmlogicOMXPlugin.cpp构成ibstagefrighthw.so，omxmaster加载的
+	
+ComponentPeers/libOmxVideo目录
+omx_video.cpp
+	创建解码组件CreatComponent，是个module模块
+	OmxModuleInit的时候，调用OmxComponentManager，把CreatComponent函数指针和组件名registerFactory到ComponentMap mCompMap中
+	创建的OmxComponent的，OmxVideoDecoder继承于OmxComponent，创建OmxVideoDecoder时会传入创建的VendorPeerComponent
+	======================================
+	VendorPeerComponent=>WorkerPeer=>AmlogicPeer=>AmlogicVideoDecoder=>AmlogicVideoDecoderAwesome
+	
+流程
+omxMaster加载libstagefrighthw.so，获取omx的各种接口;
+libOmxCore.so会加载libOmxVideo.so与libOmxAudio.so，注册创建组件接口
+
+
+

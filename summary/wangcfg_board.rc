@@ -1,0 +1,245 @@
+#!/bin/sh
+
+tftpserverip=10.68.13.158
+#10.68.8.202
+##
+##get file from windowns
+##
+##tftp -r file -g ip
+##
+
+function getfile()
+{
+	tftp -r $1 -g $tftpserverip	
+}
+
+##
+##send file to windows
+##
+##tftp -l file -p ip
+##
+
+function sendAfile()
+{
+	if [ ! -e $1 ]
+	then
+		echo "file $1 is not exist,please chek"
+		return
+	fi
+	echo "sending file $1\t..."
+	dir=`echo "$1"|sed -n "s/\(.*\).*\/.*/\1/p"`
+	file=`echo "$1"|sed -n 's/.*\/\(.*\)/\1/p'`
+	if [[ $file = "" ]]
+	then
+		tftp -l "$1" -p $tftpserverip
+		echo "send file $1 \t\tOK"
+		return
+	fi
+	cd  $dir
+	tftp -l "$file" -p $tftpserverip
+	cd -
+	echo "send file $1 \t\tOK"
+}
+
+function senddir(){
+    for element in `ls $1`
+    do  
+        dir_or_file=$1"/"$element
+        if [ -d $dir_or_file ]
+        then
+			echo "prepare send dirctory:$file ......"
+            senddir $dir_or_file
+        else
+			echo "prepare send file:$file ......"
+            sendAfile $dir_or_file 
+        fi  
+    done
+}
+
+function sendfile()
+{
+	for file in $@
+		do
+		if [ -f $file ]
+		then
+			echo "prepare send file:$file ......"
+			sendAfile $file
+		elif [ -d $file ]
+		then
+			echo "prepare send dirctory:$file ......"
+			senddir $file
+		fi
+	done
+}
+
+function rplibsytem(){
+	echo "cp $1 /system/lib && chmod 644 /system/lib/$1"
+	cp $1 /system/lib && chmod 644 /system/lib/$1
+}
+
+function rplibvendor(){
+	echo "cp $1 /vendor/lib && chmod 644 /vendor/lib/$1"
+	cp $1 /system/lib && chmod 644 /vendor/lib/$1
+}
+
+function getlibcpsystem() {
+	echo "getfile $1 && rplibsytem $1"
+	getfile $1 && rplibsytem $1
+}
+
+function getlibcpvendor(){
+	echo "getfile $1 && rplibvendor $1"
+	getfile $1 && cp rplibvendor $1
+}
+
+function boot() {
+	if [ $# -lt 1 ]
+	then
+		echo "please input:\nboot boot.img"
+		return
+	fi
+	
+	if [ -e $1 ]
+	then
+		echo "boot...., and you have 10s to undo it"
+		sleep 10
+		echo "cat $1 > /dev/block/boot && sync && reboot"
+		cat $1 > /dev/block/boot && sync && reboot
+	else
+		echo "$1 is not exist...,please check"
+	fi
+}
+
+function dumpomxrv() {
+	if [ ! -d "/data/tmp/" ]
+	then
+		mkdir /data/tmp/
+	fi
+	setenforce 0
+	chmod 777 /data/tmp/
+	setprop media.omx.dumpRecv true
+}
+
+function dumpomxcs() {
+	if [ ! -d "/data/tmp/" ]
+	then
+		mkdir /data/tmp/
+	fi
+	setenforce 0
+	chmod 777 /data/tmp/
+	setprop media.omx.dumpCodec true
+}
+
+function dumpdves() {
+	if [ ! -d "/data/tmp/" ]
+	then
+		mkdir /data/tmp/
+	fi
+	setenforce 0
+	chmod 777 /data/tmp/
+	setprop media.dv.dumpEs true
+}
+
+function dumpvdec() {
+	echo "echo dump $1 > /sys/class/vfm/map"
+	echo dump $1 > /sys/class/vfm/map
+}
+###
+### main start
+###
+curdatestr=`date +%Y%m%d`
+fpcnt=0
+export fpcnt
+
+alias procm='procrank | grep "me"'
+alias wplay='echo "am start -n com.android.gallery3d/.app.MovieActivity -d" && am start -n com.android.gallery3d/.app.MovieActivity -d'
+alias pk0='echo "echo 0 > /proc/sys/kernel/printk" && echo 0 > /proc/sys/kernel/printk'
+alias pk7='echo "echo 7 > /proc/sys/kernel/printk" && echo 7 > /proc/sys/kernel/printk'
+alias pk8='echo "echo 8 > /proc/sys/kernel/printk" && echo 8 > /proc/sys/kernel/printk'
+alias lpk='echo "cat /proc/sys/kernel/printk" && cat /proc/sys/kernel/printk'
+alias acion='echo 1 > /sys/class/tsync/debug_audio_pts && echo 1 > /sys/class/tsync/debug_pts_checkin'
+alias acoon='echo 1 > /sys/class/tsync/debug_audio_pts && echo 1 > /sys/class/tsync/debug_pts_checkout'
+alias vcion='echo 1 > /sys/class/tsync/debug_video_pts && echo 1 > /sys/class/tsync/debug_pts_checkin'
+alias vcoon='echo 1 > /sys/class/tsync/debug_video_pts && echo 1 > /sys/class/tsync/debug_pts_checkout'
+alias acioff='echo 0 > /sys/class/tsync/debug_audio_pts && echo 0 > /sys/class/tsync/debug_pts_checkin'
+alias acooff='echo 0 > /sys/class/tsync/debug_audio_pts && echo 0 > /sys/class/tsync/debug_pts_checkout'
+alias vcioff='echo 0 > /sys/class/tsync/debug_video_pts && echo 0 > /sys/class/tsync/debug_pts_checkin'
+alias vcooff='echo 0 > /sys/class/tsync/debug_video_pts && echo 0 > /sys/class/tsync/debug_pts_checkout'
+alias vcicoon='vcion && vcoon'
+alias vcicooff='vcioff && vcooff'
+alias acicoon='acion && acoon'
+alias acicooff='acioff && acooff'
+alias avcioptson='acicoon && vcicoon'
+alias avcioptsoff='acicooff && vcicooff'
+alias osdon='echo "setprop media.omx.display_mode 0" && setprop media.omx.display_mode 0'
+alias osdoff='echo "setprop media.omx.display_mode 1" && setprop media.omx.display_mode 1'
+alias losd='echo "getprop media.omx.display_mode" && getprop media.omx.display_mode'
+alias nuon='echo "setprop media.amnuplayer.localplay true" && setprop media.amnuplayer.localplay true'
+alias nuoff='echo "setprop media.amnuplayer.localplay false" && setprop media.amnuplayer.localplay false'
+alias sdon='echo "setprop media.omx.single_mode 1" && setprop media.omx.single_mode 1'
+alias sdoff='echo "setprop media.omx.single_mode 0" && setprop media.omx.single_mode 0'
+alias audiooff='echo "setprop media.amplayer.noaudio true" && setprop media.amplayer.noaudio true'
+alias audioon='echo "setprop media.amplayer.noaudio false" && setprop media.amplayer.noaudio false'
+alias apts='echo "cat /sys/class/tsync/pts_audio" && cat /sys/class/tsync/pts_audio'
+alias vpts='echo "cat /sys/class/tsync/pts_video" && cat /sys/class/tsync/pts_video'
+alias pcr='echo "cat /sys/class/tsync/pts_pcrscr" && cat /sys/class/tsync/pts_pcrscr'
+alias rendqon='echo "setprop media.hls.ptsdebug 8" && setprop media.hls.ptsdebug 8'
+alias rendqoff='echo "setprop media.hls.ptsdebug 1" && setprop media.hls.ptsdebug 1'
+alias logsrender='echo "logcat -c && logcat -s NU-NuPlayerRenderer" && logcat -c && logcat -s NU-NuPlayerRenderer'
+alias logsamgensource='echo "logcat -c && logcat -s NU-GenericSource" && logcat -c && logcat -s NU-GenericSource'
+alias logsextractor='echo "logcat -c && logcat -s AmFFmpegExtractor" && logcat -c && logcat -s AmFFmpegExtractor'
+alias subton='echo "setprop media.amplayer.nosubtitle 0" && setprop media.amplayer.nosubtitle 0'
+alias subtoff='echo "setprop media.amplayer.nosubtitle 1" && setprop media.amplayer.nosubtitle 1'
+alias exfr12='echo 1 > /sys/module/amvideo/parameters/force_vskip_cnt'
+alias exfr34='echo 2 > /sys/module/amvideo/parameters/force_vskip_cnt'
+alias exfroff='echo 0 > /sys/module/amvideo/parameters/force_vskip_cnt'
+alias lexfr='cat /sys/module/amvideo/parameters/force_vskip_cnt'
+alias omxdbgon='echo "setprop media.omx.log_levels 255" && setprop media.omx.log_levels 255'
+alias omxdbgoff='echo "setprop media.omx.log_levels 0" && setprop media.omx.log_levels 0'
+alias nuffdbgon='echo "setprop media.ffmpegextractor.loglevel 255" && setprop media.ffmpegextractor.loglevel 255'
+alias nuffdbgoff='echo "setprop media.ffmpegextractor.loglevel 10" && setprop media.ffmpegextractor.loglevel 10'
+alias libffdbgon='setprop media.amplayer.loglevel 255'
+alias libffdbgoff='setprop media.amplayer.loglevel 10'
+alias vpcrdbgon='echo 0x400000 > /sys/module/amvideo/parameters/debug_flag'
+alias vpcrdbgoff='echo 0 > /sys/module/amvideo/parameters/debug_flag'
+alias allpts='apts && vpts && pcr'
+alias logc='echo "logcat -c && logcat" && logcat -c && logcat'
+alias logs='echo "logcat -c && logcat -s" && logcat -c && logcat -s'
+alias killms='echo "kill $(busybox pidof mediaserver)" && kill $(busybox pidof mediaserver)'
+alias killme='kill $(busybox pidof media.extractor)'
+alias killmc='kill $(busybox pidof media.codec)'
+alias debugms='echo "debuggerd $(busybox pidof mediaserver)" && debuggerd $(busybox pidof mediaserver)'
+alias debugme='echo "debuggerd $(busybox pidof media.extractor)" && debuggerd $(busybox pidof media.extractor)'
+alias debugsf='echo "debuggerd $(busybox pidof surfaceflinger)" && debuggerd $(busybox pidof surfaceflinger)'
+alias logsomx='echo "logcat -c && logcat -s AmlogicVideoDecoderAwesome" && logcat -c && logcat -s AmlogicVideoDecoderAwesome'
+alias dumpme='echo "debuggerd $(pidof media.extractor)" && debuggerd $(pidof media.extractor)'
+alias dumpms='debuggerd $(pidof mediaserver)'
+alias dumpsf='debuggerd $(pidof surfaceflinger)'
+alias dumpmc='debuggerd $(pidof media.codec)'
+alias dumpSF='dumpsys SurfaceFlinger'
+alias dibypass='echo 1 >/sys/module/di/parameters/bypass_all'
+alias dibypassstat='cat /sys/module/di/parameters/bypass_state'
+alias ntsstart='echo "am start -n com.netflix.ninja/com.netflix.ninja.MainActivity" && am start -n com.netflix.ninja/com.netflix.ninja.MainActivity'
+alias killnts='echo "killall com.netflix.ninja" && killall com.netflix.ninja'
+alias skipgg='pm disable com.google.android.tungsten.setupwraith;settings put secure user_setup_complete 1;settings put secure tv_user_setup_complete 1;settings put global device_provisioned 1'
+alias logf='((fpcnt=$fpcnt+1)); logcat -c; logcat > `date +%Y%m%d_%H-%M-%S`_${fpcnt}.log'
+alias dmsgclr='echo "dmesg -c > /dev/null" && dmesg -c > /dev/null'
+alias bakboot='dd if=/dev/block/boot of=bootorg.img'
+alias remoteoff='echo "echo 0x02 > /sys/class/remote/amremote/protocol" && echo 0x02 > /sys/class/remote/amremote/protocol'
+
+mount -o rw,remount /dev/block/system  /system
+mount -o remount,rw /vendor
+#pm disable com.android.bluetooth
+
+if [ ! -d "/data/test" ]
+then
+	mkdir /data/test
+fi
+
+if [ ! -d  "/data/test/$curdatestr" ]
+then
+	mkdir /data/test/$curdatestr
+fi
+
+cd /data/test/$curdatestr
+

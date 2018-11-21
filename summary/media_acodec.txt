@@ -1,0 +1,118 @@
+mediacodec中
+mCodec->setCallback(
+            std::unique_ptr<CodecBase::CodecCallback>(
+                    new CodecCallback(new AMessage(kWhatCodecNotify, this))))
+mBufferChannel = mCodec->getBufferChannel(); 在mediacodec中
+mBufferChannel = mCodec->getBufferChannel();
+    mBufferChannel->setCallback(
+            std::unique_ptr<CodecBase::BufferCallback>(
+                    new BufferCallback(new AMessage(kWhatCodecNotify, this))))
+ACodec::getBufferChannel
+mBufferChannel = std::make_shared<ACodecBufferChannel>(
+                new AMessage(kWhatInputBufferFilled, this),
+                new AMessage(kWhatOutputBufferDrained, this));
+在MediaCodec中创建一个ACodec中定义的ACodecBufferChannel
+1.这个bufferchannel连接能ACodec与MediaCodec，连接消息kWhatInputBufferFilled与kWhatOutputBufferDrained
+2.bufferchannel还把MediaCodec中的callback set到了bufferchannel，这样Acodec的消息，回传到bufferchannel，然而就回传到
+	MediaCodec中
+
+ACodec的getPortMode状态
+BaseState是KEEP_BUFFERS
+OutputPortSettingsChangedState时，kPortIndexOutput是FREE_BUFFERS，其它是RESUBMIT_BUFFERS
+ExecutingState，是RESUBMIT_BUFFERS			
+
+MediaCodec的数据流向
+MediaCodec::queueInputBuffer 数据输入
+status_t ACodecBufferChannel::queueInputBuffer
+	把buffer传到Acodec中，通过kWhatInputBufferFilled消息
+void ACodec::BaseState::onInputBufferFilled(const sp<AMessage> &msg)
+	在这里buffer状态从BufferInfo::OWNED_BY_UPSTREAM转换成了BufferInfo::OWNED_BY_US
+	在RESUBMIT_BUFFERS处理中，buffer如果是csd数据，则flag打上OMX_BUFFERFLAG_CODECCONFIG，如是eos则打上OMX_BUFFERFLAG_EOS
+	然后就通过mOMXNode向omx里传送es数据了，然后info->mStatus = BufferInfo::OWNED_BY_COMPONENT
+mCodec->mOMXNode->emptyBuffer ACodec
+
+
+struct CodecObserver : public BnOMXObserver
+  CodecObserver是用来接收omx组件消息传递的，在传入的es流组件消耗完就会传一个omx_message::EMPTY_BUFFER_DONE消息下来
+  解码完成后会传omx_message::FILL_BUFFER_DONE消息下来
+
+送的es数据消耗了  
+bool ACodec::BaseState::onOMXMessage(const sp<AMessage> &msg)
+     omx_message::EMPTY_BUFFER_DONE:
+bool ACodec::BaseState::onOMXMessage
+	这个处理omx的消息
+bool ACodec::BaseState::onOMXEmptyBufferDone
+	此时，从BufferInfo::OWNED_BY_COMPONENT转换成info->mStatus = BufferInfo::OWNED_BY_US
+	RESUBMIT_BUFFERS里postFillThisBuffer，重新填充es数据调用
+void ACodec::BaseState::postFillThisBuffer(BufferInfo *info)
+	mCodec->mBufferChannel->fillThisBuffer(info->mBufferID);
+	从BufferInfo::OWNED_BY_US转换成BufferInfo::OWNED_BY_UPSTREAM
+void ACodecBufferChannel::fillThisBuffer(IOMX::buffer_id bufferId)
+	mCallback->onInputBufferAvailable，告诉MediaCoded当前的inputbuffer可以重新填充数据了；
+void BufferCallback::onInputBufferAvailable  kWhatFillThisBuffer
+	发送消息给MediaCodec，MediaCodec收到消息后中，updateBuffers(kPortIndexInput, msg)
+	更新下mPortBuffers和mAvailPortBuffers的输入buffer及索引，
+	kFlagIsAsync时，onInputBufferAvailable
+	同步时，handleDequeueInputBuffer，block获取输入buffer反馈消息
+void MediaCodec::onInputBufferAvailable() or
+bool MediaCodec::handleDequeueInputBuffer
+
+
+取输出数据时
+status_t MediaCodec::dequeueOutputBuffer
+bool MediaCodec::handleDequeueOutputBuffer
+  从mPortBuffers[kPortIndexOutput]取数据
+
+
+ACodec开始的传消息取解码后的数据
+status_t ACodec::fillBuffer(
+	OMXNode->fillBuffer，然后buffer转换，info->mStatus = BufferInfo::OWNED_BY_COMPONENT
+
+解码完数据的传递
+case omx_message::FILL_BUFFER_DONE:
+bool ACodec::BaseState::onOMXFillBufferDone
+	buffer状态BufferInfo::OWNED_BY_COMPONENT转换成BufferInfo::OWNED_BY_US
+	mCodec->mBufferChannel->drainThisBuffer(info->mBufferID, flags);
+	然后buffer状态转制成BufferInfo::OWNED_BY_DOWNSTREAM
+void ACodecBufferChannel::drainThisBuffer
+	mCallback->onOutputBufferAvailable，传递消息给MediaCodec
+void BufferCallback::onOutputBufferAvailable kWhatDrainThisBuffer
+	发消息给MediaCodec，updateBuffers(kPortIndexOutput, msg);
+	mPortBuffers[kPortIndexOutput] 和mAvailPortBuffers数据更新
+void MediaCodec::onOutputBufferAvailable() or kFlagIsAsync
+handleDequeueOutputBuffer
+
+
+同步显示
+status_t MediaCodec::renderOutputBufferAndRelease
+status_t MediaCodec::onReleaseOutputBuffer
+	准备显示，mBufferChannel->renderOutputBuffer(buffer, renderTimeNs)
+status_t ACodecBufferChannel::renderOutputBuffer
+	发送消息给ACodec，kWhatOutputBufferDrained
+void ACodec::BaseState::onOutputBufferDrained
+	准备显示，显示完会状态切换
+	从BufferInfo::OWNED_BY_DOWNSTREAM到BufferInfo::OWNED_BY_NATIVE_WINDOW
+	mCodec->mNativeWindow->queueBuffer
+	在RESUBMIT_BUFFERS case里会mCodec->dequeueBufferFromNativeWindow()，从sf获取数据，显示完全了才会取出来的数据
+	dequeueBufferFromNativeWindow成功的话，会mCodec->fillBuffer，继续获取解码后的数据，循环一直进行下去了
+
+ACodec的状态切换
+组件创建完成进入loaded状态
+void ACodec::LoadedState::onStart
+	mCodec->mOMXNode->sendCommand(OMX_CommandStateSet, OMX_StateIdle)
+	切换状态到mLoadedToIdleState
+void ACodec::LoadedToIdleState::stateEntered
+	allocateBuffers，申请buffer
+	mCodec->mOMXNode->sendCommand(OMX_CommandStateSet, OMX_StateLoaded)
+	mCodec->changeState(mCodec->mLoadedState);状态切换
+status_t ACodec::LoadedToIdleState::allocateBuffers
+	mCodec->allocateBuffersOnPort(kPortIndexOutput)
+	mCodec->mCallback->onStartCompleted()
+bool ACodec::LoadedToIdleState::onOMXEvent
+	状态转换完成后，收到OMX_EventCmdComplete，发送mCodec->mOMXNode->sendCommand(
+                    OMX_CommandStateSet, OMX_StateExecuting)
+    完成后转换，mCodec->changeState(mCodec->mIdleToExecutingState)
+bool ACodec::IdleToExecutingState::onOMXEvent
+	转换成ExecutingState状态后，进入
+	mCodec->mExecutingState->resume()
+	mCodec->changeState(mCodec->mExecutingState)

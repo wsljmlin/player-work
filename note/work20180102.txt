@@ -363,26 +363,6 @@ sourcesight 3.5 SI3US-361500-17409
  
  http://scgit.amlogic.com:8080/38478
  http://scgit.amlogic.com:8080/37963
- 
- 
- 
- 
- 02-08 03:03:01.061  4274  4440 I AmFFmpegExtractor: 0  0  0  1 40  1
-02-08 03:03:01.061  4274  4440 I AmFFmpegExtractor:  c  1 ff ff  1 60
-02-08 03:03:01.061  4274  4440 I AmFFmpegExtractor:  0  0  3  0 80  0
-02-08 03:03:01.061  4274  4440 I AmFFmpegExtractor:  0  3  0  0  3  0
-02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: 78 95 c0 90  0  0
-02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor:  0  1 42  1  1  1
-02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: 60  0  0  3  0 80
-02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor:  0  0  3  0  0  3
-02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor:  0 78 a0  3 c0 80
-02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: 10 e5 96 57 92 4d
-02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: ac 80  0  0  0  1
-02-08 03:03:01.062  4274  4440 I AmFFmpegExtractor: 44  1 c1 f3 d9 89
-02-08 03:42:49.349  2958  4187 E HVCCFormatter: data=0xf1c4a640,size=22
-02-08 03:42:49.349  2958  4187 E HVCCFormatter: data=0xf1c32380,size=28
-02-08 03:42:49.349  2958  4187 E HVCCFormatter: data=0xf1c32582,size=6
-logcat | grep -v "BluetoothAdapter"
 
 
 10.28.8.19
@@ -1003,7 +983,7 @@ main264
 
 
 
-ftp://firmware.reference:Druf_T3t@ftp-china.amlogic.com
+ftp://firmware.reference:Druf_T3t@ftp-china.amlogic.com/mbox
 
 北京市西城区金融街23号平安大厦9层理赔柜面尚晓雨
 
@@ -1659,6 +1639,10 @@ cat bootbak.img > /dev/block/boot && sync && reboot
 echo 0 > /proc/sys/kernel/printk && dmesg -c > /dev/null && echo 0x800000 > /sys/module/amvideo/parameters/debug_flag
 
 
+echo 0 > /proc/sys/kernel/printk && dmesg -c > /dev/null;echo 0x800000 > /sys/module/amvideo/parameters/debug_flag;logcat -c && logcat > logcat.log
+出现卡顿输入下面抓log
+echo 0 > /sys/module/amvideo/parameters/debug_flag && dmesg > k_vfm.log
+
 8M->12M相关提交
 1.omx so
 http://scgit.amlogic.com:8080/45932  
@@ -1680,4 +1664,738 @@ Date:   Mon May 28 11:27:51 2018 +0800
 
 3. wv
 http://scgit.amlogic.com:8080/#/c/45947/
+
+
+13 Reasons why
+
+hdmi60hz -> 59.94 1.001 clock
+echo 0 > /sys/class/amhdmitx/amhdmitx0/frac_rate_policy
+
+setenv frac_rate_policy 1
+save
+reset
+
+echo 1,1,1 > /sys/module/amvideo/parameters/pts_log_enable
+
+echo 1,1,1 > /sys/kernel/debug/video/pts_log_enable
+
+
+echo 1,1,1 > /sys/kernel/debug/video/pts_enforce_pulldown
+
+
+上周：
+168127 {Netflix反馈问题 #111}测试PLAY-015-TC1 有卡顿现象 概率：100% 对比：一直存在以前测试没注意到S805X和S905X共存问题
+	---相关patch已提交，24fps有卡顿是已知问题，等netflix反馈
+Bug 168583 - [R33A2-客户反馈DANGAL#691-System]：film mode功能不正确，播放24p码流时画面卡顿明显，100%
+	---输出正常，对比sony有MEMC功能，不开EMMC也都存在卡顿，FAE在说明客户接受
+Wetek NTS测试DRS-001-TC4画面顿一下的问题
+	---已提供相关的patch，等反馈
+	
+am start -n com.android.gallery3d/.app.MovieActivity -d http://10.68.11.62:8800/dts-express/index.m3u8
+am start -n com.android.gallery3d/.app.MovieActivity -d http://10.68.11.62:8800/dump/index.m3u8
+
+
+抓audio数据
+setprop media.omx.audio.debug 1
+setprop media.omx.audio.dump 1
+mkdir /data/tmp
+chmod 777 /data/tmp -R
+setenforce 0
+
+
+debug for patchbuild openlinux1215 8.0
+ http://scgit.amlogic.com:8080/47140
+ 
+ 
+打印内存
+ echo 0x30 > /sys/module/codec_mm/parameters/debug_mode
+ 
+debuggerd -b $(pidof media.extractor)
+debuggerd -b $(pidof mediaserver)
+debuggerd -b $(pidof media.codec)
+debuggerd -b $(pidof surfaceflinger)
+
+上周
+168642 {GTS}8.0 P212 GTS测试，Tests Failed 14（14个fail项） ，概率：100%,对比：无需对比。 
+168583 [R33A2-客户反馈DANGAL#691-System]：film mode功能不正确，播放24p码流时画面卡顿明显，100% 
+168951 [阿里巴巴梵高-S905X2-8.1-DTS]: 在线dts-express视频文件无法播放。
+169066 {DTS} HLS播放DTS流失败，DTS Streaming认证模块无法进行。100%，对比：Dolby流和普通PCM流正常。 
+168127 {Netflix反馈问题 #111}测试PLAY-015-TC1 有卡顿现象 概率：100% 对比：一直存在以前测试没注意到S805X和S905X共存问题
+	--fixed
+169137 [R31A4-客户反馈DANGAL#1193-Video]：[V23N] 播放U盘内的视频, 进行快进快退操作后, 画面静止, 视频播放异常, 提示: Play failed. Error(100,1) 
+	--amnuplyer退出播放，mediacodec的flush时，卡在ACodecBufferChannel的std::atomic_load，原因需要再分析
+	
+本周：
+169137 [R31A4-客户反馈DANGAL#1193-Video]：[V23N] 播放U盘内的视频, 进行快进快退操作后, 画面静止, 视频播放异常, 提示: Play failed. Error(100,1) 
+netflix反馈问题
+其它问题
+
+
+169137 	[R31A4-客户反馈DANGAL#1193-Video]：[V23N] 播放U盘内的视频, 进行快进快退操作后, 画面静止, 视频播放异常, 提示: Play failed. Error(100,1)
+	---卡在std::atomic_load(&(input ? mInputBuffers : mOutputBuffers)))，没有找到根本原因，已提供暂时避免的办法
+169357 	[Ref#Bug 169513-R31A4-T960x-8.1-System]：Movieplayer本地播放《AVS+_E-AC320.6 Mbps-720x576.ts》退出播放--mediacodec内存泄露
+	---liuyao已有相应的patch
+169116 	[R33A2-MIUI-Video]：本地多种格式视频循环播放煲机12h画面卡住
+	---去掉avs源后暂时没有复现，需要进一步煲机
+169021 	[R31A4-客户反馈DANGAL#1018-Video]：[V23N]播放ts视频，后台一直打log
+	---interlace片源bottom场的pts为0或者与top一致，log已去掉
+	
+echo 1 > /sys/module/amvideo/parameters/video_dbg_vf;
+echo 0x800000 > /sys/module/amvideo/parameters/debug_flag;echo 0 > /proc/sys/kernel/printk && dmesg -c > /dev/null; logcat -c && locat > logcat.log
+
+dmesg > kernel.log
+
+cat /sys/class/vdec/dump_vdec_chunks;cat /sys/class/amstream/bufs;echo dump decoder > /sys/class/vfm/map 
+
+
+169611 	[Wetek-S905X-客户反馈-Netflix-Video]Netflix播放某节目，会几率性出现丢帧、视频卡顿的问题。 在7.1上复现几率较高，并且现象比较明显。8.0也可复现，但几率不高 
+	---数据下溢，已加大secmem的大小，4k以下使用2.8M内存，客户已送测
+169714  [P21A7-S905X-8.1-NTS]:SEC-978-TC2 Video freeze frequently(100%)
+	---
+169578 	[MINI-R33A2-T950X-Video]:小米版本，本地视频[LG.4K.演示片]韩国女子组合20_T-ara_No.9.ts播放+seek煲机，退出、再进入播放时，卡死在加载界面，操作遥控器无反应。 
+
+
+setprop media.omx.audio.debug 1
+
+setprop media.omx.out_buffer2 8
+
+
+1. 用usrdebug版本：setprop libc.debug.malloc.options "backtrace guard"
+2. setprop libc.debug.malloc.program media.codec
+3. kill掉media.codec进程, kill $(pidof media.codec)
+4. 设置prop
+	setprop media.hls.ptsdebug 4
+	setprop media.omx.log_levels 255
+	setprop media.omx.audio.debug 1
+5.煲机
+
+cat /sys/class/vdec/core
+cat /sys/kernel/debug/vdec_profile/event
+
+debuggerd -b $(pidof mediaserver)
+debuggerd -b $(pidof surfaceflinger)
+debuggerd -b $(pidof media.codec)
+
+07-26 19:13:51.887506  9960 10198 E NdkMediaCodec: sf error code: -13
+
+170411 [R31A2-Customer Feedback#4317-Video]： VLC播放视频反复快进，画面卡住，退出再播放黑屏
+	---已提供两个煲机patch，还没有复现问题
+169752 {NTS Bug CJHFCNAMLX-28} PLAY-103-TC5 - fails as A/V sync is off w/ VP9 HFR content w/ DDP decode capable panel
+	---输入输出buffer少引起的解码输出慢，vp9的问题先waive，后面netflix会继续跟进
+170496 [R33A2-客户反馈-DANGAL-1929-Video]：[V23N][工厂反馈]U盤播放4K測試檔案時, 檔案內容播完後, 無法再次播放(電視重啟後, 操作正常,概率約 6/30 )
+	---已提供patch，还没有复现问题
+169855 {NTS}测试SYNC-002-TC8播放视频没有画面同时还存在杂音 概率：100% 对比：S805X/S905X共存 之前测试正常
+	---fixed
+
+12-31 16:34:18.320  2816  2962 I chatty  : uid=0(root) HwBinder:2816_3 identical 6 lines
+12-31 16:34:18.321  2816  2962 I SystemControlHal: getPropertyBoolean key :sys.videoplayer.debug, value:0
+12-31 16:34:18.322  8995  8995 W MediaPlayer: Couldn't open /storage/6CE5-9FB0/170750/iPhone7-2160x3840-Vertical-30fps.MOV: java.io.FileNotFoundException: No content provider: /storage/6CE5-9FB0/170750/iPhone7-2160x3840-Vertical-30fps.MOV
+12-31 16:34:18.326  2895  2991 E MediaPlayerService: offset error
+12-31 16:34:18.326  8995  8995 E MediaPlayerNative: Unable to create media player
+12-31 16:34:18.326  8995  8995 E VideoPlayer: Unable to open content: /storage/6CE5-9FB0/170750/iPhone7-2160x3840-Vertical-30fps.MOV,ex:java.io.IOException: setDataSourceFD failed.: status=0x80000000
+12-31 16:34:18.327  9233  9233 I SubTitleServer: [SubTitleServer]
+12-31 16:34:18.327  9233  9233 I SubTitleServer: [onCreate]
+12-31 16:34:18.327  2816  2962 I SystemControlHal: getPropertyBoolean key :sys.videoplayer.debug, value:0
+12-31 16:34:18.327  9233  9233 I SubTitleServer: [onBind]
+12-31 16:34:18.330  2895  4258 E MediaPlayerService: offset error
+12-31 16:34:18.330  8995  8995 E MediaPlayerNative: Unable to create media player
+
+
+[   63.409962@2] after ionvideo_fillbuff
+[   63.411337@2] before ionvideo_fillbuff
+[   63.415156@2] before ge2d_paint_dst
+[   64.433963@3] after ge2d_paint_dst
+[   64.434018@3] after ionvideo_fillbuff
+[   64.435384@3] before ionvideo_fillbuff
+[   64.441369@3] before ge2d_paint_dst
+[   65.457901@0] after ge2d_paint_dst
+[   65.457948@0] after ionvideo_fillbuff
+[   65.459385@0] before ionvideo_fillbuff
+[   65.463476@0] before ge2d_paint_dst
+[   66.481919@1] after ge2d_paint_dst
+[   66.481966@1] after ionvideo_fillbuff
+[   66.483337@1] before ionvideo_fillbuff
+[   66.487315@1] before ge2d_paint_dst
+[   67.505913@3] after ge2d_paint_dst
+[   67.505954@3] after ionvideo_fillbuff
+[   67.507347@3] before ionvideo_fillbuff
+
+
+#内存
+cat /sys/class/codec_mm/config
+cat /sys/class/codec_mm/codec_mm_dump
+cat /sys/class/codec_mm/codec_mm_scatter_dump
+
+cat /sys/class/decoder_bmmu_box/box_dump
+cat /sys/class/decoder_mmu_box/box_dump
+
+测试前设置
+echo 0x30 > /sys/module/codec_mm/parameters/debug_mode 
+
+每次播放刚开始的时候dump
+cat /sys/class/codec_mm/codec_mm_dump
+
+出问题时dump
+cat /sys/class/codec_mm/codec_mm_dump
+cat /sys/class/codec_mm/codec_mm_scatter_dump
+cat /sys/class/decoder_mmu_box/box_dump
+cat /sys/class/decoder_bmmu_box/box_dump
+cat /sys/class/codec_mm/codec_mm_keeper_dump
+
+
+For HFR VP9, the decode operation is complex, requires more bandwidth, and  also has higher requirements for data input efficiency.
+The DDR bandwidth  calculation formula is as follows in theory:
+DDR freq×2× bit width（16/32/64）/ 8 ×efficiency（75%）
+805x Soc, bandwidth =1G*2*16/8*0.75=
+理论上分给解码器的带宽是xx，
+理论总带宽是DDR freq×2× bit width（16/32/64）/ 8 ×efficiency（75%）
+3840x2060x1.5/10=1186560
+高码率 50
+
+可以说vp9运算复杂，需要带宽更多，对数据输入效率有要求更高
+就我前面说的这个吧，强调vp9运算复杂度导致带宽要求高吧
+
+echo 0x800000 > /sys/module/amvideo/parameters/debug_flag 
+echo 0x4841 > /sys/module/amvdec_h265/parameters/debug
+
+
+cat /sys/class/video/disable_video
+
+171345 [阿里巴巴-S905M2-6.0-audio]：TV助手本地投屏音乐，播放到马上结束时暂停播放
+	---fixed
+171461 {Netflix反馈问题#148}{NTS}测试SYNC-002-TC5 : Macro blocking during video playback during first 40secs-1min 概率：连续测试6次后出现，复现之后就100%必现
+	--fixed
+video peek
+	--ongoning
+	1.hevc docoder没有及时输出第一帧，添加3k的padding数据也不有及输出。打开一些debug，第一帧能及时peek到，原因不知道；
+	2.zhanghui分析kernel log，第一帧解码出来了，但是没有及时输出，目前pengyixin在协助处理第一帧输出问题；
+
+1.
+video peek, hevc ok
+hevc.ko + omx.so + boot.img
+http://firmware.myamlogic.com/shenzhen/image/android/Android-O/MR1/Android_TV/trunk/2018-08-21/p212-userdebug-32-GTVS-316/
+
+2.
+SEC-924-TC1 在r321上是pass，0822 patchbuild
+SEC-978-TC20 not ok，需要4k，应该是上不4k的原因，黑屏
+SEC-978-TC15 pass
+SEC-924-TC1  pass
+
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80117716?source=99'
+
+audio fd leak
+http://scgit.amlogic.com:8080/#/c/50602/
+http://scgit.amlogic.com:8080/#/c/50623/
+
+VPEEK-001-TC1-Tunnel, VPEEK-001-TC2-Tunnel, VPEEK-001-TC3-Tunnel
+
+fastboot flashing unlock
+fastboot flash vbmeta vbmeta.img
+fastboot reboot
+
+fastboot flashing unlock 
+fastboot flashing unlock_critical
+
+#HDR
+echo rh1000101a > /sys/class/amhdmitx/amhdmitx0/debug
+cat /sys/module/am_vecm/parameters/hdr_mode
+cat /sys/class/amvecm/hdr_dbg
+cat /sys/module/am_vecm/parameters/cur_csc_type
+红色方框，0910是hdr的
+0101是sdr的
+
+ ACodec  : Configuring TUNNELED video playback.
+
+172444 {HDR}{system}播放4K VP9的HDR片源，使用命令cat /sys/module/am_vecm/parameters/cur_csc_type的节点是16；概率：100%；对比S905X P212+Android N正常。
+	---fixed
+172137 ｛netflix｝support Ninja 6.0 video peek(tunnel mode)功能
+	---
+171345 [阿里巴巴-S905M2-6.0-audio]：TV助手本地投屏音乐，播放到马上结束时暂停播放 	Wed 18:06
+171583 	{NTS}Manual,DRS-001-TC6 Failed step 5 The probability of losing a frame or fast-forward when switching to a moving frame Probability: 80% contrast: no need 	Wed 16:34
+172382 	[Harman-T962E-HDR]:HDR dosen't work 
+
+am start
+
+
+        pProfileLevel->eProfile = kProfileLevels_AVC[pProfileLevel->nProfileIndex].mProfile;
+                    pProfileLevel->eLevel = kProfileLevels_AVC[pProfileLevel->nProfileIndex].mLevel;
+            
+
+Planet Earth II   S1 EP1  3'15''`3'17''出现问题
+
+dolby atmos 4k
+
+libOmxAudio.so   libdatachunkqueue_alt.so   libomx_timed_task_queue_alt.so libOmxBase.so    libfpscalculator_alt.so    libomx_worker_peer_alt.so libOmxCore.so    libomx_av_core_alt.so      libstagefrighthw.so  libOmxCoreSw.so  libomx_clock_utils_alt.so  libthreadworker_alt.so    libOmxVideo.so   libomx_framework_alt.so
+
+openlinux 1215 profilelevel
+netflix-profilelevel
+http://scgit.amlogic.com:8080/51184
+http://scgit.amlogic.com:8080/#/c/51207/
+
+trunk
+http://scgit.amlogic.com:8080/#/c/51212/
+
+
+Now it can be tested normally, test code as follows:
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android_P/job/Android_P_PATCHBUILD/1055/
+
+patch：
+
+http://scgit.amlogic.com:8080/50266
+
+http://scgit.amlogic.com:8080/50309
+
+omx source code:
+
+http://scgit.amlogic.com:8080/50242
+test account:
+shuanglong.wang@amlogic.com
+test case :VPEEK-001-TC1-Tunnel, VPEEK-001-TC2-Tunnel, VPEEK-001-TC3-Tunnel
+netflix apk：netflix-ninja-5.3.3-102326-debug.apk
+Above nts test case ok(only have  hevc case)
+
+We are trying simple media CTS.
+
+
+
+0920
+/sys/module/amdolby_vision/parameters/dolby_vision_enable
+/sys/class/amdolby_vision/dv_mode
+/sys/module/amdolby_vision/parameters/force_stb_mode
+
+o-mr1-amlogic
+dv diff
+http://scgit.amlogic.com:8080/51852
+http://scgit.amlogic.com:8080/51853
+
+echo 2 > /sys/module/amdolby_vision/parameters/debug_dolby
+
+
+
+
+173678 	{gts}[S905X 2G]:GtsMediaTestCases模块有4个Fail项;概率:100%;对比:v0912新出现,p241也出现
+	--fixed
+173876 	[Ampere P]{HDR}Netflix/movieplay播放HDR源，平台自己解码输出画面黑白，自己解码或者透传给tv解码osd均黑屏显示；概率：（100%）；对比：v0918新增，trunk ok
+	--fixed
+173738 	{cts}[S905X]:android.media.cts.DecoderTest#testH264SecureDecode60fps1920x1080Tv测试Fail
+	--fixed
+173676 	{AV}:KODI上播放HDR视频后，播放所有4K H265视频，画面颜色失真 概率：50% 对比：0912 trunk和drawin P上也有此问题
+	--fixed
+172452 	{Dolby Vision}{System}平台接第三方SDR电视机，播放DV片源时使用命令cat /sys/class/amdolby_vision/dv_mode获得节点是Bypass;概率：100%；对比S912 Q201+Android N正常 
+	--fixed
+173668 	{Dolby Vision}{AV}平台播放DV to HDR和DV to SDR视频自动快进效果；概率：100%；对比对比S912 Q201+Android N正常
+	--ongoning，原生nuplayer对回环流的支持不好，已提供patch，本地确认是ok
+173350 	[烽火海外IPTV-S905X-8.0-video]：直播卡顿，dump出来的流有马赛克，本地播放流畅。要求优化网络播放卡顿，将错误帧也播放出来 
+	--ongoing，可能单个板卡硬件问题
+	
+	
+http://firmware-old.amlogic.com/shanghai/image/android/Android-P_Google_P-tv-dev//Android_TV/patchbuild/2018-09-13/atom-user-32-GTVS-1270/这个版本还是好的
+11:22:05
+袁洁 2018/9/27 11:22:05
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android_P/job/Android_P_Google_TV_DEV_PATCHBUILD/1330/这个版本的固件就fail了
+
+sys.media.omx.vr
+media.omx.display_mode
+
+P上dv的extractor部分已经可以了，但目前看dolbyvision的4.9适配还有点问题
+1) 这两个malloc有问题，没有实体，导致kernel crash
+pq_config =  vmalloc(sizeof(pq_config));
+dovi_setting = vmalloc(sizeof(dovi_setting));
+2) p_funcs->tv_control_path这个调用也有问题，没有函数指针的判断，导致PC为0 crash
+3) 不能正常播放，8.1和p都是同样的问题，tv_mode修改成1也，force_stb_mode打开能出颜色错误的图像
+4) dovi_txlx_stb_24_4.9.ko和dovi_txlx_stb_24_demo_4.9.ko都试过也不行
+http://10.18.11.97/shanghai/image/android/Android-P//Android_TV/patchbuild/2018-10-01/t962x_r311-userdebug-32-GTVS-1849/
+http://10.18.11.97/shanghai/image/android/Android-O/MR1//Android_TV/patchbuild/2018-10-01/t962x_r311-userdebug-32-GTVS-4602/
+
+
+dv不能show的patch
+http://scgit.amlogic.com:8080/#/c/51422/  wangjian
+http://scgit.amlogic.com:8080/51852
+
+
+
+Bug 173990 - {NTS}Android P test PLAY-001-TC1 Play video video caton contrast:no need 
+Bug 173121 - {NTS}Manual test,PLAY-103-TC4,Step#4,视频中火的部分视频异常，动态有阴影。probability:3/3.contrast:P212_O Normal.
+Bug 173094 - {NTS}Manual test,HDR-001-TC1,HDR-002-TC2,Step#1 Failed.Play 80174402 for 5 seconds without graphics,contrast:no need
+
+
+android.media.cts.DecoderTest#testHEVCDecode30fps3840x2160	
+android.media.cts.DecoderTest#testVP9Decode30fps3840x2160	
+android.media.cts.DecoderTest#testVP9Decode60fps3840x2160	
+android.media.cts.StreamingMediaPlayerTest#testHTTP_H264Base_AAC_Video2	
+android.media.cts.VideoDecoderPerfTest#testAvcOther0Perf0320x0240	
+android.media.cts.VideoDecoderPerfTest#testAvcOther0Perf1280x0720	
+android.media.cts.VideoDecoderPerfTest#testVp9Other0Perf0320x0180
+
+
+Try to start any automated test case(preferably HDR) in a stress of 30 times and randomly in between the stress run netflix 
+application crashes and loose connection with the monitor and never returns to Hone screen. Only way to recover is to unplug 
+HDMI cable and replug or reboot the device   
+
+10-03 14:09:31.600  2902  3098 I ActivityManager: Force stopping com.netflix.ninja appid=10065 user=0: from pid 6918   
+10-03 14:09:31.604  2902  3098 I ActivityManager: Killing 6761:com.netflix.ninja/u0a65 (adj 0): stop com.netflix.ninja   
+10-03 14:09:31.609  2902  3098 W ActivityManager: Scheduling restart of crashed service com.netflix.ninja/.NetflixService in 1000ms   
+10-03 14:09:31.610  2902  3098 W ActivityManager: Force removing ActivityRecord\{fd52f48 u0 com.netflix.ninja/.MainActivity t1819}: app died, no saved state   
+
+http://scgit.amlogic.com:8080/52340			//h265
+http://scgit.amlogic.com:8080/#/c/52437/    //ogg
+
+
+
+echo "1,1,1" > /sys/kernel/debug/video/pts_log_enable
+echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
+
+pattern 32323
+http://scgit.amlogic.com:8080/52528
+
+http://scgit.amlogic.com:8080/52548 o-openlinx-1215
+
+stet he chimera
+
+<MediaCodec name="OMX.google.raw.decoder" type="audio/raw" />        
+        <MediaCodec name="OMX.amlogic.audio.decoder.ac3" type="audio/ac3" />
+        <MediaCodec name="OMX.amlogic.audio.decoder.eac3" type="audio/eac3" />
+        <MediaCodec name="OMX.amlogic.audio.decoder.dtshd" type="audio/dtshd" />
+
+http://10.68.11.62:8800/latm/index.m3u8
+
+
+
+
+上周：
+SWPL-310 Android P from trunk0926 version, movieplayer can't playback some video of unsupported audio track Frequency: 10/10 of the times comparison: trunk0925 normal
+	---已修改amnuplayer，但目前mainline无法验证（没有打开amnuplayer，原生的nuplayer无此问题），建议降低优先级或先pengding
+173406 	{Dolby Vision}，R311 Android P平台需添加Dolby vision功能。参考Android 7.1平台。
+	---dolby相关的问题已上gerry，由于tv平台还没有release ko（目前给的stb的ko），需要Frank他们release
+SWPL-374 {NTS}Android P test PLAY-001-TC1 Play video video caton contrast:no need
+	---ongoning，初步有patch，但需要与QA对下问题
+SWPL-376 {NTS}Manual test,PLAY-103-TC4,Step#4,视频中火的部分视频异常，动态有阴影。probability:3/3.contrast:P212_O Normal.
+	---未开始，可能需转给处理HDR的同事处理
+支持netflix反馈的805x 8.0起播放卡顿问题
+支持烽火反馈的latm网络播放不识别问题
+
+echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
+echo 1,1,1 > /sys/kernel/debug/video/pts_log_enable
+
+
+从Ampere patchbuild1015-311开始.RealMagic MPEG-4 and VP8 codec 视频 Resume play后黑屏，无法播放。Ampere P patch1015-309是正常的
+	---新的代码已经没有这个问题了
+不支持音轨的视频播放黑屏，问题已经改好，未合并到mainline版本
+	---已经merge到mainline， http://scgit.amlogic.com:8080/#/c/52973/
+默认走android extractor，部分codec视频无法播放，走amlogic extractor可以播放
+	--正在添加支持，需要把对应放到amlogic extractor的白名单里，再过下media cts项
+
+	
+netflix 60fps播放
+stet
+wanderlust
+
+Bug 174217 - [Harman-T962E-CTS]：用9.0_r2包测试CtsMediaTestCases包有3项fail 概率：100%
+	---fixed
+SWPL-874 {Dolby vision}{AV}The brightness and saturation has no change when play MP4 
+	---fixed
+SWPL-518 {NTS}{manual}VIDEO-RESIZE-HDR10-TC1/TC3 (H.265)AV sync issues after playback a few minutes 
+	---audio问题，audio更新后无此问题，已转xujian
+SWPL-658{Dolby Vision}{AV}The MP4 formats combine video of dvhe.dtr of Adaptive_Streaming_Tests folders in Dolby vision certification folders can't play to the end;Frenquency
+	---目前只还有一个异常流不能播放完，不打开dv也会马赛克，先不处理
+google-atom-17789106 [Atom NTS] Test v5.1 error mismatch: Playback PLAY-258-TC1
+	---目前atom复现不了
+	
+yongbin，今天对一下问题哦，这三个，可能需要你那边配合搞下log
+SWPL-799 {NTS}Manual Run Audio-007 -TC1-NonTunnel, step 10, crash
+SWPL-842 {NTS}Test PLAY-015-TC3 Close media playback is fail
+	---目前新的睡醒没有些问题，
+SWPL-795 {NTS}EyePatch test cases: DRS-HDR10-25FPS-HEAAC-DWN and DRS-HDR10-25FPS-HEAAC-UP fail
+
+
+[  125.364907@0] type=1400 audit(1540999471.312:192): avc: denied { connectto } for pid=5314 comm="Binder:5314_1" 
+path="/dev/socket/property_service" scontext=u:r:mediaextractor:s0 tcontext=u:r:init:s0 tclass=unix_stream_socket permissive=0
+ duplicate messages suppressed
+ 
+DYNASTY
+
+
+SWPL-799{NTS}Manual Run Audio-007 -TC1-NonTunnel, step 10, crash
+SWPL-842{NTS}Test PLAY-015-TC3 Close media playback is fail
+	---fixed，这两个已无此问题
+SWPL-1151{Dolby vision certification}{AV}There are observable changes in brightness or saturation when test Negative test.
+	---reopened，目前还有一个视频有问题，可以此视频在7.1上也有问题
+Bug 171122 - [华曦达-S905X-客户反馈-NTS]:AUDIO-023-TC5-fail(100%)
+	---fixed
+
+
+
+
+--- a/arch/arm64/configs/meson64_defconfig
++++ b/arch/arm64/configs/meson64_defconfig
+@@ -11,7 +11,7 @@ CONFIG_TASK_XACCT=y
+ CONFIG_TASK_IO_ACCOUNTING=y
+ CONFIG_IKCONFIG=y
+ CONFIG_IKCONFIG_PROC=y
+-CONFIG_LOG_BUF_SHIFT=19
++CONFIG_LOG_BUF_SHIFT=23
+
+
+http://scgit.amlogic.com:8080/54480  drop
+
+http://scgit.amlogic.com:8080/#/c/54509
+
+
+
+SWPL-1145 {Dolby vision certification}{AV}It is fail when test Dolby Vision profile 4 FEL negative test.
+	---fixed
+SWPL-989 {Franklin P}{Dolby Vision}When connect to SDR TV,it will Bypass when play DoViTrailer_MP4_with_Atmos.mp4
+	---fixed
+SWPL-1126 {Dolby vision}{AV}There are some videos can't play in Dolby Vision certification test vector folder after burn ko;Frequency
+	---ongoning,目前还有两个流不能正常播放
+SWPL-1151{Dolby vision certification}{AV}There are observable changes in brightness or saturation when test Negative test.
+	---reopened，目前还有一个视频有问题
+	
+	
+开始测试前
+echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
+echo 1,1,1 > /sys/kernel/debug/video/pts_log_enable
+echo 0 > /proc/sys/kernel/printk; dmesg -c > /dev/null
+echo 3 > /sys/module/amvideo/parameters/video_dbg_vf
+
+感觉会出现卡顿前输入 dmesg -c > /dev/null
+出现卡顿后(可以包含几个卡顿)输入 dmesg > kernel.log
+
+adb push boot.img /data
+cd /data; cat /dev/block/boot > bootorg.img      //备份bootimg
+cat boot.img > /dev/block/boot && sync && reboot   //替换
+
+cat /sys/module/amvideo/parameters/underflow
+setprop media.omx.out_buffer1 6
+scp xiaoliang.wang@10.18.11.213:/mnt/fileroot/xiaoliang.wang/p-mirror/out/target/product/atom/boot.img .
+
+
+open widevin45.544 12717 12717 V CodecCapHelper:  codecName: OMX.amlogic.dolby-vision.decoder.awesome.secure                                                 
+OEMCrypto_Ge45.544 12717 12717 V CodecCapHelper:   Type: video/dolby-vision, isAdaptive: true, isSecurity: true, isTunneled: true                                                   
+open widevin45.545 12717 12717 V CodecCapHelper:    profile: 16, levels: [256]                                                                                                      
+open widevin45.546 12717 12717 V CodecCapHelper:    profile: 32, levels: [256]                                                                                                     
+OEMCrypto_Ge45.546 12717 12717 V CodecCapHelper:    profile: 64, levels: [256]                                                                                
+open widevin45.546 12717 12717 V CodecCapHelper:    profile: 128, levels: [256]                                                                                                     
+open widevin45.547 12717 12717 V CodecCapHelper:    profile: 256, levels: [256]                                                                                                     
+open widevin45.547 12717 12717 V CodecCapHelper:    profile: 512, levels: [256]                                                                                                     
+open widevin45.547 12717 12717 V CodecCapHelper:    profile: 1, levels: [256]                                                                                                       
+open widevin45.548 12717 12717 V CodecCapHelper:    profile: 2, levels: [256]                                                            
+open widevin45.548 12717 12717 V CodecCapHelper:    profile: 4, levels: [256]                                                                                                       
+open widevin45.549 12717 12717 V CodecCapHelper:    profile: 8, levels: [256]
+
+
+第二个时videopeek与这个功能冲突不，因为目前videopeek是立即显示第一帧
+Is it complict with video peek? Now video peek will render the first frame once the first frame is decoded.
+Do netflix app send any message to control the timing to render the first frame?
+
+
+11-22 02:34:18.662 15980 16057 E OmxVideoDecoder: OMX_IndexParamSupportVPeekInTunnel setParameter 1660, videopeek:1
+11-22 02:34:18.662 15980 16057 D OmxVideoDecoder: getConfig 1674 0x6f100004 
+
+11-22 02:34:18.973 15980 16126 D AmlogicVideoDecoderAwesome: media.omx.videopeek 0                                 
+11-22 02:34:18.973 15980 16126 V AmlogicVideoDecoderAwesome: mFlvFlag=0
+
+
+http://scgit.amlogic.com:8080/52528
+http://scgit.amlogic.com:8080/55892
+
+nts问题
+	SWPL-44 netflix video peek feature supprot
+		---videopeek的修改，这个等netflix的app添加vendor.nrdp.support-video-peek-in-tunnel再提交
+			netflix可能会在mediacodec的execting状态设置videopeek，bug里gerry的提交应该不需要修改的
+	SWPL-795 {NTS}EyePatch test cases: DRS-HDR10-25FPS-HEAAC-DWN and DRS-HDR10-25FPS-HEAAC-UP fail
+		---amperer nts 23fps, 29fps, 59fps应该能pass 30, 24, 25, 50,可能发生drop，16s drop一次	
+	SWPL-1955 {NTS}{Manual}PLAY-001-TC14: playback is not smooth with dancers-couple chapter
+		---atom的nts，hdmi 1.001 shift问题，原录安已经提交gerry，xiaoliang已经提供给google，google还没有验证
+	SWPL-2013{NTS}Automated case ,Video play is not smooth, such as :SEC- 990-tc1 cases
+		---u212的nts，应该就是这样的case，8.0，8.1之前也都是这样效果。
+    SWPL-2002 {NTS}Automated Test PROF-001-TC14 Step #1 Failed: Load the JavaScript Test, (Verify HDR Video Profiles - Dolby Vision - 4K) to be executed on the device and wait for completion
+		---u212的nts，能检测到dv的profile，应该是是没有使用dv的电视确认
+	SWPL-1008 {NTS}Eyepatch 60 DV /59.94 DV Lose frames 10 seconds before playback
+		---8.0的nts起播放卡顿问题，深圳yongbin只复现过一次
+	SWPL-2317 {Netflix}CLONE - [P252-S905X-8.0-Customer feedback-Video]:Play Netflix movie《22JULY》, red artifacts appears in the video(100%)
+		---小米的netflix播放问题，还没有看
+	
+dolbyviion问题
+	SWPL-1656{Dolby Vision certification}{AV}It will exit to home or display Unsupport media when play SDR MP4 source in Test_Vectors/SDR/Adaptive_Streaming_Tests of Dolby vision certification.Frequency：5/5.Comparison results:No need.
+		---原味生mpeg4extractor,过认证的话，设置setprop media.ffmpegextractor.force true，就没有此问题了
+	dolbyvision应该没有其它parse方面的问题了，7.1之前的patch 上面的加上之前的已经merge的，已经全了
+	
+error: common/: kernel/common checkout f3b2df252c86812df8af50b3fec901974cc420ad 
+error: device/amlogic/: device/amlogic-o checkout 721c9cdcf224f55323b5fe7b2b92599bf22a11de 
+error: frameworks/av/: platform/frameworks/av checkout 6e2ca64a496e125cc2c7f6c0b73941aac6d7f670 
+error: hardware/amlogic/media_modules/: platform/hardware/amlogic/media_modules checkout def3816234615d1f4814ec71148f4580fa98eb33 
+error: vendor/amlogic/common/tdk/linuxdriver/: vendor/amlogic/tdk_linuxdriver checkout 8d691592e0caf3188fb005bff81a3d69f59b3307 
+
+12-13 19:39:59.513  9398  9433 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+12-13 19:39:59.513  9398  9433 F DEBUG   : Build fingerprint: 'Amlogic/franklin/franklin:9/PI/20181214:userdebug/release-keys'
+12-13 19:39:59.513  9398  9433 F DEBUG   : Revision: '0'                                  
+12-13 19:39:59.513  9398  9433 F DEBUG   : ABI: 'arm'                                                
+12-13 19:39:59.513  9398  9433 F DEBUG   : pid: 9398, tid: 9433, name: mediaextractor  >>> media.extractor <<<
+12-13 19:39:59.514  9398  9433 F DEBUG   : signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------
+12-13 19:39:59.514  9398  9433 F DEBUG   : Abort message: 'ubsan: add-overflow'                                        
+12-13 19:39:59.514  9398  9433 F DEBUG   :     r0  00000000  r1  000024d9  r2  00000006  r3  aabe6918
+12-13 19:39:59.514  9398  9433 F DEBUG   :     r4  000024b6  r5  000024d9  r6  a6f8162c  r7  0000010c
+12-13 19:39:59.514  9398  9433 F DEBUG   :     r8  a6f81790  r9  000007d2  r10 00009910  r11 aa73d800                               
+12-13 19:39:59.514  9398  9433 F DEBUG   :     ip  a89e33da  sp  a6f81618  lr  aab750e5  pc  aab6ce72
+12-13 19:39:59.537  9398  9433 F DEBUG   :                                       
+12-13 19:39:59.537  9398  9433 F DEBUG   : backtrace:                            
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #00 pc 0001ce72  /system/lib/libc.so (abort+62)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #01 pc 00016f50  /system/lib/extractors/libmp4extractor.so (abort_with_message(char const*)+24)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #02 pc 00016fac  /system/lib/extractors/libmp4extractor.so (__ubsan_handle_add_overflow_minimal_abort+24)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #03 pc 00013857  /system/lib/extractors/libmp4extractor.so (android::MPEG4Source::fragmentedRead(android::MediaBufferBase**, android::MediaTrack::ReadOptions c
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #04 pc 000120af  /system/lib/extractors/libmp4extractor.so (android::MPEG4Source::read(android::MediaBufferBase**, android::MediaTrack::ReadOptions const*)+98)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #05 pc 0003acbb  /system/lib/libmedia.so (android::BnMediaSource::onTransact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+570)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #06 pc 000361cf  /system/lib/libbinder.so (android::BBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+70)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #07 pc 0003da17  /system/lib/libbinder.so (android::IPCThreadState::executeCommand(int)+410)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #08 pc 0003d7a3  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+106)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #09 pc 0003dccb  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+38)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #10 pc 000546fd  /system/lib/libbinder.so (android::PoolThread::threadLoop()+12)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #11 pc 0000c147  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+166)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #12 pc 00063c15  /system/lib/libc.so (__pthread_start(void*)+22)
+12-13 19:39:59.537  9398  9433 F DEBUG   :     #13 pc 0001e065  /system/lib/libc.so (__start_thread+22)
+
+20181217
+SWPL-1656 {Dolby Vision certification}{AV}It will exit to home or display Unsupport media when play SDR MP4 source in Test_Vectors/SDR/Adaptive_Streaming_Tests of Dolby vision certification.Frequency：5/5.Comparison results:No need
+	---fixed，原生mp4extractor的问题，32拉数越引起的crash，待QA验证
+SWPL-1174 {Dolby vision certification}{AV}The screen is frozen when play the source in Longevity_Tests/ folder;Frequency：3/3;Comparison results:No need
+	---ongoing，煲机问题，QA复现中
+SWPL-1285 {Dolby vision certification}{AV}The TV display black Screen when play "Okja" with netflix after set Dolby vision Enable.Frequency：3/3.Comparison results:Dolby vision Disable is OK
+	---core的问题，与zhouyi商量，转过去处理
+	
+4353485 12-14 14:30:56.543  3151  3423 D BufferLayer: AML_VIDEO_OVERLAY come in, vaddr: 0xec390000
+4353486 12-14 14:30:56.544  3310  6306 D OmxComponent: fillThisBuffer pBufferHdr 0xec797aa0 nAllocLen 12441600 nFilledLen 0
+4353487 12-14 14:30:56.544  3310  6306 D AmlogicVideoDecoderAwesome: fillThisBuffer
+4353488 12-14 14:30:56.545  3151  3201 D BufferLayer: AML_VIDEO_OVERLAY come in, vaddr: 0xec372000
+4353489 12-14 14:30:56.550  3310 21028 D AmlogicVideoDecoderAwesome: In PTS 123790333,  nFilledLen=83250, bufferHdr.pBuffer=e85ae000
+4353490 12-14 14:30:56.550  3310 21028 D AmlogicVideoDecoderAwesome: input emptebufferdone p
+
+echo 0x4000000 > /sys/module/amvideo/parameters/debug_flag
+
+
+SWPL-3099 {Dolby Certification}Local playback,AVsync test failed.The latency is about +200ms+,audio is slower.3/3,T962/T962X exists
+	---fixed
+SWPL-2109 {Franklin P Dolby vision certification}It will frozen when play the source in HDR10/Adaptive_Streaming_Tests/TS/Combined and SDR/Adaptive_Streaming_Tests/HEVC/TS/Combined and AVC/MP4/Combined：3/3.Comparison results:T962E is normal.
+	---fixed
+SWPL-2101 {Franklin P Dolby vision certification}{AV}It will keep low resolution playback when play the source in /Test_Vectors/SDR/Adaptive_Streaming_Tests/AVC/23976/TS/combined.Frequency：5/5.Comparison results:T962E Android P is normal.
+	---fixed
+SWPL-1656 {Dolby Vision certification}{AV}It will exit to home or display Unsupport media when play SDR MP4 source in Test_Vectors/SDR/Adaptive_Streaming_Tests of Dolby vision certification.Frequency：5/5.Comparison results:No need.
+	---fixed
+SWPL-2508 {T962E Dolby vision certification}{AV}combined_ves_graffiti_50_hdr10__dvh1_st can't play.The other can be played normal source will black screen after play it.mp4.Frequency：5/5.Comparison results:Franklin P doesn't have this issue.
+	---ongoing
+SWPL-1174 {Dolby vision certification}{AV}The screen is frozen when play the source in Longevity_Tests/ folder;Frequency：3/3;Comparison results:No need
+	---ongoing，使用辉哥提供的patch，t962e煲机2次，u212煲机1次没有复现，准备u212再煲机一次
+	
+
+绿屏
+[0xff6388cc]=0x2aa0aaaa DMC_VPU_SEC_WRITE_CTRL
+[0xff6388c8]=0x6aaabaa5 DMC_VPU_SEC_READ_CTRL
+非绿屏
+[0xff6388cc]=0x55555555 DMC_VPU_SEC_WRITE_CTRL
+[0xff6388c8]=0xffffffff DMC_VPU_SEC_READ_CTRL
+
+undefine dv profiel hevc 第二个
+mov_read_dvcc:-438259320                                                       1                                                                          
+,3g2,mj2 @ 0xe5e50000] profile error:127
+
+mp42isomdby1 mp42isomdby1
+
+
+Line 925: 12-28 21:52:01.727  9617 11094 D AmlogicVideoDecoderAwesome:   		  0# Out PTS: 0..vf.fd=0, mOutBufferNo=0, frame_num=0
+Line 1167: 12-28 21:52:01.835  9617 11094 D AmlogicVideoDecoderAwesome:   		  0# Out PTS: 41708..vf.fd=0, mOutBufferNo=1, frame_num=1
+	
+Line 3960: 12-28 21:52:05.762  9617 11094 D AmlogicVideoDecoderAwesome:   		  0# Out PTS: 31281281..vf.fd=0, mOutBufferNo=91, frame_num=0
+Line 4057: 12-28 21:52:05.874  9617 11094 D AmlogicVideoDecoderAwesome:   		  0# Out PTS: 31322989..vf.fd=0, mOutBufferNo=92, frame_num=1
+
+echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
+echo 0x0f > /sys/module/amvideo/parameters/video_dbg_vf
+echo 1,1,1 > /sys/kernel/debug/video/pts_log_enable
+
+echo 0 > /sys/module/amvdec_h265/parameters/fast_output_enable
+
+while true;  do cat /sys/kernel/debug/vdec_profile/event; done &
+
+
+sed -n 's/.*CONSUME timestampNs \(.*\), nowUs.*/\1/p' 20190116_12-50-42_9.log> 20190116_12-50-42_9-rendertime.log
+sed -n 's/.*nowUs \(.*\), delta.*, delta_media.*/\1/p' 20190116_12-50-42_9.log > 20190116_12-50-42_9-rendernow.log
+sed -n 's/.*mediatimeus:\(.*\),.*, render.*/\1/p' 20190116_12-50-42_9.log > 20190116_12-50-42_9-rendderpts.log
+sed -n 's/.*mediatimeus:.*,\(.*\), render.*/\1/p' 20190116_12-50-42_9.log > 20190116_12-50-42_9-renderkpts.log
+grep -rnI "Out PTS" 20190116_12-50-42_9.log > 20190116_12-50-42_9-omxoutpts.log
+sed -n 's/.*mediatimeus:.*, render=\(.*\)/\1/p' 20190116_12-50-42_9.log >  20190116_12-50-42_9-render-render.log
+
+sed -n 's/\[\(.*\)\].*set_omx_pts.*/\1/p' 20190116_12-50-42_9-kernel.log > 20190116_12-50-42_9-kernel-time.log
+sed -n 's/.*tmp_pts:\(.*\), set_from_hw.*/\1/p' 20190116_12-50-42_9-kernel.log > 20190116_12-50-42_9-kernel-kernel-pts.log
+
+sed -n 's/.*\[\(.*\)\] vpts.*/\1/p' 20190116_12-50-42_9-kernel.log  > 20190116_12-50-42_9-kernel-display-time.log
+sed -n 's/.*pts=\(.*\) scr.*/\1/p' 20190116_12-50-42_9-kernel.log  > 20190116_12-50-42_9-kernel-display-pts.log
+sed -n 's/.*ptstrace=\(.*\)/\1/p' 20190116_12-50-42_9-kernel.log  > 20190116_12-50-42_9-kernel-display-ptstrace.log
+
+After first frame rended, system time(pcr) is changed to "current_vpts-VIDEO_HOLD_THRESHOLD" and trigged to continue increass even though audio have not started.
+In this case, after first frame rended, and if video input buffer is enough and new frame is decoded after "VIDEO_HOLD_THRESHOLD" seconds, video
+will be rended through comparing system time and video pts, not wait audio to sync. Then when audio started, it will resync again.
+All is lead by system time(pcr) is changed by first frame rended, not by audio start.
+
+Now for video peek in tunnel mode, after first frame peeked, we will not change systime time and not enable to increass system time(pcr) until audio start.
+That is video will wait for audio for to sync after first frame.
+
+
+echo 1 > /sys/module/decoder_common/parameters/dec_time_stat_reset
+
+echo 1 > /sys/module/decoder_common/parameters/dec_time_stat_flag
+sleep 1s
+cat /sys/kernel/debug/vdec_profile/time_stat
+
+media.audio.hal.debug
+
+播放前输入
+echo 0 > /proc/sys/kernel/printk
+echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
+echo 0x0f > /sys/module/amvideo/parameters/video_dbg_vf
+echo 1,1,1 > /sys/kernel/debug/video/pts_log_enable
+
+出现卡顿前输入
+dmesg -c > /dev/null
+出现卡顿后输入
+dmesg > kernel-1.log
+
+出现卡顿前输入
+dmesg -c > /dev/null
+出现卡顿后输入
+dmesg > kerne-2.log
+
+
+Please set "setprop media.omx.dw 4" and to confirm the follow stream problem
+[8KH265_Main 10@L6.2@Main_7680x4320_30fps_36Mbps_8bit_AAC2ch]video_ultrahd_demo_video_for_8k_oled_tv-IRSVsCBtgnk.ts
+"0:00:00-0:00:11，0:00:50-0:01:10" not smooth
+code: http://jenkins-sh.amlogic.com:8080/job/android/job/Android_P/job/Android_P_Mainline_PATCHBUILD2/2216/
+
+
+youtobe
+macro flowers
+
+SWPL-3695 [Ampere P]{Netflix}during play h265 video random picture obviously not smooth；（5/5times）;contrast:no 
+	---fixed
+SWPL-3377 {A/V} X301 P Playing 8K VP9/H265, The first second screen after the broadcast or seek will not be smooth Probability: 10/10 of the times comparison: No need to compare 
+	---fixed
+SWPL-3520 {A/V} X301 P The video is not smooth when playing port of 8K H265 below 30fps Probability: 10/10 of the times comparison: No need to compare 	
+	---ongoing，还有一个30fps的8k视频QA反馈有不流畅，但实际toggle显示是ok的
+SWPL-2002 {NTS}Automated Test PROF-001-TC14 Step #1 Failed: Load the JavaScript Test, (Verify HDR Video Profiles - Dolby Vision - 4K) to be executed on the device and wait for completion. 
+	---ongoing，转liushen处理
+SWPL-3591 {A/V} X301 P playing "Samsung.HDR.4K.DEMO_Chasing.the.Light.ts", Probabilistic caron once after seek Probability: 7/10 of the times comparison: Einstein P is normal 
+	---ongoing,准备看
+SWPL-3631 [Ampere P]during play youtube video,use bt voice many times pitcture stop audio output normal；（3times/1day）;contrast:no
+	---ongoing，上周四没有复现，需要再煲机
+	
+11110058 01-26 19:28:19.097 I/NU-LiveSession( 3009): bandwidth estimated at 444.17 kbps, stable 0, shortTermBps 80.59 kbps
+11110059 01-26 19:28:19.097 I/NU-LiveSession( 3009): changeConfiguration: timeUs=-1 us, bwIndex=0, pickTrack=0
+11110060 01-26 19:28:19.097 I/NU-LiveSession( 3009): #### Starting Bandwidth Switch: 1 => 0
+11110061 01-26 19:28:19.097 I/NU-LiveSession( 3009): pausing fetcher-1, threshold=0.00
+11110077 01-26 19:28:19.898 I/NU-LiveSession( 3009): Switch/Reconfig in progress, defer buffer polling
+11110099 01-26 19:28:20.006 I/NU-LiveSession( 3009): [fetcher-0] startAsync: startTimeUs 95606606333 mLastSeekTimeUs 0 segmentStartTimeUs 42504811 seekMode 1
+guessed wrong seg number: diff -95426077689 out of [-6000000, 0]
+bytesRead 48128 took 12.51 seconds - abnormal bandwidth dip
+
+
+
+
 
