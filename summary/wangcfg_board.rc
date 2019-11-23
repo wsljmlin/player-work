@@ -1,6 +1,6 @@
 #!/bin/sh
 
-tftpserverip=10.68.13.158
+tftpserverip=10.68.13.63
 #10.68.8.202
 ##
 ##get file from windowns
@@ -148,8 +148,10 @@ function dumpvdec() {
 ### main start
 ###
 curdatestr=`date +%Y%m%d`
-fpcnt=0
-export fpcnt
+logcatfpcnt=0
+kfpcnt=0
+export logcatfpcnt
+export kfpcnt
 
 alias procm='procrank | grep "me"'
 alias wplay='echo "am start -n com.android.gallery3d/.app.MovieActivity -d" && am start -n com.android.gallery3d/.app.MovieActivity -d'
@@ -222,11 +224,19 @@ alias dibypassstat='cat /sys/module/di/parameters/bypass_state'
 alias ntsstart='echo "am start -n com.netflix.ninja/com.netflix.ninja.MainActivity" && am start -n com.netflix.ninja/com.netflix.ninja.MainActivity'
 alias killnts='echo "killall com.netflix.ninja" && killall com.netflix.ninja'
 alias skipgg='pm disable com.google.android.tungsten.setupwraith;settings put secure user_setup_complete 1;settings put secure tv_user_setup_complete 1;settings put global device_provisioned 1'
-alias logf='((fpcnt=$fpcnt+1)); logcat -c; logcat > `date +%Y%m%d_%H-%M-%S`_${fpcnt}.log'
-alias dmsgclr='echo "dmesg -c > /dev/null" && dmesg -c > /dev/null'
+alias logf='((logcatfpcnt=$logcatfpcnt+1)); logcat -c; logcat > `date +%Y%m%d_%H-%M-%S`_logcat_${logcatfpcnt}.log'
+alias klogf='((kfpcnt=$kfpcnt+1)); dmesg > `date +%Y%m%d_%H-%M-%S`_k_${kfpcnt}.log'
+alias kdclr='echo "dmesg -c > /dev/null" && dmesg -c > /dev/null'
 alias bakboot='dd if=/dev/block/boot of=bootorg.img'
 alias remoteoff='echo "echo 0x02 > /sys/class/remote/amremote/protocol" && echo 0x02 > /sys/class/remote/amremote/protocol'
+alias remoteon='echo "echo 0x01 > /sys/class/remote/amremote/protocol" && echo 0x01 > /sys/class/remote/amremote/protocol'
+alias ffdemuxon='echo "setprop media.ffmpegextractor.force true" && setprop media.ffmpegextractor.force true'
+alias ffdemuxoff='setprop media.ffmpegextractor.force ""'
+alias resetlogcnt='kfpcnt=0;logcatfpcnt=0'
+alias underflow='echo "cat /sys/module/amvideo/parameters/underflow" && cat /sys/module/amvideo/parameters/underflow'
+alias mytrace='echo 1 > /sys/kernel/debug/tracing/events/meson_atrace/enable;atrace -z -b 40000 sched irq freq idle video binder_driver ss  -t 20 -a \"*\"  -o /data/local/tmp/trace_`date +%Y%m%d_%H-%M-%S`'
 
+mount -o remount,rw -t ext4 /dev/root /
 mount -o rw,remount /dev/block/system  /system
 mount -o remount,rw /vendor
 #pm disable com.android.bluetooth

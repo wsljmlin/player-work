@@ -97,6 +97,7 @@ echo 1 > /sys/class/graphics/fb0/blank
 dumpsys SurfaceFlinger --latency-clear， dumpsys SurfaceFlinger --latency
 dumpsys SurfaceFlinger --latency-clear
 dumpsys SurfaceFlinger --latency "org.xbmc.kodi/org.xbmc.kodi.Main#0"
+dumpsys SurfaceFlinger --latency " com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity#0"
 
 chmod 644 /sys/module/mali/parameters/mali_l2_max_reads
 echo 4 > /sys/module/mali/parameters/mali_l2_max_reads
@@ -234,68 +235,6 @@ p212:/data/test/20180122 # cat /sys/class/vfm/map
 [  321.950525@3] W Timeout, but fetch ok,[  321.950574@1] type 4 len=72,wpdiff=-72, isphy 0
 [  322.562818@2] W Timeout, but fetch ok,[  322.562928@2] type 4 len=72,wpdiff=-72, isphy 0
 
-	vmh264.c
-	run
-	vh264_work
-	config_buf_specs
-	vh264_isr_thread_fn
-	vh264_init
-	vh264_stop
-	ammvdec_h264_probe
-	hevc_alloc_mmu
-	hevc_mcr_config_canv2axitbl
-	hevc_mcr_config_mc_ref
-	hevc_mcr_config_mcrcc
-	hevc_mcr_sao_global_hw_init
-	hevc_sao_set_pic_buffer
-	hevc_set_unused_4k_buff_idx
-	config_decode_canvas
-	hevc_set_frame_done
-	hevc_sao_wait_done
-	vh264_set_params
-	vui_config
-	check_decoded_pic_error
-	check_timer_func
-	set_aux_data
-	config_decode_mode
-	config_decode_buf
-	config_aux_buf
-	alloc_one_buf_spec
-	vh264_isr
-	
-	vdec.c
-	vdec_sync_input_read
-	vdec_sync_input_write
-	vdec_init
-	vdec_ready_to_run
-	vdec_poweron
-	vdec_poweroff
-	amrisc_regs_show
-	vdec_prepare_input
-	vdec_enable_input
-	vdec_has_more_input
-	vdec_save_input_context
-	vdec_sync_input
-	
-	codec mem info:
-        total codec mem size:120 MB
-        alloced size= 90 MB
-        max alloced: 91 MB
-        CMA:90,RES:0,TVP:0,SYS:0 MB
-        [4]CMA size:120 MB:alloced: 90 MB,free:29 MB
-        [224].0:ammvdec_h264.65,addr=000000002c400000,size=2097152,from=4,cnt=1,flags=69633,used:243 ms
-        [228].0:ammvdec_h264.0,addr=000000002c780000,size=3133440,from=4,cnt=1,flags=69633,used:232 ms
-        [229].0:ammvdec_h264.64,addr=000000002ca80000,size=4702208,from=4,cnt=1,flags=69633,used:230 ms
-        [230].0:ammvdec_h264.1,addr=000000002cf00000,size=3133440,from=4,cnt=1,flags=69633,used:230 ms
-        [231].0:ammvdec_h264.2,addr=000000002d200000,size=3133440,from=4,cnt=1,flags=69633,use[ 
-		[232].0:ammvdec_h264.[   95.621008@0] DI buf[10] page:0xffffffbf00fd7880 no release.
-		[233].0:ammvdec_h264.4,addr=000000002d800000,size=3133440,from=4,cnt=1,flags=69633,used:229 ms
-        [234].0:ammvdec_h264.5,addr=000000002db00000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
-        [235].0:ammvdec_h264.6,addr=000000002de00000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
-        [236].0:ammvdec_h264.7,addr=000000002e100000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
-        [237].0:ammvdec_h264.8,addr=000000002e400000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
-        [238].0:ammvdec_h264.9,addr=000000002e700000,size=3133440,from=4,cnt=1,flags=69633,used:228 ms
-        [239].0:ammvdec_h264.10,addr=000000002ea00000,size=3133440,from=4,cnt=1,flags=69633,used:227 ms
 		
 2.codcec_mm内存确认，通过以下两种方法确认内存，应该可以排除内存问题
 1）通过在ammvdec_h264_prober结尾处调用dump_mem_infos查看code_mm内存
@@ -717,7 +656,7 @@ To ssh://shuanglong.wang@scgit.amlogic.com:29418/av-restricted/platform/hardware
 
 
  
- ommit 4e8e78b6478f86a19a4d293051decbca7711f7f2
+ commit 4e8e78b6478f86a19a4d293051decbca7711f7f2
 Author: qi.yuan <qi.yuan@amlogic.com>
 Date:   Thu Feb 8 21:35:52 2018 +0800
 
@@ -1072,6 +1011,8 @@ echo 3 > /sys/module/amvideo/parameters/video_dbg_vf
 while true;do echo dump decoder > /sys/class/vfm/map; echo dump amlvideo > /sys/class/vfm/map; sleep 0.5;done &
 
 setprop   debug.stagefright.omx-debug 5
+
+while true;do dumpsys meminfo; sleep 1;done &
 
 
 setprop media.omx.log_levels 255
@@ -1693,6 +1634,7 @@ Wetek NTS测试DRS-001-TC4画面顿一下的问题
 	
 am start -n com.android.gallery3d/.app.MovieActivity -d http://10.68.11.62:8800/dts-express/index.m3u8
 am start -n com.android.gallery3d/.app.MovieActivity -d http://10.68.11.62:8800/dump/index.m3u8
+am start -n com.android.gallery3d/.app.MovieActivity -d file:///storage/2940-157B/mi-tv-play/
 
 
 抓audio数据
@@ -1881,7 +1823,8 @@ SEC-978-TC20 not ok，需要4k，应该是上不4k的原因，黑屏
 SEC-978-TC15 pass
 SEC-924-TC1  pass
 
-am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80117716?source=99'
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80996905?source=99'
+
 
 audio fd leak
 http://scgit.amlogic.com:8080/#/c/50602/
@@ -2220,40 +2163,7 @@ dolbyviion问题
 	SWPL-1656{Dolby Vision certification}{AV}It will exit to home or display Unsupport media when play SDR MP4 source in Test_Vectors/SDR/Adaptive_Streaming_Tests of Dolby vision certification.Frequency：5/5.Comparison results:No need.
 		---原味生mpeg4extractor,过认证的话，设置setprop media.ffmpegextractor.force true，就没有此问题了
 	dolbyvision应该没有其它parse方面的问题了，7.1之前的patch 上面的加上之前的已经merge的，已经全了
-	
-error: common/: kernel/common checkout f3b2df252c86812df8af50b3fec901974cc420ad 
-error: device/amlogic/: device/amlogic-o checkout 721c9cdcf224f55323b5fe7b2b92599bf22a11de 
-error: frameworks/av/: platform/frameworks/av checkout 6e2ca64a496e125cc2c7f6c0b73941aac6d7f670 
-error: hardware/amlogic/media_modules/: platform/hardware/amlogic/media_modules checkout def3816234615d1f4814ec71148f4580fa98eb33 
-error: vendor/amlogic/common/tdk/linuxdriver/: vendor/amlogic/tdk_linuxdriver checkout 8d691592e0caf3188fb005bff81a3d69f59b3307 
 
-12-13 19:39:59.513  9398  9433 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
-12-13 19:39:59.513  9398  9433 F DEBUG   : Build fingerprint: 'Amlogic/franklin/franklin:9/PI/20181214:userdebug/release-keys'
-12-13 19:39:59.513  9398  9433 F DEBUG   : Revision: '0'                                  
-12-13 19:39:59.513  9398  9433 F DEBUG   : ABI: 'arm'                                                
-12-13 19:39:59.513  9398  9433 F DEBUG   : pid: 9398, tid: 9433, name: mediaextractor  >>> media.extractor <<<
-12-13 19:39:59.514  9398  9433 F DEBUG   : signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------
-12-13 19:39:59.514  9398  9433 F DEBUG   : Abort message: 'ubsan: add-overflow'                                        
-12-13 19:39:59.514  9398  9433 F DEBUG   :     r0  00000000  r1  000024d9  r2  00000006  r3  aabe6918
-12-13 19:39:59.514  9398  9433 F DEBUG   :     r4  000024b6  r5  000024d9  r6  a6f8162c  r7  0000010c
-12-13 19:39:59.514  9398  9433 F DEBUG   :     r8  a6f81790  r9  000007d2  r10 00009910  r11 aa73d800                               
-12-13 19:39:59.514  9398  9433 F DEBUG   :     ip  a89e33da  sp  a6f81618  lr  aab750e5  pc  aab6ce72
-12-13 19:39:59.537  9398  9433 F DEBUG   :                                       
-12-13 19:39:59.537  9398  9433 F DEBUG   : backtrace:                            
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #00 pc 0001ce72  /system/lib/libc.so (abort+62)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #01 pc 00016f50  /system/lib/extractors/libmp4extractor.so (abort_with_message(char const*)+24)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #02 pc 00016fac  /system/lib/extractors/libmp4extractor.so (__ubsan_handle_add_overflow_minimal_abort+24)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #03 pc 00013857  /system/lib/extractors/libmp4extractor.so (android::MPEG4Source::fragmentedRead(android::MediaBufferBase**, android::MediaTrack::ReadOptions c
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #04 pc 000120af  /system/lib/extractors/libmp4extractor.so (android::MPEG4Source::read(android::MediaBufferBase**, android::MediaTrack::ReadOptions const*)+98)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #05 pc 0003acbb  /system/lib/libmedia.so (android::BnMediaSource::onTransact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+570)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #06 pc 000361cf  /system/lib/libbinder.so (android::BBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+70)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #07 pc 0003da17  /system/lib/libbinder.so (android::IPCThreadState::executeCommand(int)+410)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #08 pc 0003d7a3  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+106)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #09 pc 0003dccb  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+38)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #10 pc 000546fd  /system/lib/libbinder.so (android::PoolThread::threadLoop()+12)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #11 pc 0000c147  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+166)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #12 pc 00063c15  /system/lib/libc.so (__pthread_start(void*)+22)
-12-13 19:39:59.537  9398  9433 F DEBUG   :     #13 pc 0001e065  /system/lib/libc.so (__start_thread+22)
 
 20181217
 SWPL-1656 {Dolby Vision certification}{AV}It will exit to home or display Unsupport media when play SDR MP4 source in Test_Vectors/SDR/Adaptive_Streaming_Tests of Dolby vision certification.Frequency：5/5.Comparison results:No need
@@ -2311,24 +2221,34 @@ echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
 echo 0x0f > /sys/module/amvideo/parameters/video_dbg_vf
 echo 1,1,1 > /sys/kernel/debug/video/pts_log_enable
 
+1）如果只想看是否有drop的话，设置下面的节点，直接看kernel的log就可以了
+echo 1,1,1 > /sys/kernel/debug/video/pts_log_enable
+2）如果想看drop的具体情况，开始前输入
+echo 0 > /proc/sys/kernel/printk 
+dmesg -c > /dev/null
+echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
+结束时使用dmesg > kernel.log保存即可
+如果播放的时间比较长的话，还要打上这个patch，http://scgit.amlogic.com:8080/#/c/55892/
+
 echo 0 > /sys/module/amvdec_h265/parameters/fast_output_enable
 
 while true;  do cat /sys/kernel/debug/vdec_profile/event; done &
 
 
-sed -n 's/.*CONSUME timestampNs \(.*\), nowUs.*/\1/p' 20190116_12-50-42_9.log> 20190116_12-50-42_9-rendertime.log
-sed -n 's/.*nowUs \(.*\), delta.*, delta_media.*/\1/p' 20190116_12-50-42_9.log > 20190116_12-50-42_9-rendernow.log
-sed -n 's/.*mediatimeus:\(.*\),.*, render.*/\1/p' 20190116_12-50-42_9.log > 20190116_12-50-42_9-rendderpts.log
-sed -n 's/.*mediatimeus:.*,\(.*\), render.*/\1/p' 20190116_12-50-42_9.log > 20190116_12-50-42_9-renderkpts.log
-grep -rnI "Out PTS" 20190116_12-50-42_9.log > 20190116_12-50-42_9-omxoutpts.log
-sed -n 's/.*mediatimeus:.*, render=\(.*\)/\1/p' 20190116_12-50-42_9.log >  20190116_12-50-42_9-render-render.log
+sed -n 's/.*CONSUME timestampNs \(.*\), nowUs.*/\1/p' 20190214_02-15-54_logcat_15.log > 20190214_02-15-54_logcat_15-rendertime.log
+sed -n 's/.*nowUs \(.*\), delta.*, delta_media.*/\1/p' 20190214_02-15-54_logcat_15.log > 20190214_02-15-54_logcat_15-rendernow.log
+sed -n 's/.*mediatimeus:\(.*\),.*, render.*/\1/p' 20190214_02-15-54_logcat_15.log > 20190214_02-15-54_logcat_15-rendderpts.log
+sed -n 's/.*mediatimeus:.*,\(.*\), render.*/\1/p' 20190214_02-15-54_logcat_15.log > 20190214_02-15-54_logcat_15-renderkpts.log
+grep -rnI "Out PTS" 20190214_02-15-54_logcat_15.log > 20190214_02-15-54_logcat_15-omxoutpts.log
+sed -n 's/.*mediatimeus:.*, render=\(.*\)/\1/p' 20190214_02-15-54_logcat_15.log >  20190214_02-15-54_logcat_15-render.log
 
-sed -n 's/\[\(.*\)\].*set_omx_pts.*/\1/p' 20190116_12-50-42_9-kernel.log > 20190116_12-50-42_9-kernel-time.log
-sed -n 's/.*tmp_pts:\(.*\), set_from_hw.*/\1/p' 20190116_12-50-42_9-kernel.log > 20190116_12-50-42_9-kernel-kernel-pts.log
+sed -n 's/\[\(.*\)\].*set_omx_pts.*/\1/p'  k_15 >  k_15-kernel-setomx-time.log
+sed -n 's/.*tmp_pts:\(.*\), set_from_hw.*/\1/p'  k_15 >  k_15-kernel-pts.log
 
-sed -n 's/.*\[\(.*\)\] vpts.*/\1/p' 20190116_12-50-42_9-kernel.log  > 20190116_12-50-42_9-kernel-display-time.log
-sed -n 's/.*pts=\(.*\) scr.*/\1/p' 20190116_12-50-42_9-kernel.log  > 20190116_12-50-42_9-kernel-display-pts.log
-sed -n 's/.*ptstrace=\(.*\)/\1/p' 20190116_12-50-42_9-kernel.log  > 20190116_12-50-42_9-kernel-display-ptstrace.log
+sed -n 's/.*\[\(.*\)\] vpts.*/\1/p' k_14  > k_14-display-time.log
+sed -n 's/.*pts=0x\(.*\), scr.*/\1/p' 5-kernel.log  > 5-kernel.log-display-pts.log
+awk '{print strtonum("0x"$0)}' 5-kernel.log-display-pts.log > 5-kernel.log-display-pts.log-10.log
+sed -n 's/.*ptstrace=\(.*\)/\1/p' k_14  > k_14-display-ptstrace.log
 
 After first frame rended, system time(pcr) is changed to "current_vpts-VIDEO_HOLD_THRESHOLD" and trigged to continue increass even though audio have not started.
 In this case, after first frame rended, and if video input buffer is enough and new frame is decoded after "VIDEO_HOLD_THRESHOLD" seconds, video
@@ -2347,16 +2267,16 @@ cat /sys/kernel/debug/vdec_profile/time_stat
 
 media.audio.hal.debug
 
-播放前输入
+测试前输入
+setprop media.omx.log_levels 255
 echo 0 > /proc/sys/kernel/printk
 echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
-echo 0x0f > /sys/module/amvideo/parameters/video_dbg_vf
 echo 1,1,1 > /sys/kernel/debug/video/pts_log_enable
+echo 0x0f > /sys/module/amvideo/parameters/video_dbg_vf
+logcat > kadun.log &
 
-出现卡顿前输入
-dmesg -c > /dev/null
-出现卡顿后输入
-dmesg > kernel-1.log
+出现卡顿后，保存kernel log
+dmesg > kernel.log
 
 出现卡顿前输入
 dmesg -c > /dev/null
@@ -2394,6 +2314,1107 @@ SWPL-3631 [Ampere P]during play youtube video,use bt voice many times pitcture s
 11110099 01-26 19:28:20.006 I/NU-LiveSession( 3009): [fetcher-0] startAsync: startTimeUs 95606606333 mLastSeekTimeUs 0 segmentStartTimeUs 42504811 seekMode 1
 guessed wrong seg number: diff -95426077689 out of [-6000000, 0]
 bytesRead 48128 took 12.51 seconds - abnormal bandwidth dip
+
+mnt/fileroot/shuanglong.wang/p-amlogic-mainline/frameworks/base
+core/java/android/webkit/URLUtil.java:30:public final class URLUtil {
+
+
+dd if=es_aml_secure.h264 skip=40960 of=seek25M.h264
+
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80015468?source=99'
+
+
+while true; do  cat /sys/class/codec_mm/codec_mm_dump;free; dumpsys meminfo; done &
+
+
+adb shell setprop libc.debug.malloc.program app_process
+adb shell setprop libc.debug.malloc.options backtrace
+看内存踩踏
+1. 用usrdebug版本：setprop libc.debug.malloc.options "backtrace guard"
+2. setprop libc.debug.malloc.program com.google.android.youtube.tv
+3. kill掉mediaserver进程
+
+am start -a com.google.android.exoplayer.demo.action.VIEW -d file:///storage/2940-157B/swpl-3591/Samsung.HDR.4K.DEMO_Chasing.the.Light.ts
+
+am start -a com.google.android.exoplayer.demo.action.VIEW -d http://10.68.11.62:8800/4kvp9/%5b4KVP9_60fps_25.7Mbps_8bit%5dbbb_sunflower_2160p_60fps_normal.webm
+
+
+nts trace patch
+	http://scgit.amlogic.com:8080/#/c/61397/
+	http://scgit.amlogic.com:8080/#/c/61398/
+
+nts debug kernel
+	http://scgit.amlogic.com:8080/#/c/55892
+	http://scgit.amlogic.com:8080/#/c/62934
+	http://scgit.amlogic.com:8080/63020
+	
+	trace:
+	http://scgit.amlogic.com:8080/63070
+	http://scgit.amlogic.com:8080/#/c/63095
+
+打trace的版本
+http://10.18.11.97/shanghai/image/android/Android-P//Android_TV/patchbuild/2019-03-13/franklin-userdebug-android32-kernel64-GTVS-3238/
+加log的的版本
+http://10.18.11.97/shanghai/image/android/Android-P//Android_TV/patchbuild/2019-03-13/franklin-userdebug-android32-kernel64-GTVS-3228/  + libstagefright.so
+
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android_P/job/Android_P_Mainline_PATCHBUILD2/3245/
+
+
+/vendor/build.prop 文件，把 vendor.media.sync.limit=1，这个先注释掉，重启下压测试试
+
+这个是注释掉的原因
+https://partnertools.nrd.netflix.com/nts/#testhistory?markerSetId=136803517
+
+
+sed -n 's/.*\[\(.*\)\].*set_omx_pts.*/\1/p' setomxpts.log > setomxpts-kernel-time.log
+sed -n 's/.*tmp_pts:\(.*\), set_from_hw.*/\1/p' setomxpts.log > setomxpts-kernel-pts.log
+
+
+sed -n 's/.*\[\(.*\)\] vpts.*/\1/p' 0507-k_15.log  > 0507-k_15-display-time.log
+sed -n 's/.*pts=0x\(.*\), scr.*/\1/p' k_0  > k_0-display-pts.log
+awk '{print strtonum("0x"$0)}' k_0-display-pts.log > k_0-display-pts.10.log
+sed -n 's/.*ptstrace=\(.*\)/\1/p' 0507-k_15.log  > 0507-k_15-display-ptstrace.log
+
+
+1.  reset, 关掉selinux
+2. 保存kernel log, dmesg > /data/kernel.log
+3. setprop media.omx.log_levels 255 ; logcat > /data/logcat.log &
+4.开始测试，观察下pcr，while do cat /sys/class/tsync/pts_pcrscr; sleep 0.5; done
+
+
+echo 3 > /sys/module/vfm/parameters/vfm_debug_flag
+
+
+
+media.omx.videopeek
+/sys/module/amvdec_h265/parameters/force_bypass_dvenl
+
+
+file:///D:/work/prox.pac
+http://it-wiki.amlogic.com/IT_knowledge/How_to_setup_proxy
+
+
+mount -o remount,rw -t ext4 /dev/root /
+mount -w -o remount /dev/block/system /system
+mount -o remount,rw /vendor
+ 
+ 整包编译
+1) source build/envsetup.sh
+2) lunch r33a8-userdebug
+3) make otapackage -j8
+
+
+
+1. TV-4097 [MIUI][R31AD][T960X][9.0][video][NTS_other]SingIn Netflix,video preview playback error
+--播放一会就停止，ott是直接不播放，需要确认下是否合理
+2. TV-4017 [R31AD][T960X][9.0][NTS]: In Case Play-253-TC5，the time of FF/FB more than 250ms. 
+---resume的慢，从log上看解码的不慢，像是app同步的有点慢，需要进一步确认
+3. TV-4011 [MIUI][R31AD][T960X][9.0][NTS]Run Peanut test，video is not smooth after overnight test
+--煲机问题，需要现场和log分析
+4. TV-3778 [MIUI][R31AD][T960X][9.0][NTS][DRS]: Test DRS-AL1-25FPS-HEAAC-DWN Step #1 Failed.ERROR: Frame Drop and Freeze Frame deteced
+--高帧率的patch问题
+5. TV-3670 [MIUI][R33A8][T950X][9.0][NTS]Run case PLAY-257-TC2 step#8 fail,The video play fast forward after click OK
+--closed 需要确认，source版本已无些问题
+6. TV-3621[MIUI][R33A8][T950X][9.0][NTS][Video] PROF-004-TC2 fail，nrdp.device.capability.videoProfiles contains unexpected profile: hevc-hdr-main10-L30-dash-cenc-prk.
+--closed profile没有，目前看dpi-profile里是有的
+7. TV-3560 [MIUI][R31AD][T960X][9.0][NTS][PlaybackQuality]: Test PLAY-AL1-23FPS-HEAAC Step #1 Failed.
+--patch不全，需要新版本再确认下
+
+
+DRS-HDR10-60FPS-HEAAC-UP  2次fail drop 1
+PLAY-HEVC-60FPS-HEAAC     2次fail frezee drop
+DRS-HDR10-59FPS-HEAAC-DWN 
+
+0423
+1. 高帧率timestamp不准确的问题，相关高帧率优化的patch没有合进去，新版本已经确认无些问题了
+2. PLAY-257-TC2 step#8 fail,The video play fast forward after click OK
+    --- source版本已无此问题，需要QA确认
+3. Play-253-TC5，the time of FF/FB more than 250ms.
+   ----从trace上看，目前大概280ms的时间，需要QA再确认下
+4.PLAY-001-TC4 artifacts
+   ----dump流确认流就是这样的，不用care
+   
+0424   
+TV-3670 [MIUI][R33A8][T950X][9.0][NTS]Run case PLAY-257-TC2 step#8 fail,The video play fast forward after click OK
+   --这个问题应该复现不到
+TV-4017 [R31AD][T960X][9.0][NTS]: In Case Play-253-TC5，the time of FF/FB more than 250ms.
+  --这个从trace上看大概是280ms，没有超过500ms，帮忙再确认下，如果有问题，帮忙抓个trace
+  
+关掉蓝牙：
+service call bluetooth_manager 8
+pm disable com.android.bluetooth
+mount -w -o remount /dev/block/vendor /vendor
+rm vendor/etc/permissions/android.hardware.bluetooth*
+  
+1. play 60
+Log ID:137267386
+
+
+DRS-HDR10-50FPS-HEAAC-UP	Fail  137265270  
+512x384	Fail  137265473
+DRS-HDR10-60FPS-HEAAC-UP	Fail  137265355
+
+PLAY-HDR10-59FPS-HEAAC		Fail  137263103
+PLAY-HDR10-60FPS-HEAAC		Fail  137263286
+PLAY-HEVC-29FPS-HEAAC		Fail  137264058	  211ms frezee引起的drop，应该是低概率的
+PLAY-HEVC-59FPS-HEAAC		Fail  137264407
+
+SYNC-AL1-24FPS-DDP51	Fail	137242504   diff了16ms
+SYNC-AL1-29FPS-DDP2CH	Fail	137243656   After Track Change， 超过165ms， out of range
+SYNC-AL1-30FPS-HEAAC	Fail	137244972   After Audio Track Switch，超过165ms， 1/2
+SYNC-HDR10-23FPS-HEAAC	Fail	137245552   After Video Seek 
+SYNC-HDR10-25FPS-HEAAC	Fail	137246675   After Video Seek 
+SYNC-HDR10-29FPS-HEAAC	Fail	137247351   After Video Seek 
+SYNC-HDR10-60FPS-HEAAC	Fail	137250520   After Video Seek , 1/2
+SYNC-HEVC-25FPS-HEAAC	Fail	137252576   After Video Seek
+SYNC-HEVC-30FPS-HEAAC	Fail	137254587   After Video Seek
+SYNC-HEVC-50FPS-HEAAC	Fail	137255272   After Video Seek,环境有问题一次
+SYNC-HEVC-59FPS-HEAAC	Fail	137256375   After Video Seek  1/1
+
+
+58      echo rv 0x1d93 > sys/class/amvecm/reg 
+59      echo wv 0x1d93 0xf8d7 > sys/class/amvecm/reg 
+60      echo wv 0x1d93 0xf8d3 > sys/class/amvecm/reg 
+61      cd sys
+62      cd class/
+63      cd amvecm
+64      echo rv 1de1 > reg
+65      echo rv 1de2 > reg
+66      echo wv 1de2 0x20000000 > reg
+67      echo wv 1de1 0x20000000 > reg
+68      echo rv 1d93 > reg
+69      echo wv 1de2 0x0 > reg
+70      echo wv 1
+71      echo wv 1d93 0xf8d0 > reg
+72      pk8
+73      clear
+
+14      cat frame_width 
+15      cd ..
+16      cd amvecm
+17      echo rv 1
+18      echo rv 1ae0 > reg
+19      echo 0 > /sys/module/amvideo/parameters/force_no_compress 
+
+
+
+http://scgit.amlogic.com:8080/#/c/61695/   Add cap_nice and set sched policy to FIFO
+http://scgit.amlogic.com:8080/#/c/62551/    add a sysfs to get vframe ready count
+http://scgit.amlogic.com:8080/#/c/62620/ Start pcrscr only when 2 frames ready Adjust
+http://scgit.amlogic.com:8080/#/c/62600/  The pcrscr start early than video pts.
+
+http://scgit.amlogic.com/kernel/common/commit/?h=amlogic-4.9-dev_9.2.1811_21&id=022737d113a3d961da9257d09abab315f305f1a9
+http://scgit.amlogic.com/kernel/common/commit/?h=amlogic-4.9-dev_9.2.1811_21&id=f11cd90319faacce9e949a87020823c66191b461
+http://scgit.amlogic.com/kernel/common/commit/?h=amlogic-4.9-dev_9.2.1811_21&id=e76cceeb8f9fa36449768954a2c7fa515250f6a0
+http://scgit.amlogic.com/platform/hardware/amlogic/media_modules/commit/?h=amlogic-4.9-dev_9.2.1811_21&id=84ced1ae65628216fd8d81807eb3fe5a5d36daa2
+http://scgit.amlogic.com/vendor/amlogic/prebuilt/libmediadrm/commit/?h=p-amlogic-mainline_9.2.1811_21&id=aa83fd565a4684cdfa70743e31b50f4f6af8fac5
+http://scgit.amlogic.com/vendor/widevine/commit/?h=p-amlogic_9.2.1811_21&id=4bb4ccc849203ea6baa05f56a20c794d516e3b10
+http://scgit.amlogic.com/device/amlogic-o/commit/?h=p-amlogic-mainline_9.2.1811_21&id=93eb27ec826ba203a426f85ac295e370864e6957
+http://scgit.amlogic.com/device/amlogic-o/commit/?h=p-amlogic-mainline_9.2.1811_21&id=f45254a60550f817cbb7e898e8693146708a2810
+http://scgit.amlogic.com/platform/hardware/amlogic/audio/commit/?h=p-amlogic-mainline_9.2.1811_21&id=3eea15d6d4c0764cb1b628ceeb286f2b26f67af8
+
+
+
+35243.07299999893	1
+
+
+v50
+ 137450102 frezee drop
+ 137450019 audio tone
+ 137449706 audio tone
+ 137449640 frezee drop
+ 137449581 audio tone
+ 137448846 frezee drop
+ 137447899 audio tone
+ 137447816 frezee drop
+ 137447725 frezee drop
+ 137447275 frezee drop
+ 137446943 frezee drop
+ 137446811 frezee drop
+ 137446761 audio tone
+ 137446712 frezee drop
+ 137446490 audio tone
+ 137446405 frezee drop
+ 137446342 audio tone
+ 137446280 audio tone
+ 137445918 audio tone
+
+ 
+ 
+1.HeapTaskDaemon, Storaged, HWBinder, IpClent.eth0, DOLBY_MS12
+2. 执行GC操作的时候，任何线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行
+-Memory Churn内存抖动，内存抖动是因为大量的对象被创建又在短时间内马上被释放。
+-瞬间产生大量的对象会严重占用Young Generation的内存区域，当达到阀值，剩余空间不够的时候，也会触发GC。
+即使每次分配的对象占用了很少的内存，但是他们叠加在一起会增加Heap的压力，从而触发更多其他类型的GC。
+这个操作有可能会影响到帧率，并使得用户感知到性能问题
+
+
+
+
+#guotao
+top -d 10
+
+
+setprop media.omx.out_buffer1 8
+
+
+echo 0x0002 > /sys/module/amvdec_mmpeg12/parameters/debug_enable
+
+OTT-3857
+[Hisense][A311D][9.0][Feedback][HDMI]: NT72673A311D-3323 A311D data abnormality causes MEMC to fail
+1.替换老版本libamffmpegadatper.so与原来的效果一样，不会出现underflow
+2.加大输出omx buffer num到8，有效果，不会出现underflow
+3.加大buffer情况下，只出现两场drop，原因是pts回调，mpeg12只用I帧的pts，其它的pts是计算出来。ffmpeg出来的pts有不少NA
+
+
+no reproduce -TV-4476[MIUI][R31AD][T960X][9.0][Video]: Play 【(1920x1080)Alisan.Trailer-80Mbps.mpg（PCM）】Video is not smooth, audio video is out of sync(100% source NG)
+---TV-4484[MIUI][R31AD][T960X][9.0][Video]: Play【[4KVP9_50fps_Mbps_8bit]Wetek-Astra_12343_H_30000-Insight UHD Pearl TV.webm】Do the seek action, appear mosaic(100% source NG)
+	-----The stream cannot seek, should be abnormal stream. VLC or ffplay play will occur mosaic after play several second.
+hwc -TV-5820[MIUI][R33A8][T950X][9.0][AML-18][Video]:Play some HDR-H265_60fps source black screens, but the sound is normal.(100% Sources NG, R311 ok)
+TV-5811[SWPL-8481][MIUI][R31AD][T960X][9.0][AML-26][Video]：The 2k_2048x1440_mpeg4_60fps.mp4 video cannot be loaded and the sound is normal.(100% R311 NG) 
+TV-4466[SWPL-2357][MIUI][R31AD][T960X][9.0][Video]: Play 【134108-xvid-mp3-704x340-6k-gmc-bf-6m.avi】Serious mosaic(100% source NG) 
+
+am start -n com.android.gallery3d/.app.MovieActivity -d file:///sdcard/Download/tv4484.webm
+
+
+echo 0x8000000 > /sys/module/amvdec_vp9/parameters/debug 
+echo 4 > /sys/module/amvdec_vp9/parameters/double_write_mode 
+
+
+/sys/class/thermal/thermal_zone0/mode
+/sys/class/mpgpu/scale_mode
+
+播放前设置
+setprop media.omx.log_levels 255
+logcat -c; logcat > logcat.log &
+出现问题后下面指令多执行几次
+debuggerd $(busybox pidof mediaserver) >> ms.log
+debuggerd $(busybox pidof surfaceflinger) >> sf.log
+debuggerd $(busybox pidof media.codec) >> mc.log
+
+由于不是太好复现，log就多抓些，kernel 和logcat分开抓吧，logcat重定向到falsh或者u盘都可以,kernel用串口终端保存就ok
+setprop media.omx.log_levels 255
+while true; do dumpsys meminfo; sleep 10; done &
+logcat -v threadtime >logcat.log
+
+1.setprop debug.stagefright.omx-debug 5; setprop media.omx.log_levels 255
+2. 用usrdebug版本：setprop libc.debug.malloc.options "backtrace guard leak_track verify_pointers"
+3. setprop libc.debug.malloc.program media.codec
+4. kill掉mediaserver进程,复现问题，抓logcat
+   kill $(busybox pidof media.codec)
+   logcat -v threadtime >logcat.log
+   
+从log上看有两个问题，
+1. mediacodec crash问题，像是发生内存踩踏或越界，这个还需要debug
+
+2.发生ANR
+像是卡在player的reset上，从logcat上看是player的seek卡住导致了ANR，需要小米来看
+  native: #00 pc 00053f0c  /system/lib/libc.so (__ioctl+8)
+  native: #01 pc 00021c11  /system/lib/libc.so (ioctl+36)
+  native: #02 pc 0003d5f7  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+206)
+  native: #03 pc 0003e003  /system/lib/libbinder.so (android::IPCThreadState::waitForResponse(android::Parcel*, int*)+26)
+  native: #04 pc 0003725d  /system/lib/libbinder.so (android::BpBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+36)
+  native: #05 pc 00036171  /system/lib/libmedia.so (android::BpMediaPlayer::reset()+60)
+  native: #06 pc 0002fd59  /system/lib/libmedia.so (android::MediaPlayer::reset_l()+36)
+  native: #07 pc 0002fde3  /system/lib/libmedia.so (android::MediaPlayer::reset()+30)
+  native: #08 pc 00030d55  /system/lib/libmedia_jni.so (android_media_MediaPlayer_reset(_JNIEnv*, _jobject*)+76)
+  at android.media.MediaPlayer._reset(Native method)
+  at android.media.MediaPlayer.reset(MediaPlayer.java:2188)
+  at com.miui.videoplayer.model.OriginMediaPlayer.reset(SourceFile:93)
+  at com.miui.videoplayer.media.DuoKanPlayer.reset(SourceFile:495)
+  at com.miui.videoplayer.videoview.DuoKanVideoView.release(SourceFile:457)
+  at com.miui.videoplayer.videoview.DuoKanVideoView.close(SourceFile:728)
+  at com.mitv.videoplayer.localplay.LocalVideoView.close(SourceFile:47)
+
+
+
+setprop libc.debug.malloc.options "backtrace guard"
+setprop libc.debug.malloc.program "hw/android.hardware.media.omx@1.0-service"
+killall media.codec
+
+串口输入设置 setprop media.omx.log_levels 255; setprop debug.stagefright.omx-debug 5
+再播放抓logcat即可，还使用昨天libstagefright下的patch
+出现crash即可
+
+setprop libc.debug.malloc 1
+setprop libc.debug.malloc.program "mediaserver"
+setprop libc.debug.malloc.options "backtrace"
+killall mediaserver
+sleep 1
+dumpsys -t 200 media.player -m >a1.log
+sleep 3
+dumpsys -t 200 media.player -m > a2.log
+
+
+
+
+#extractor 
+setprop libc.debug.malloc.options "backtrace guard"
+setprop libc.debug.malloc.program aextractor
+killms;killmc;killme;killmc
+
+01-01 06:18:50.584 14310 14353 E malloc_debug: InternalFree 0xb02e79d0                                                                                                                                   
+01-01 06:18:50.585 14310 14353 I AmFFmpegExtractor: [wsl]buf[22]11=187, 0xb0284e30                                                                       
+01-01 06:18:50.585 14310 14353 I AmFFmpegExtractor: [wsl]buf[22]22=50 0xb0284e30                                                                         
+01-01 06:18:50.585 14310 14353 E malloc_debug: InternalFree 0xb0284e30                                                                                
+01-01 06:18:50.585 14310 14353 E malloc_debug: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***                              
+01-01 06:18:50.585 14310 14353 E malloc_debug: +++ ALLOCATION 0xb0284e30 SIZE 1024 HAS A CORRUPTED REAR GUARD                               
+01-01 06:18:50.586 14310 14353 E malloc_debug:   allocation[1026] = 0x32 (expected 0xbb)                      
+01-01 06:18:50.586 14310 14353 E malloc_debug: Backtrace at time of failure:                                  
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #00  pc 0000df7c  /system/lib/libamffmpegadapter.so (android::AmFFmpegSource::read(android::MediaBufferBase**, android::MediaTrack::ReadOptions const
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #01  pc 0003acba  /system/lib/libmedia.so (android::BnMediaSource::onTransact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+5
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #02  pc 000361ce  /system/lib/libbinder.so (android::BBinder::transact(unsigned int, android::Parcel const&, android::Parcel*, unsigned int)+69)
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #03  pc 0003da16  /system/lib/libbinder.so (android::IPCThreadState::executeCommand(int)+409)
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #04  pc 0003d7a2  /system/lib/libbinder.so (android::IPCThreadState::getAndExecuteCommand()+105)
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #05  pc 0003dcca  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+37)
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #06  pc 000546fc  /system/lib/libbinder.so                                                                                                           
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #07  pc 0000c146  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+165)                                                                  
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #08  pc 00063c14  /system/lib/libc.so                                                                                                           
+01-01 06:18:50.587 14310 14353 E malloc_debug:           #09  pc 0001e064  /system/lib/libc.so                                                        
+01-01 06:18:50.587 14310 14353 E malloc_debug: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***                                           
+01-01 06:18:50.589 14310 14353 E malloc_debug: InternalFree 0xb0299730                                                                                
+01-01 06:18:50.590 14310 14353 E malloc_debug: InternalFree 0xb02fc3f0
+
+
+#mediacodec
+setprop libc.debug.malloc.options "backtrace guard"
+setprop libc.debug.malloc.program "mediaserver" or none
+killall media.codec
+
+01-01 06:40:12.165  5025  5875 I MediaCodec: [wsl]buf[22]11=187,0xaedd9aa0
+01-01 06:40:12.165  5025  5875 I MediaCodec: [wsl]buf[22]22=50,0xaedd9aa0
+01-01 06:40:12.165  5025  5875 E malloc_debug: InternalFree 0xaedd9aa0
+01-01 06:40:12.165  5025  5875 E malloc_debug: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-01 06:40:12.165  5025  5875 E malloc_debug: +++ ALLOCATION 0xaedd9aa0 SIZE 20 HAS A CORRUPTED REAR GUARD
+01-01 06:40:12.165  5025  5875 E malloc_debug:   allocation[22] = 0x32 (expected 0xbb)
+01-01 06:40:12.165  5025  5875 E malloc_debug: Backtrace at time of failure:
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #00  pc 00085f16  /system/lib/libstagefright.so (android::MediaCodec::queueInputBuffer(unsigned int, unsigned int, unsigned int, long long, unsigned
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #01  pc 000536d6  /system/lib/libamnuplayer.so (android::AmNuPlayer::Decoder::onInputBufferFetched(android::sp<android::AMessage> const&)+1341)
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #02  pc 00052d72  /system/lib/libamnuplayer.so (android::AmNuPlayer::Decoder::doRequestBuffers()+201)
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #03  pc 00054334  /system/lib/libamnuplayer.so (android::AmNuPlayer::DecoderBase::onRequestInputBuffers()+27)
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #04  pc 00050d6c  /system/lib/libamnuplayer.so (android::AmNuPlayer::Decoder::onMessageReceived(android::sp<android::AMessage> const&)+439)
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #05  pc 0000d428  /system/lib/libstagefright_foundation.so (android::AHandler::deliverMessage(android::sp<android::AMessage> const&)+23)
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #06  pc 0000fd18  /system/lib/libstagefright_foundation.so (android::AMessage::deliver()+59)
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #07  pc 0000e100  /system/lib/libstagefright_foundation.so (android::ALooper::loop()+475)
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #08  pc 0000c1be  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+285)
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #09  pc 00063c14  /system/lib/libc.so
+01-01 06:40:12.166  5025  5875 E malloc_debug:           #10  pc 0001e064  /system/lib/libc.so
+01-01 06:40:12.166  5025  5875 E malloc_debug: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-01 06:40:12.167  5749  5749 E malloc_debug: InternalFree 0xaa397570
+01-01 06:40:12.167  5025  5875 I MediaCodec: [wsl]buf[22]33=20        
+01-01 06:40:12.168  5025  5878 E malloc_debug: InternalFree 0xaea58e90
+01-01 06:40:12.169  5749  5749 E malloc_debug: InternalFree 0xaa397570
+01-01 06:40:12.169  5749  5749 E malloc_debug: InternalFree 0xaa397570
+
+#amnuplayer
+setprop libc.debug.malloc.options "backtrace guard"
+setprop libc.debug.malloc.program "mediaserver"
+killall mediaserver
+01-01 01:00:56.153  8559  8770 E malloc_debug: InternalFree 0xa7a04430
+01-01 01:00:56.153  8559  8770 E malloc_debug: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-01 01:00:56.153  8559  8770 E malloc_debug: +++ ALLOCATION 0xa7a04430 SIZE 1024 HAS A CORRUPTED REAR GUARD
+01-01 01:00:56.153  8559  8770 E malloc_debug:   allocation[1026] = 0x32 (expected 0xbb)
+01-01 01:00:56.153  8559  8770 E malloc_debug: Backtrace at time of failure:
+01-01 01:00:56.153  8559  8767 E malloc_debug: InternalFree 0xa7a55a30
+01-01 01:00:56.154  8559  8767 E malloc_debug: InternalFree 0xa7a41e30
+01-01 01:00:56.154  8559  8769 E malloc_debug: InternalFree 0xa7a55d30
+01-01 01:00:56.154  8559  8769 E malloc_debug: InternalFree 0xa7a421b0
+01-01 01:00:56.155  8559  8770 E malloc_debug:           #00  pc 00041b50  /system/lib/libamnuplayer.so (android::AmNuPlayer::GenericSource::readBuffer(android::media_track_type, long long, android::MediaTr
+01-01 01:00:56.155  8559  8770 E malloc_debug:           #01  pc 00042566  /system/lib/libamnuplayer.so (android::AmNuPlayer::GenericSource::onReadBuffer(android::sp<android::AMessage> const&)+81)
+01-01 01:00:56.155  8559  8770 E malloc_debug:           #02  pc 00041118  /system/lib/libamnuplayer.so (android::AmNuPlayer::GenericSource::onMessageReceived(android::sp<android::AMessage> const&)+119)
+01-01 01:00:56.155  8559  8770 E malloc_debug:           #03  pc 0000d428  /system/lib/libstagefright_foundation.so (android::AHandler::deliverMessage(android::sp<android::AMessage> const&)+23)
+01-01 01:00:56.155  8559  8770 E malloc_debug:           #04  pc 0000fd18  /system/lib/libstagefright_foundation.so (android::AMessage::deliver()+59)
+01-01 01:00:56.155  8559  8770 E malloc_debug:           #05  pc 0000e100  /system/lib/libstagefright_foundation.so (android::ALooper::loop()+475)
+01-01 01:00:56.155  8559  8770 E malloc_debug:           #06  pc 0000c1be  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+285)
+01-01 01:00:56.155  8559  8770 E malloc_debug:           #07  pc 00063c14  /system/lib/libc.so
+01-01 01:00:56.155  8559  8770 E malloc_debug:           #08  pc 0001e064  /system/lib/libc.so
+01-01 01:00:56.155  8559  8770 E malloc_debug: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+
+#omx
+ 
+setprop libc.debug.malloc.options "backtrace guard"
+setprop libc.debug.malloc.program "hw/android.hardware.media.omx@1.0-service"
+killall media.codec
+
+01-01 01:28:15.354 13053 13247 I AmlogicVideoDecoderAwesome: [wsl]buf[22]22=50 0xa6883a30
+01-01 01:28:15.354 13053 13247 E malloc_debug: InternalFree 0xa6883a30
+01-01 01:28:15.354 13053 13247 E malloc_debug: *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+01-01 01:28:15.354 13053 13247 E malloc_debug: +++ ALLOCATION 0xa6883a30 SIZE 1024 HAS A CORRUPTED REAR GUARD
+01-01 01:28:15.355 13053 13247 E malloc_debug:   allocation[1026] = 0x32 (expected 0xbb)
+01-01 01:28:15.355 13053 13130 E malloc_debug: InternalFree 0xa6364750
+01-01 01:28:15.355 13053 13247 E malloc_debug: Backtrace at time of failure:
+01-01 01:28:15.358 13053 13130 E malloc_debug: InternalFree 0xa6364810
+01-01 01:28:15.358 13053 13130 E malloc_debug: InternalFree 0xa6364810
+01-01 01:28:15.362 13053 13130 E malloc_debug: InternalFree 0xa6364870
+01-01 01:28:15.372 13053 13247 E malloc_debug:           #00  pc 00014ac6  /vendor/lib/libOmxVideo.so (android::amlpeer::AmlogicVideoDecoder::doWriteBuffer()+85)
+01-01 01:28:15.372 13053 13247 E malloc_debug:           #01  pc 0000262e  /vendor/lib/libomx_worker_peer_alt.so (android::WorkerPeer::runWorker()+293)
+01-01 01:28:15.372 13053 13247 E malloc_debug:           #02  pc 00002492  /vendor/lib/libomx_worker_peer_alt.so (android::WorkerPeer::runWorkerStatic(void*)+37)
+01-01 01:28:15.372 13053 13247 E malloc_debug:           #03  pc 00063c14  /system/lib/libc.so
+01-01 01:28:15.372 13053 13247 E malloc_debug:           #04  pc 0001e064  /system/lib/libc.so
+
+
+backtrace\_dump\_on\_exit
+
+setprop libc.debug.malloc.options "backtrace guard leak_track"
+setprop libc.debug.malloc.program aextractor
+killall media.extractor
+kill -47 $(busybox pidof media.extractor)
+
+#内存泄露
+
+
+VTS_01_1.VOB,
+1.没声音及音频与视频不对的问题，需要小米从播放器同步方面去分析，从log上看流是回环流，应该播放器方面对这种pts回跳处理的问题
+07-11 11:08:18.671  2681 31848 D AmlogicVideoDecoderAwesome: In PTS 79960000,	nFilledLen=29000, bufferHdr.pBuffer=ed742000
+07-11 11:08:18.712  2681 31848 D AmlogicVideoDecoderAwesome: In PTS 80000000,	nFilledLen=57041, bufferHdr.pBuffer=ed742000
+07-11 11:08:18.754  2681 31848 D AmlogicVideoDecoderAwesome: In PTS 0,	nFilledLen=20538, bufferHdr.pBuffer=ed742000
+07-11 11:08:19.503  2681 31848 D AmlogicVideoDecoderAwesome: In PTS 1,	nFilledLen=9299, bufferHdr.pBuffer=ed842000
+07-11 11:08:19.524  2681 31848 D AmlogicVideoDecoderAwesome: In PTS 40000,	nFilledLen=29000, bufferHdr.pBuffer=ed942000
+07-11 11:08:19.964  2681 31831 W MiCore  : main audio output: buffer too late (-79926939 us): dropped
+07-11 11:08:19.964  2681 31831 W MiCore  : main audio output: buffer too late (-79895220 us): dropped
+07-11 11:08:19.964  2681 31831 W MiCore  : main audio output: buffer too late (-79863404 us): dropped
+07-11 11:08:19.970  2681 31831 W MiCore  : main audio output: buffer too late (-79836818 us): dropped
+07-11 11:08:19.970  2681 31831 W MiCore  : main audio output: buffer too late (-79805078 us): dropped
+07-11 11:08:19.970  2681 31831 W MiCore  : main audio output: buffer too late (-79773204 us): dropped
+07-11 11:08:19.970  2681 31831 W MiCore  : main audio output: buffer too late (-79741295 us): dropped
+2.最后面卡住的问题，请先小米处理完上面的问题后再确认，从dump数据上看，输入数据没有了，decoder就没有解码输出的，可能上面的问题处理完后就没有这个卡住的问题了
+
+
+
+0xebe3f1c0: 8100.00 KiB | 1920 (1920) x 1080 |    1 |        1 | 0xb00 | com.google.android.tvlauncher/com.google.android.tvlauncher.appsview.AppsViewActivity#0
+0xebe3f280: 8100.00 KiB | 1920 (1920) x 1080 |    1 |        1 | 0xb00 | com.google.android.tvlauncher/com.google.android.tvlauncher.appsview.AppsViewActivity#0
+
+
+echo null > /sys/class/display/mode
+echo 0 >/sys/class/amhdmitx/amhdmitx0/frac_rate_policy (0=60hz, 1=59.94hz)
+echo 2160p60hz > /sys/class/display/mode
+
+
+1.copy到data目录，chmod +x scratch-logcat-toyb-59fps-kernel-all.sh 
+2.执行脚本, ./scratch-logcat-toyb-59fps-kernel-all.sh 
+3.播放复现问题，出现问题后，立刻推出播放，等待超过40s后，ctrl+c结束抓log
+4.tar cvfz log.tar.gz  k_* logcat.log，把data目录生成的log.tar.gz发来
+
+
+1.adapter的提交  divx不放到blacklist，这样extractor source不会有video source，会给player报805错
+http://scgit.amlogic.com:8080/#/c/81328/
+
+2.nts问题common提交
+ 1）app不连续drop时不更新omxpts
+ 2）check omxpts有一段时间不更新的逻辑修改，之前修改bug的时候改错了，现在又恢复回去
+http://scgit.amlogic.com:8080/#/c/80847/
+
+3. omx的so的提交，source之前merge的
+scgit.amlogic.com:8080/#/c/81357/
+
+
+[ 8517.093293] [set_omx_pts]tmp_pts:225225, set_from_hwc:1,frame_num=75, not_reset=0                  
+[ 8517.114346] vpts = 0x37b83, c.dur=0xc83, n.pts=0x3873e, scr = 0x38a2e, pcr-pts-diff=376, ptstrace=2
+[ 8517.126937] [set_omx_pts]tmp_pts:228228, set_from_hwc:1,frame_num=76, not_reset=0                  
+[ 8517.147714] vpts = 0x3873e, c.dur=0xc83, n.pts=0x392f9, scr = 0x395e9, pcr-pts-diff=376, ptstrace=2
+[ 8517.160098] [set_omx_pts]tmp_pts:231231, set_from_hwc:1,frame_num=77, not_reset=0      231231             
+[ 8517.181085] vpts = 0x392f9, c.dur=0xc83, n.pts=0x39eb4, scr = 0x3a1a4, pcr-pts-diff=376, ptstrace=2
+[ 8517.197752] omxpts is not update for a while,do not need compenstatete
+
+repo init -u git://aml-code-master.amlogic.com/ref-o/platform/manifest.git -b q-fs-release -m google_partner_ref.xml --repo-url=git://git.myamlogic.com/tools/repo.git
+
+repo init -u git://aml-code-master.amlogic.com/re...m/manifest.git -b q-fs-release -m google_partner_ref.xml --repo-url=git://git.myamlogic.com/tools/repo.git
+---use this
+repo init -u git://aml-code-master.amlogic.com/ref-o/platform/manifest.git -b q-fs-release -m google_partner_ref.xml --repo-url=git://git.myamlogic.com/tools/repo.git
+
+
+am start -n  com.gitvdemo.video/com.gala.video.app.epg.HomeActivity
+
+1.关掉selinux
+2.创建目录并修改权限，mkdir /data/tmp; chmod 777 /data/tmp
+3.设置节点，setprop media.hls.dumpmode 1
+4.打开爱奇艺apk开始播放dv视频，播放一小会退出播放，把/data/tmp/目录下的流发下
+
+am start -n com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity -d https://www.youtube.com/tv?v=LciyZg78Q40
+
+ffprobe -i $tftpd/nuplayer_hls_dump.ts -show_data -show_packets -select_streams v > v.data
+
+android.hidl.allocator@1.0 android.hidl.memory@1.0 android.hardware.media.omx@1.0
+
+
+1. ref ffmpeg是怎么更新的
+2. 
+3. apex amextractor mk->bp
+
+
+
+./soong/.intermediates/vendor/amlogic/AmFFmpegAdapter/amextractor/libamextractor/android_arm_armv7-a-neon_cortex-a9_core_shared_com.android.media/libamextractor.so
+./soong/.intermediates/vendor/amlogic/AmFFmpegAdapter/amextractor/libamextractor/android_arm_armv7-a-neon_cortex-a9_core_shared_com.android.media/unstripped/libamextractor.so
+./soong/.intermediates/vendor/amlogic/AmFFmpegAdapter/amextractor/libamextractor/android_arm_armv7-a-neon_cortex-a9_core_shared/libamextractor.so
+./soong/.intermediates/vendor/amlogic/AmFFmpegAdapter/amextractor/libamextractor/android_arm_armv7-a-neon_cortex-a9_core_shared/unstripped/libamextractor.so
+./target/product/franklin/symbols/apex/com.android.media/lib/extractors/libamextractor.so
+./target/product/franklin/symbols/system/lib/extractors/libamextractor.so
+./target/product/franklin/system/apex/com.android.media/lib/extractors/libamextractor.so
+./target/product/franklin/system/lib/extractors/libamextractor.so
+./target/product/franklin/obj/SHARED_LIBRARIES/com.android.media.libamextractor_intermediates/libamextractor.so
+./target/product/franklin/obj/SHARED_LIBRARIES/libamextractor_intermediates/libamextractor.so
+./target/product/franklin/obj/SHARED_LIBRARIES/libamextractor_intermediates/LINKED/libamextractor.so
+./target/product/ampere/symbols/system/lib/extractors/libamextractor.so
+./target/product/ampere/system/lib/extractors/libamextractor.so
+./target/product/ampere/obj/SHARED_LIBRARIES/libamextractor_intermediates/libamextractor.so
+./target/product/ampere/obj/SHARED_LIBRARIES/libamextractor_intermediates/LINKED/libamextractor.so
+
+
+
+
+http://aml-code-master.amlogic.com:8080/c/ref-o/device/amlogic/franklin/+/6520   device/amlogic/franklin/
+http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/6508   frameworks/av/
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/hardware/amlogic/+/6513  hardware
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6512   omx
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6511  ffmpeg
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6499  libmedia
+
+
+http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/6508 frameworks/av/
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/hardware/amlogic/+/6513 hardware
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6512 omx
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6511 ffmpeg
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6499 libmedia
+http://aml-code-master.amlogic.com:8080/c/ref-o/device/amlogic/franklin/+/6560  device/amlogic/franklin/
+http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/6545  frameworks/av/media/mediaserver
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6561 mediaextconfig
+
+
+1.extractor
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/hardware/amlogic/+/6513 hardware
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6512 omx
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6499 libmedia
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6511 ffmpeg
+
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android_Q/job/Android_Q_Google_ref_PATCHBUILD/1272/
+
+
+2. extractor + codec_ext
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/hardware/amlogic/+/6513 hardware
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6512 omx
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6499 libmedia
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6511 ffmpeg
+http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/6508   frameworks/av/
+http://aml-code-master.amlogic.com:8080/c/ref-o/device/amlogic/franklin/+/6520 device/amlogic/franklin/
+
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android_Q/job/Android_Q_Google_ref_PATCHBUILD/1276/
+
+
+3. extractor + codec_ext + play_ext
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/hardware/amlogic/+/6513 hardware
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6512 omx
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6499 libmedia
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6511 ffmpeg
+http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/6508   frameworks/av/
+http://aml-code-master.amlogic.com:8080/c/ref-o/device/amlogic/franklin/+/6560  device/amlogic/franklin/
+http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/6545  frameworks/av/media/mediaserver
+http://aml-code-master.amlogic.com:8080/c/ref-o/platform/vendor/amlogic/common/+/6561 mediaextconfig
+
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android_Q/job/Android_Q_Google_ref_PATCHBUILD/1274/
+
+
+20190821
+1.加了debug的patch，但是编译的libstagefright.so没有生效
+
+
+setprop miplayer.debug.level 1
+grep -E "word1|word2|word3" 
+
+1.SWPL-7163 Android Q media extension (ongoing)
+--目前extractor+player基本版本是ok的，本地简单自测ok
+2.TV-8670 [MIUI][R34AE][T920L][5.1][Audio]：Sound Discontinuity When Playing Local DTS Audio (ongoing)
+--audiodrop的问题，小米把OMXCodec封装到自己的player接口中，有个线程处理数据的输入+输出，串行执行，大概逻辑是,queueData->audiosink.write->dequeuData->queueData...，目前从log
+上看每次queueData的调用周期过长，超过了从pts来看应该有的20ms左右的间隔，原因是audiosink.write写入的是8k数据，40多ms，block，导致queueData的调用周期被拉长。
+而且小米反馈单线程的串行调用一直都是这样的，修改的可能性不大。目前还是需要老李从audio方面来分析audiosink write block的原因。
+3.SWPL-12847{AV} Android P from trunk20190727, After playing "2017_OLED_杜比惊艳_4K_O_H_0417.ts" for 4 seconds, the picture is freeze, sound is normal 
+4.SWPL-12801{AV} Android P After 4K H264 seek, The first 2 seconds of the picture is not smooth Frequency: 10/10 of the times
+--本周没有资源看，foucs on mi 920L
+
+920L
+10.235.177.192 shiming.lai hc4Zg6j
+10.98.17.52 shiming.lai 1
+echo  10  > /sys/module/amvdec_h264/parameters/dpb_size_adj
+echo 1 > /sys/module/amvdec_h264/parameters/error_recovery_mode
+
+
+
+kodi版本17.6 vlc版本1.6.0
+asf_1.asf： 
+	使用kodi和vlc不卡顿，除了固定点卡顿。使用miplayer基本是播放一小会就卡顿，但cpu idle剩余很多
+big_buck_bunny_1080p_VP8_VORBIS_25fps_7800K.WebM：
+	使用kodi和vlc不花瓶，使用miplayer是基本一直在花屏
+src01_1920x1080_0.075.vp9.mkv：
+	使用kodi和vlc都不花屏，但会卡住或卡顿，但miplayer会花屏
+
+软解
+1.开启性能模式
+echo performance >  scaling_governor
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+1416000
+
+2.gpu 频率设置成最大744M
+echo 3 > /sys/class/mpgpu/scale_mode
+cat /sys/class/mpgpu/cur_freq
+744
+
+
+/sys/class/thermal/thermal_zone0/mode
+
+atrace -z -b 40000 sched irq freq idle video binder_driver ss  -t 20 -a *  -o mytrace
+
+atrace -z -b 40000 sched irq freq idle video  ss  -t 20 -a * 
+
+echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+echo 3 > /sys/class/mpgpu/scale_mode
+cat /sys/class/mpgpu/cur_freq
+echo 0xf > /sys/module/amvideo/parameters/debug_flag 
+
+
+
+1.
+09-07 08:49:44.355  3176 10032 I OMX_AmlogicDTSDecoder: OMX_BUFFERFLAG_EOS
+09-07 08:49:44.356  3171 10016 I NU-NuPlayerDecoder: [audio] saw output EOS
+09-07 08:49:44.357  3171 10015 I NU-NuPlayerRenderer: audio have queued eos, no need to check buffer discontinue
+09-07 08:49:44.358  3171 10009 I NU-AmNuPlayer: audio discontinuity: formatChange 1
+09-07 08:49:44.358  3171 10016 I NU-NuPlayerDecoder: [doFlush:831] audio flushing 
+09-07 08:49:44.358  3171 10016 I NU-NuPlayerDecoder: [doFlush:838] audio flushing 
+
+NU-NuPlayerDecoder: Failed to create audio/ac3 decoder
+09-07 10:25:58.104 13495 13523 E NU-AmNuPlayer: received error(0x80000000) from audio decoder, flushing(0), now shutting down
+09-07 10:25:58.104 13321 13646 D AmlogicVideoDecoderAwesome:   		  0# Out PTS: 14993172..vf.fd=0, mOutBufferNo=718, frame_num=287
+09-07 10:25:58.104 13495 13783 I NU-NuPlayerDecoder: [doFlush:825] audio flushing 
+09-07 10:25:58.104 13321 13646 D AmlogicVideoDecoderAwesome: set_info: time 14993172,frame_num 287,handle 0x1c183001
+09-07 10:25:58.104 13495 13783 I NU-NuPlayerDecoder: [doFlush:832] audio flushing 
+09-07 10:25:58.104 13495 13783 I NU-NuPlayerDecoder: [doFlush:838] audio flushing 
+09-07 10:25:58.104 13495 13532 I NU-NuPlayerRenderer: clearAnchorTime
+09-07 10:25:58.104 13495 13532 I NU-NuPlayerRenderer: misTrickmode 0
+09-07 10:25:58.104 13495 13532 I NU-NuPlayerRenderer: flushing audio
+09-07 10:25:58.109 13495 13523 I AmAVUtils: set profile 1668446539 level:0
+09-07 10:25:58.109 13495 13523 I AmAVUtils: set default max-input-size to 1887436
+09-07 10:25:58.109 13495 13523 I NU-AmNuPlayer: AmNuPlayer::Source::getFormat frame-rate = 24
+09-07 10:25:58.109 13495 13523 D NU-AmNuPlayerDriver: notifyListener_l(0xabe2e280), (200, 804, -2147483648, -1), loop setting(0, 0)
+09-07 10:25:58.110 13495 13523 D NU-AmNuPlayerDriver: notifyListener_l(0xabe2e280), (211, 0, 0, 20), loop setting(0, 0)
+09-07 10:25:58.110 13495 13523 I NU-AmNuPlayer: decoder audio flush completed
+09-07 10:25:58.111 13495 13532 I NU-NuPlayerRenderer: PTS: queue[video]:14993172:VJ=0:Aj=0 ,postions 0
+09-07 10:25:58.112 11798 12650 W MediaPlayerNative: info/warning (804, -2147483648)
+09-07 10:25:58.112 11798 11798 D DuoKanPlayer: onInfo : what = 804, extra = -2147483648
+09-07 10:25:58.113 11798 11798 I VideoFragment: onInfo: 804, -2147483648
+09-07 10:25:58.115 13495 13523 I NU-AmNuPlayer: audio shutdown completed
+09-07 10:25:58.115 13495 13523 I NU-AmNuPlayer: audio setHasNoMedia
+
+media.hls.disable-nuplayer
+media.ffmpegextractor.enable
+
+
+
+替换mainline的libavenhancements.so到/vendor/lib，进行下面的尝试
+1.抽线+bypass di同样能复现
+echo 2 > /sys/module/amvideo/parameters/force_vskip_cnt
+echo 1 > /sys/module/di/parameters/bypass_all
+2. 性能模式无效果，默认的已经是1.4G，最高的cpu频率
+echo performance >  scaling_governor
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+1416000
+3.gpu 频率设置成最大，无效果
+echo 3 > /sys/class/mpgpu/scale_mode
+cat /sys/class/mpgpu/cur_freq
+744
+4.设置成no audio不能复现
+setprop media.amplayer.noaudio true
+5. dts passthrough，不使用liscene的dts so，不能复现
+
+
+echo 0x2 > /sys/module/amvdec_mmpeg4/parameters/debug_enable
+
+
+ninjia 7
+1 在uboot selinux 关了
+setenv EnableSelinux permissive;save;reset
+
+2  mount product 分区，删掉原来的apk
+mount -rw -o remount /product
+rm  /product/app/Netflix/Netflix.apk
+
+3 mount vendor 分区，修改认证版本为ninja7
+ vi /vendor/build.prop
+ 搜索  ro.vendor.nrdp.validation=ninja_6
+ 修改成ro.vendor.nrdp.validation=ninja_7
+ wq ，保存重启
+ 
+ 
+TV-10691[MIUI][X30A2][T972][9.0][VIDEO]:The video is dead frame about 8s when play MS12 DRC file .(100%)
+TV-10675[MIUI][X30A2][T972][9.0][VIDEO]:The picture is not smooth when playing online video "故梦"
+TV-10673[MIUI][X30A2][T972][9.0][VIDEO]:The picture is dead frame and has cross striation with sound when playing online video "时髦的秋裤"
+TV-10671[MIUI][X30A2][T972][9.0][VIDEO]:"The video frame rate exceeds the support range, press "Return" key to return" displays when playing the local video ”www.5anba.com]2009一級方程式 英國站-週日大獎賽.wmv“
+--客户自己解析的及处理的
+TV-10665[MIUI][X30A2][T972][9.0][VIDEO]:The local play video “134108-xvid-mp3-704x340-6k-gmc-bf-6m.avi will occur mosaic when playing.
+--这种mpeg4的格式，decoder不支持，同TV-4466
+TV-10661[MIUI][X30A2][T972][9.0][VIDEO]:The local video "4KVP9_50fps_Mbps_8bit]Wetek-Astra_12343_H_30000-Insight UHD Pearl TV.webm" which carton mosaic and green stripe when playing for several minutes.
+TV-10659[MIUI][X30A2][T972][9.0][AML-620][Video]:Part of of flv format video can't play.(100%, X301 OK)
+TV-10657[MIUI][X30A2][T972][9.0][VIDEO]:The picture of the local video "gonein60sec_1200.avi" will be stucked and sound is normal when seeking, exiting and replay it again, there is only sound withound picture.
+TV-10600[MIUI][X30A2][T972][9.0][VIDEO]:The video named "Miyavi.-.[Rockin&#39;.mama.festival.vol.1(050925)].asf" will keep the original picture for several seconds before the sound has been updated to the latest seek point when seeking the video.
+
+
+TV-10579[MIUI][X32A7][T84M][9.0][AML-625][VIDEO]:The video occasionally carton mosaic when playing local video which is VP9 8K.
+TV-10568[MIUI][R33A8][T950X][9.0][AML-626][Video]:Local playback "H.264 AVC [6791kbps&29.970fps]25.000fps Andy.Lau. Concert.avi", Audio/Video is not synchronized when starting playback.[100% ]
+TV-10352[MIUI][R33A8][T950X][9.0][Feedback][AML-608][Video]:Play LG.4K.DEMO_Chess_HEVC_60FPS_10bit_HDR.ts source, video card when starting[80%, R311 NG]
+TV-10690[MIUI][R34AE][T920L][5.1][AML-634][Video]:The video will occur "loading buffer circle" when playing.
+--可能是apk没有播放起来，需要log分析
+TV-10525[MIUI][R34AE][T920L][5.1][AML-624][Video]:The content of the “智能摄像机” is black and sometimes the TV source such as the HDMI content is dead frame.
+TV-10631[MIUI][R33A8][T950X][9.0][Feedback][AML-627][Video]: Play "H.264 AVC [6791kbps&29.970fps]25.000fps Andy.Lau. Concert.avi", stuck in the playing interface.[Once, R311 OK]
+
+TV-10044[MIUI][R34AE][T920L][5.1][Video]: The local video 00031.m2ts can not play fluently.
+TV-10032[MIUI][X30A2][T972][9.0][AML-570][Video]:Local video play error.
+TV-9847[MIUI][R34AE][T920L][5.1][Video]: The local video stucks after repeatedly playing and pressing Home key to the main interface.
+TV-9825[P355][T962][6.0][Feedback][AML-520][Video]:Play online video, switch to the next episode, appear a short time.
+TV-9810[MIUI][X30A2][T972][9.0][AML-448][Video]:Picture was not smooth when play AVI_MPEG4+MPEG_1920x1080_29.97fps_6832kbps_S0V1A1_00.04.04.avi.(100%, T962 is ok)
+TV-9701 [MIUI][X32A7][T972][9.0][AML-523][Video];TV had sound and blacklight and no picture when play local video.
+
+
+1. 进入external/chromium-trace目录，连接网络adb
+2.播放出现问题时使用下面的指令抓20秒的trace，生成trace的时间内，需要包含有问题的
+python systrace.py -t 20 -o mynewtrace.html sched freq idle am wm gfx view video binder_driver hal dalvik input res
+
+
+while true; do logcat > logcat_`date +%Y%m%d_%H-%M-%S`; done
+
+echo dump `cat /sys/class/vfm/map | grep "(1)" | awk '{ print $4 }' | sed -n 's/\(.*\)(.*/\1/p'` > /sys/class/vfm/map
+cat /sys/class/vdec/dump_vdec_chunks
+
+
+
+1.ffmpeg这个帮建立个q的分支
+http://aml-code-master.amlogic.com:8080/#/admin/projects/ref-o/vendor/amlogic/frameworks/av,branches
+2.vendor/amlogic/frameworks/av这个目前没有分支，帮建立个q分支
+http://aml-code-master.amlogic.com:8080/#/admin/projects/ref-o/vendor/amlogic/frameworks/av,branches
+
+cat bootorg.img > /dev/block/boot && sync && reboot
+
+#看出第二路一直在drop
+echo 0x4000000 > /sys/module/amvideo/parameters/debug_flag
+
+echo 0x14000000 > /sys/module/amvideo/parameters/debug_flag
+
+echo 0x14400000 > /sys/module/amvideo/parameters/debug_flag
+
+echo 0x400000 > /sys/module/amvideo/parameters/debug_flag
+
+pip sync toggle: http://scgit.amlogic.com:8080/87572
+
+echo 7 > /sys/module/videosync/parameters/vp_debug_flag
+
+
+
+"have hardware/amlogic/media"
+"have hardware/amlogic/media"
+[ 99% 408/409] finishing build rules ...
+FAILED: 
+bootable/recovery/updater/Android.mk: error: "updater (EXECUTABLES android-arm) missing libsecurity (STATIC_LIBRARIES android-arm)" 
+You can set ALLOW_MISSING_DEPENDENCIES=true in your environment if this is intentional, but that may defer real problems until later in the build.
+build/make/core/main.mk:1008: error: exiting from previous errors.
+10:27:03 ckati failed with: exit status 1
+
+1.这个需要创建个Q的分支
+	git://git.myamlogic.com/vendor/amlogic/frameworks/av
+2. AmFFmpegAdapter基于下面的提交创建个q分支
+	commit dd82cff3c5f5be136ce4a3d3db34e6b1b46b4008
+	Change-Id：I7af4694fd3e6bd534a2535384083925b9f6aa61e
+	amffmpegadapter: not put divx to blacklist [1/1]
+3. 这两个需要创建q分支
+	git://git.myamlogic.com/vendor/amlogic/prebuilt/libmedia
+	git://git.myamlogic.com/vendor/amlogic/prebuilt/libstagefright
+
+#VDA
+common
+http://scgit.amlogic.com:8080/#/c/85323/
+http://scgit.amlogic.com:8080/#/c/84088/  ==》 88293
+media_modules：
+http://scgit.amlogic.com:8080/#/c/83441/
+media_hal：
+http://scgit.amlogic.com:8080/#/c/82474/
+
+device：
+http://scgit.amlogic.com:8080/#/c/84090/    ==》 88292 + 88362
+
+omx：
+http://scgit.amlogic.com:8080/#/c/82794/  88723(omx+vda so)
+
+media.omx.support.omx2
+
+
+
+1.manifest
+2.frameworks/av   http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/6508
+mediaserver ext  http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/7015
+3.vendor/frameworks/av   http://scgit.amlogic.com:8080/87869
+4.libmedia  http://scgit.amlogic.com:8080/88193
+5.libstagefright  http://scgit.amlogic.com:8080/#/c/88199/
+6. common ignore  http://scgit.amlogic.com:8080/87899
+7.ffmpeg    http://scgit.amlogic.com:8080/#/c/83056/
+8.devices  http://aml-code-master.amlogic.com:8080/c/ref-o/device/amlogic/franklin/+/6560  extplayer
+
+extractor  7163
+1.manifest  http://aml-code-master.amlogic.com:8080/c/ref-o/platform/manifest/+/7088
+2.ffmpeg    http://scgit.amlogic.com:8080/#/c/83056/
+3. ignore http://scgit.amlogic.com:8080/87899
+
+extractor_codec_ext
+
+codec ext
+4.http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/6508
+
+player
+1.devices  http://aml-code-master.amlogic.com:8080/c/ref-o/device/amlogic/franklin/+/6560  
+2. framework mediaserver http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/7015 
+3. vendor/framework  http://scgit.amlogic.com:8080/87869
+4.libmedia
+5.libstagefright
+http://scgit.amlogic.com:8080/#/c/87979/
+
+http://scgit.amlogic.com:8080/#/c/88020/   Q amnuplaer
+http://scgit.amlogic.com:8080/#/c/88191/   Q extractor
+http://scgit.amlogic.com:8080/88196   Q omx
+
+
+manifest: http://aml-code-master.amlogic.com:8080/c/ref-o/platform/manifest/+/7088
+ffmpeg: http://scgit.amlogic.com:8080/#/c/83056/
+vendor/framwork/av http://scgit.amlogic.com:8080/87869
+
+
+-------need review
+1.manifest  http://aml-code-master.amlogic.com:8080/c/ref-o/platform/manifest/+/7088
+2.ffmpeg    http://scgit.amlogic.com:8080/#/c/83056/ ---已merge
+3.frameworks/av   http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/6508
+
+4. device franklin   http://scgit.amlogic.com:8080/#/c/88841/
+5. device netwn      http://scgit.amlogic.com:8080/88252
+6  vendor/frameworks/av http://scgit.amlogic.com:8080/#/c/88271/   ---已merge
+7. common app invoke ffmepg extractor    http://scgit.amlogic.com:8080/#/c/88551/
+8. commmon so        http://scgit.amlogic.com:8080/#/c/87979/
+
+source：
+http://scgit.amlogic.com:8080/#/c/88020/   Q amnuplaer
+http://scgit.amlogic.com:8080/#/c/88191/   Q extractor
+http://scgit.amlogic.com:8080/88196   Q omx
+
+
+player
+1.vendor/frameworks/av   http://scgit.amlogic.com:8080/#/c/88271/    3/5
+2. framework mediaserver http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/7015 xxxx no use
+.libmedia  http://scgit.amlogic.com:8080/88193   xxxxxxxxxxxxx
+.libstagefright  http://scgit.amlogic.com:8080/#/c/88199/ xxxxxxxxx
+3. http://scgit.amlogic.com:8080/#/c/87979/   omx + player
+4.devices  http://aml-code-master.amlogic.com:8080/c/ref-o/device/amlogic/franklin/+/6560
+--------------------------////////////////////////////////
+http://aml-code-master.amlogic.com:8080/c/ref-o/device/amlogic/franklin/+/6560  1
+http://scgit.amlogic.com:8080/88252 2 
+http://scgit.amlogic.com:8080/#/c/87869/ xxx 3
+http://aml-code-master.amlogic.com:8080/c/pdk-o/platform/frameworks/av/+/7015  no use
+http://scgit.amlogic.com:8080/#/c/87979/
+
+http://aml-code-master.amlogic.com:8080/c/ref-o/device/amlogic/franklin/+/6560  1
+http://scgit.amlogic.com:8080/88252 2
+
+
+
+source:
+http://scgit.amlogic.com:8080/#/c/88020/   Q amnuplaer
+http://scgit.amlogic.com:8080/#/c/88191/   Q extractor
+http://scgit.amlogic.com:8080/88196   Q omx
+
+
+http://scgit.amlogic.com:8080/88226 remote so
+
+http://scgit.amlogic.com:8080/88551 force ffmpeg
+
+
+		
+		chmod +x device/amlogic/common/quick_build_kernel.sh
+	2. 编译
+		export KERNEL_A32_SUPPORT=false;export TARGET_KERNEL_BUILT_FROM_SOURCE=true;
+		export BOARD_AML_VENDOR_PATH=vendor/amlogic/common/;export TOP=$PWD;
+		device/amlogic/common/quick_build_kernel.sh build-modules
+		
+		
+				atrace -z -b 20000 sched irq freq idle video binder_driver -t 10 -a \"*\" -o /data/local/tmp/trace1;
+	循环抓只保留最后多少内存的数据
+		echo 0 > /sys/class/debug/atrace_tag
+		echo 1 > /sys/class/debug/atrace_tag
+		echo 2 > /sys/class/debug/atrace_tag
+		echo 3 > /sys/class/debug/atrace_tag
+			cat /sys/class/debug/atrace_tag
+	
+gfx input view webview wm am sm audio  video 
+camera hal res dalvik rs bionic power pm ss database network adb vibrator
+ aidl pdx sched irq i2c freq idle disk mmc load sync workq memreclaim regulators binder_driver binder_lock pagecache
+ 
+		播放开始的时候
+		echo 1 > /sys/kernel/debug/tracing/events/meson_atrace/enable
+		atrace -b 25000 sched irq freq idle video gfx input view webview sync binder_driver --async_start -o /data/local/tmp/trace1
+
+		出问题之后
+		atrace --async_stop -o /data/local/tmp/trace1
+
+
+echo 1 > /sys/module/amvdec_ports/parameters/aml_vcodec_dbg;
+echo 2 > /sys/module/amvdec_ports/parameters/aml_v4l2_dbg_level;
+echo 1 > /sys/module/v4l2_mem2mem/parameters/debug;
+echo 1 > /sys/module/videobuf_res/parameters/debug;
+echo 1 > /sys/module/videobuf2_core/parameters/debug;
+echo 1 > /sys/module/videobuf_core/parameters/debug;
+echo 1 > /sys/module/videobuf2_v4l2/parameters/debug;
+echo 1 > /sys/module/amvdec_mh264/parameters/h264_debug_flag
+echo 1 > /sys/class/video4linux/video26/dev_debug
+echo 8 > /proc/sys/kernel/printk;
+
+
+echo 0x0010 > /sys/module/amvdec_mh264/parameters/h264_debug_flag
+
+
+帮忙用下面的code 1952确认下，我本地已经确认是可以的
+1. divx是因为版权问题不支持的，divx流正常情况是不能播放的，会提示“Un Supported Video”
+2. VP6，rmvb可以正常播放，提供的ogm流是divx会出现有声音没有画面
+http://jenkins-sh.amlogic.com:8080/job/android/job/Android_Q/job/Android_Q_Google_ref_PATCHBUILD/1952/
+
+
+media.hls.disable-nuplayer
+media.ffmpegextractor.enable
+
+pm disable com.google.android.tungsten.setupwraith;
+settings put secure user_setup_complete 1;
+settings put secure tv_user_setup_complete 1;
+settings put global device_provisioned 1
+
+
+$(BOARD_AML_VENDOR_PATH)/prebuilt/libstagefrighthw/lib/libvideo_dec.so:$(TARGET_COPY_OUT_VENDOR)/lib/libvideo_dec.so
+
+
+file name  video type    width height 
+
+
+1.TV-11490 [MIUI][X30A2][T972][9.0][Video]The video "00001.m2ts" will occur black screen but has sound when playing at the first time.
+----没有复现
+2.TV-7143 [X30A2][T972][9.0][Video]:The thumbnails appear green and there are a lot of mosaics
+----需要复现
+3.TV-8750[X30A2][T972][9.0][Video]:PIP display last frame local video picture when exit local video to lanucher.(100%, X301 NG)
+----重复bug？？
+4.TV-10661 [SWPL-14914][MIUI][X30A2][T972][9.0][VIDEO]:The local video "4KVP9_50fps_Mbps_8bit]Wetek-Astra_12343_H_30000-Insight UHD Pearl TV.webm" which carton mosaic and green stripe when playing for several minutes.
+
+
+
+
+1.默认的omx 255 打开，把kernel log 和logcat提供下，如果不能分析出问题时就需要使用下面方法来进一步定位问题
+setprop media.omx.log_levels 255
+
+2.小米使用自己player的平台比如972 出现黑屏，卡顿不流畅、静帧问题时，再复现时抓log方法
+1）copy scratch-logcat-toyb-59fps-kernel-all.sh到/data目录，
+并修改权限 chmod +x scratch-logcat-toyb-59fps-kernel-all.sh
+2) cd到/data目录，开始播放前执行./scratch-logcat-toyb-59fps-kernel-all.sh
+出现问题后（dump完decoder的一些信息可以推出播放），退出播放，等待超过40s后，使用下面命令把log都打包，把生成的log-1.tar.gz提供下
+tar cvfz log-1.tar.gz k_* logcat.log
+note: 
+	a) 出现问题后，不要再进行其它操作（退出播放除外），比如seek，再播放其它片源
+    b）fae可以使用此wiki来dump信息，http://wiki-china.amlogic.com/Media/%e5%a4%9a%e5%aa%92%e4%bd%93%e7%9b%b8%e5%85%b3%e7%9f%a5%e8%af%86/%e5%a4%9a%e8%b7%af%e8%a7%a3%e7%a0%81%e9%97%ae%e9%a2%98%e5%88%86%e6%9e%90
+	c）如果上面的log不能定位是小米问题还是我们的问题时，需要替换些so之类的，替换这后也是用上面的方法抓log
+
+3.小米使用我们的player的平台，比如960x，950x 出现黑屏，卡顿不流畅、静帧问题时，如果RD不能使用公版复现问题，再复现时请使用下面的方法
+抓log方法
+1）设置相关属性
+   setprop media.hls.ptsdebug 8
+2）使用同样使用2中说的方法抓log
+
+4.花屏马赛克问题分析一般需要dump流来分析
+  mkdir /data/tmp/
+  setenforce 0
+  chmod 777 /data/tmp/
+  setprop media.omx.dumpCodec true
+  
+
+两个原因造成fail
+1）开始进入播放的时候，
+
+am start -n com.netflix.ninja/com.netflix.ninja.MainActivity -a android.intent.action.VIEW -d 'https://www.netflix.com/watch/80996905?source=99'
+
+ffmpeg -re -i F:/08.flv -vcodec copy -acodec copy -f flv rtmp://localhost:1935/live/stream
+
+
+rtsp://10.68.13.188:8554/live
+
+        deleted:    Am-Hdcpadaptor/Android.mk
+        modified:   Am-Httplive/Android.mk
+        modified:   Am-mpeg2ts/Android.mk
+        modified:   AmFFmpegExtractor.h
+        modified:   AmFFmpegSource.cpp
+        modified:   AmFFmpegSource.h
+		
+		
+http://10.68.13.188:8554/dv/zion.dm1_U25000.ts
+
+		
+http://10.68.13.188:8554/dv/zion.dm1_U25000.ts
+
+http://10.68.11.62:8800/dv/zion.dm1_U25000.ts
+
+
+http://10.68.11.62:8800/dv/zion.dm1_U25000.ts
+
+wplay http://10.68.11.62:8800/dv/index1.m3u8
+
+udp://239.1.1.1:8210
+
+nts问题
+1）SWPL-11287 SWPL-9821 Netflix Ninja 7 feature integration-Fast Playback Requirements
+   SWPL-15813 {NTS}Run netlfix Automated test case,PLAY-LAT-XXX-XXX-XXX, DEL-PLAY-LAT-XXX-XXX-XXX, 48 test cases fail
+   ----这个是目前卡在audio的问题
+2）SWPL-15976 [NTS][Manual]FPSTART-24FPS-HR-AL1/H264-DDP51 failed step 10,timeout
+	---这个已经有patch，同SWPL-15397
+3）SWPL-15994 Netflix Ninja 7 feature integration-Fast Playback Requirements-LASTFRAME-DISPLAY-UNDERFLOW-*
+   SWPL-15968 [NTS][Manual]LASTFRAME-DISPLAY-UNDERFLOW-AL1-HEAAC failed step 11,not display all the frames
+	--同一问题
+4）SWPL-15987[NTS][Manual]EP:DRS-AUDIO-AL1-23FPS-ATMOS/DDP5.1-DWN/UP exist 1-2 times freeze;Frequency:3/3
+   SWPL-15951[NTS][Adhoc]standby/resume,video can't playback
+   SWPL-15949 NTS}[Adhoc]HD(H264) Video,Pause/play playback,exist freeze
+   ---264的play相关问题
+5）SWPL-15806 {NTS}Netflix APK, play ATMOS source, switch from AMTOS to stereo output, AVSync is not synchronized
+   ---同步问题，可能已经好了
+
+Q播放问题
+1） SWPL-16636 {A/V} Android Q can not user gallery to play every network protocol streaming. Frequency: 10/10 of the times comparison: android P is normal
+	SWPL-16439 CLONE - {A/V} Android Q not support HLS AVS streaming Probability: 10/10 of the times comparison: android P is normal
+	---应该是同一问题，目前网络下载不下来
+2）SWPL-16497 {A/V} Android Q Need to support UDP / RTSP / RTP protocol streaming player Frequency: 10/10 of the times comparison: android P is normal
+   ---需要port下rts的source
+3）SWPL-15012{AC214}{Android Q}{A/V}movieplayer apk defaults used the osd layer, the image is poor,video layer should be used；block PQ testing;(100%);contrast:Android P OK
+   ----需要强制video播放的问题
+
+   
+media.ffmpegextractor.enable false
+setprop media.hls.disable-nuplayer true
+
+
+setprop media.omx.out_buffer2_360 6
+echo 0x200 > /sys/module/amvdec_vp9/parameters/double_write_mode
+chmod 444 /sys/module/amvdec_vp9/parameters/double_write_mode
+
+echo 4 > /sys/module/decoder_common/parameters/debug
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -87,13 +87,26 @@ gitdir=$(git rev-parse --git-dir); scp -p -P 29418 shuanglong.wang@scgit.amlogic
 git commit --amend
 
 git merge xxx
-git push  origin HEAD:refs/for/refs/heads/master
+git push origin HEAD:refs/for/refs/heads/master
+
+media.omx.drm_framemode
+
+git remote add review ssh://shuanglong.wang@aml-code-master.amlogic.com:29418/ref-o/device/amlogic/franklin
 
 
 so 编译 先需要pull 到最新 ，然后加你上你改动，find . -type f -exec touch {} \; 再mm -B
 你编译的so 需要按照这个步骤重新编译 提交一下
 代码pull 到最新 ，然后加你上你改动 
 然后把所有生成的so 覆盖到libstagefright lib 目录
+
+
+
+    vi -b filename
+    :%!xxd
+待编辑工作完成后，执行下面的命令即可将其转换回去
+
+    :%!xxd -r
+
 
 
 3.usb burning uboot->update
@@ -168,6 +181,7 @@ samba passwd: abc@123456
 original passwd: RpocMiZ
 outlook 20170929 abc@12345 => Rpoc4MiZ
 20171010=》abc@123456
+Rpoc4MiZ1->Rpoc4MiZ2 20190321
 
 20180925=>Rpoc4MiZ1
 
@@ -183,6 +197,7 @@ android O
 dumpsys SurfaceFlinger --latency "com.droidlogic.videoplayer/com.droidlogic.videoplayer.VideoPlayer#0"
 
 dumpsys SurfaceFlinger --latency "org.xbmc.kodi/org.xbmc.kodi.Main#0"
+dumpsys SurfaceFlinger --latency "SurfaceView - com.netflix.ninja/com.netflix.ninja.MainActivity#1"
 
 绑定其它cpu
 cat /proc/irq/158/smp_affinity
@@ -191,6 +206,8 @@ cat /proc/interrupts
 goole帐号、netflix账号
  shuanglong.wangwsl@gmail.com
  iloveyou1314yz
+ shuanglong.wang@amlogic.com
+ Rpoc4MiZ1
  cts2.4G
  @ml4yourlife
  
@@ -201,10 +218,19 @@ goole帐号、netflix账号
  testeramologic2@netflix.com
  am123logic
  
+ mount -rw -o remount /product
+ 
  #显示netflix app 网络信息
  input keyevent 138
  
  testvp9@netflix.com 密码1234
+ 
+ amazon
+ mmsw_auto1@amazon.com 
+mmdaauto1
+
+amltest5@amlogic.com
+amlqa123
  
  google帐号：
  netwang88@gmail.com   Amlqa?9a
@@ -216,6 +242,10 @@ Amlqa?6a
 netflix parter nts账号
 shuanglong.wang@amlogic.com
 Amlogic123!
+
+
+#surfaceflinger optimization
+setprop media.sf.omxvideo-optmize  1
 
 关掉红外
 echo 0x02 > /sys/class/remote/amremote/protocol
@@ -241,11 +271,21 @@ keyman query exist widevinekeybox
 keyman query exist hdcp 
 
 Widevien key uboot命令行输入
-usb start;fatload usb 0 12000000  aml-test-p212-008.bin aml-test-r321-120.bin aml-test-p212-008.bin aml-test-p241-181.bin  // widevinekeybox.bin
+usb start;fatload usb 0 12000000 widevinekeybox0000105 aml-test-p241-181.bin aml-test-p212-008.bin aml-test-r321-120.bin aml-test-p212-008.bin aml-test-p241-181.bin  // widevinekeybox.bin
 keyunify init 0
 keyunify write widevinekeybox 0x12000000 128
 save
 reset
+
+8 chen.cry
+6 zhiguang
+4 wencai.you
+
+5  OK
+
+2@Safety123456
+wencai.you@amlogic.com
+
 
 pr key 烧写
 keyunify init 0 
@@ -261,6 +301,11 @@ reset
 #wifi
 appolo
 Amluser88!!
+
+ying.long
+10.28.8.21
+yingwei.long
+密码WY1wlY3
 
 while true; do echo m > /proc/sysrq-trigger; cat /proc/pagetrace; cat /proc/slabinfo; dumpsys meminfo; sleep 300; done &
 
@@ -305,6 +350,8 @@ server:    10.28.8.22
 account:   firmware.autobuild
 password:  78Vsh$!!
 port:      22
+
+etprop debug.stagefright.omx-debug 5
 
 
 //stream mode
@@ -358,6 +405,8 @@ echo 1 > /sys/module/amvideo/parameters/force_vskip_cnt
 
 编译8.0的boot.img
 export BOARD_COMPILE_ATV=true
+
+usb_update boot boot.img
 
 server: ftp-china.amlogic.com   ( 10.18.11.251:21)
 account: firmware.reference
@@ -446,8 +495,10 @@ bypass hdr
 echo 0 > /sys/module/am_vecm/parameters/csc_en
 
 #9.0编译32bit bootimg ko
-export?KERNEL_A32_SUPPORT=true
+export KERNEL_A32_SUPPORT=true
 
+netflix 7.0
+min.liu@amlogic.com            Aml1234!
 
 dump ge2d reg: 设置下面命令，再执行一次ge2d操作
 echo 1 >/sys/class/ge2d/dump_reg_enable
@@ -487,6 +538,9 @@ non-screen
 kernel
 atrace -z -b 20000 sched irq freq idle load memreclaim  -t 10 > /data/trace_output1
 
+//netflix debug log
+setprop debug.nrdp.log.module 1
+
 
 netflix常测试的视频
 stet he chimera
@@ -516,6 +570,37 @@ cat /sys/class/codec_mm/codec_mm_dump
 echo codec_mm.default_tvp_4k_size=201326592 > /sys/class/codec_mm/config 
 
 
+看decoder freq
+cat /sys/kernel/debug/aml_clkmsr/clkmsr | grep hevc
+cat /sys/kernel/debug/aml_clkmsr/clkmsr | grep vdec
+
+绿屏
+./vendor/bin/tee_debug dump secmem //对比下绿屏前后寄存器的差
+比如找到这两寄存器异常
+[0xff6388cc]=0x55555555 DMC_VPU_SEC_WRITE_CTRL
+[0xff6388c8]=0xffffffff DMC_VPU_SEC_READ_CTRL
+高16bit 是写， 低16bit 是读，
+一位位的禁止，直到找到这一位，可以用二分法
+./tee_debug.debug ef set 0xff63889c 0xffffffef
+
+export KERNEL_A32_SUPPORT=false
+
+20191009
+ssh重启 2UW035G$#
+深圳 10.28.8.25  samba Login password:	 8rw02vc
+
+
+接4K显示屏
+setenv model_name UHD_1RG; save;reset
+
+#osd dump
+dd if=/dev/graphics/fb0 of=/sdcard/fb0.rgb32
+
+non-tunnel mode
+1. app release buffer时会把当前视频帧的pts设置到系统中的omx_pts
+2. 系统时间pcr与omx_pts的差值有个阈值window的判断，(-1.5sync, 3sync),超过这个window就会根据omx_pts调整系统时间pcr
+3. video的显示紧跟着pcr
+
 测温度
 cnt=0
 while true; do
@@ -531,6 +616,93 @@ while true; do
 	echo ------------ cnt=$cnt -----------
     sleep 1
 done;
+
+1.HeapTaskDaemon, Storaged, HWBinder, IpClent.eth0, DOLBY_MS12
+2. 执行GC操作的时候，任何线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行
+-Memory Churn内存抖动，内存抖动是因为大量的对象被创建又在短时间内马上被释放。
+-瞬间产生大量的对象会严重占用Young Generation的内存区域，当达到阀值，剩余空间不够的时候，也会触发GC。
+即使每次分配的对象占用了很少的内存，但是他们叠加在一起会增加Heap的压力，从而触发更多其他类型的GC。
+这个操作有可能会影响到帧率，并使得用户感知到性能问题
+
+#yuv dump
+该功能在android 9.0 2019年之后的版本支持yuv dump功能
+1) 在播放前串口下执行如下两个命令
+mkdir -p /data/tmp;chmod 777 /data/tmp;setenforce 0; 
+echo 0 1 30 > /sys/class/vdec/dump_yuv
+第一行是设置dump yuv的路径
+第二行是 echo 0 1 2 > /sys/class/vdec/dump_yuv
+其中0 :vdec.id 
+
+=0         1: 表示从第1帧开始dump.     2: 表示连续dump帧个数
+note:   由于h264 canvas blkmod默认是32x32, 故dump h264的yuv时，需预先设置 dump_yuv，其他格式可在播放时设置触发dump
+
+2) dump 生成的yuv文件， 需要用7yuv工具看,设置好图像的分辨率， 选择YUV420 NV12格式.可以看
+
+
+#include <linux/time64.h>
+struct timespec64 t;
+getrawmonotonic64(&t);
+struct timespec64 delta_t = timespec64_sub(t1, t2);
+s64 delay_ns = timespec64_to_ns(&t1);
+
+#include <linux/math64.h>
+6765 static void vsync_fiq_up(void)
+ 6766 {
+ 6767 #ifdef FIQ_VSYNC
+ 6768     request_fiq(INT_VIU_VSYNC, &vsync_fisr);
+ 6769 #else
+ 6770     int r;
+ 6771     /*TODO irq     */
+ 6772     r = request_irq(video_vsync, &vsync_isr,
+ 6773         IRQF_SHARED, "vsync", (void *)video_dev_id);
+ 6774 
+ 6775 #ifdef CONFIG_MESON_TRUSTZONE
+ 6776     if (num_online_cpus() > 1)
+ 6777         irq_set_affinity(INT_VIU_VSYNC, cpumask_of(1));
+ 6778 #endif
+ 6779 #endif
+ 6780 }
+ 
+ 
+How to remount
+1. enter bootloader fastboot mode:
+
+fastboot flashing unlock_critical
+fastboot flashing unlock
+fastboot reboot
+2. run in adb mode
+
+adb root
+adb disable-verity
+adb reboot
+#############adb wait-for-device############
+adb root
+adb shell setenforce 0      # this cmd is needed by remount system & vendor, for product/odm, you can ignore it
+adb remount
+
+
+#android q golang
+build/soong/android/config.go
+
+ 
+深圳服务器：
+droid16-sz
+zhiguang.zhang
+bWLqzCl
+
+
+shipeng
+10.68.11.55
+shipeng.sun
+Myforlovers0625
+~/workdir/Amaza/
+
+zhiguang 55
+upt#b!f4m
+
+小米现场server
+10.235.177.192
+ssh://git@source.amlogic.com/airwave/
 
 keyman write hdcp 309 12000000
 4.解决的bug
