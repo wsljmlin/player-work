@@ -1,0 +1,36 @@
+echo 0 > /proc/sys/kernel/printk 1>/dev/null 2>&1
+mount -t debugfs debugfs /sys/kernel/debug/
+
+echo 0 > /sys/kernel/debug/tracing/tracing_on
+echo 0 > /sys/kernel/debug/tracing/events/enable
+
+atrace sched irq freq idle gfx binder_driver ss am  pagecache video audio --async_start
+
+
+echo 10000 > /sys/kernel/debug/tracing/buffer_size_kb
+
+1>/dev/null 2>&1 echo 1 > /proc/sys/kernel/sched_schedstats
+1>/dev/null 2>&1 echo 1 > /sys/kernel/debug/tracing/options/record-tgid
+1>/dev/null 2>&1 echo 1 > /sys/kernel/debug/tracing/options/print-tgid
+
+
+echo 1 > /sys/kernel/debug/tracing/events/irq/enable
+echo 1 > /sys/kernel/debug/tracing/events/sched/enable
+echo 1 > /sys/kernel/debug/tracing/events/timer/enable
+echo 1 > /sys/kernel/debug/tracing/events/workqueue/enable
+echo 1 > /sys/kernel/debug/tracing/events/power/enable
+echo 1 > /sys/kernel/tracing/events/sched/sched_blocked_reason/enable
+
+echo 1 > /sys/kernel/debug/tracing/events/block/enable
+
+1>/dev/null 2>&1 echo 1 > /sys/kernel/debug/tracing/events/meson_atrace/enable
+for loop in `cat /sys/class/debug/atrace_tag | grep OFF | awk '{print $1}'`; do echo $loop > /sys/class/debug/atrace_tag; done
+cat /sys/class/debug/atrace_tag
+
+echo 1 > /sys/kernel/debug/tracing/tracing_on
+echo "" > /sys/kernel/debug/tracing/trace
+
+
+
+echo 0 > /sys/kernel/debug/tracing/tracing_on
+dd if=/sys/kernel/debug/tracing/trace of=/data/trace bs=4096
