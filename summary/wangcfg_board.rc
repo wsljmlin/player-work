@@ -1,6 +1,6 @@
 #!/bin/sh
 
-tftpserverip=10.68.13.158
+tftpserverip=10.68.13.63
 #10.68.8.202
 ##
 ##get file from windowns
@@ -118,6 +118,7 @@ function dumpomxrv() {
 	setenforce 0
 	chmod 777 /data/tmp/
 	setprop media.omx.dumpRecv true
+	setprop vendor.media.omx.dumpRecv true
 }
 
 function dumpomxcs() {
@@ -128,6 +129,7 @@ function dumpomxcs() {
 	setenforce 0
 	chmod 777 /data/tmp/
 	setprop media.omx.dumpCodec true
+	setprop vendor.media.omx.dumpCodec true
 }
 
 function dumpdves() {
@@ -144,70 +146,92 @@ function dumpvdec() {
 	echo "echo dump $1 > /sys/class/vfm/map"
 	echo dump $1 > /sys/class/vfm/map
 }
+
+function dumpdmafd() {
+    cat /sys/class/codec_mm/codec_mm_dump
+    lsof | grep "dmabuf" > /data/lsof.tmp
+    echo "PROCESS:PID:FD: SIZE: INO"
+    cat lsof.tmp | while read line
+    do
+        name=`echo $line | awk '{print $1}'`
+        pid=`echo $line | awk '{print $2}'`
+        fd=`echo $line | awk '{print $4}' | sed -n 's/\(.*\)u/\1/p'`
+        if [ -f  "/proc/$pid/fdinfo/$fd" ]
+        then
+            size=`cat /proc/$pid/fdinfo/$fd | sed -n 's/size:\(.*\)/\1/p'`
+            ino=`cat /proc/$pid/fdinfo/$fd | sed -n 's/ino:\(.*\)/\1/p'`
+            echo "$name:$pid:$fd:$size:$ino"
+        fi
+    done < /data/lsof.tmp
+    rm -f /data/lsof.tmp
+}
+
 ###
 ### main start
 ###
 curdatestr=`date +%Y%m%d`
-fpcnt=0
-export fpcnt
+logcatfpcnt=0
+kfpcnt=0
+export logcatfpcnt
+export kfpcnt
 
-alias procm='procrank | grep "me"'
+#alias procm='procrank | grep "me"'
 alias wplay='echo "am start -n com.android.gallery3d/.app.MovieActivity -d" && am start -n com.android.gallery3d/.app.MovieActivity -d'
 alias pk0='echo "echo 0 > /proc/sys/kernel/printk" && echo 0 > /proc/sys/kernel/printk'
 alias pk7='echo "echo 7 > /proc/sys/kernel/printk" && echo 7 > /proc/sys/kernel/printk'
 alias pk8='echo "echo 8 > /proc/sys/kernel/printk" && echo 8 > /proc/sys/kernel/printk'
 alias lpk='echo "cat /proc/sys/kernel/printk" && cat /proc/sys/kernel/printk'
-alias acion='echo 1 > /sys/class/tsync/debug_audio_pts && echo 1 > /sys/class/tsync/debug_pts_checkin'
-alias acoon='echo 1 > /sys/class/tsync/debug_audio_pts && echo 1 > /sys/class/tsync/debug_pts_checkout'
-alias vcion='echo 1 > /sys/class/tsync/debug_video_pts && echo 1 > /sys/class/tsync/debug_pts_checkin'
-alias vcoon='echo 1 > /sys/class/tsync/debug_video_pts && echo 1 > /sys/class/tsync/debug_pts_checkout'
-alias acioff='echo 0 > /sys/class/tsync/debug_audio_pts && echo 0 > /sys/class/tsync/debug_pts_checkin'
-alias acooff='echo 0 > /sys/class/tsync/debug_audio_pts && echo 0 > /sys/class/tsync/debug_pts_checkout'
-alias vcioff='echo 0 > /sys/class/tsync/debug_video_pts && echo 0 > /sys/class/tsync/debug_pts_checkin'
-alias vcooff='echo 0 > /sys/class/tsync/debug_video_pts && echo 0 > /sys/class/tsync/debug_pts_checkout'
-alias vcicoon='vcion && vcoon'
-alias vcicooff='vcioff && vcooff'
-alias acicoon='acion && acoon'
-alias acicooff='acioff && acooff'
-alias avcioptson='acicoon && vcicoon'
-alias avcioptsoff='acicooff && vcicooff'
-alias osdon='echo "setprop media.omx.display_mode 0" && setprop media.omx.display_mode 0'
-alias osdoff='echo "setprop media.omx.display_mode 1" && setprop media.omx.display_mode 1'
-alias losd='echo "getprop media.omx.display_mode" && getprop media.omx.display_mode'
-alias nuon='echo "setprop media.amnuplayer.localplay true" && setprop media.amnuplayer.localplay true'
-alias nuoff='echo "setprop media.amnuplayer.localplay false" && setprop media.amnuplayer.localplay false'
-alias sdon='echo "setprop media.omx.single_mode 1" && setprop media.omx.single_mode 1'
-alias sdoff='echo "setprop media.omx.single_mode 0" && setprop media.omx.single_mode 0'
-alias audiooff='echo "setprop media.amplayer.noaudio true" && setprop media.amplayer.noaudio true'
-alias audioon='echo "setprop media.amplayer.noaudio false" && setprop media.amplayer.noaudio false'
+#alias acion='echo 1 > /sys/class/tsync/debug_audio_pts && echo 1 > /sys/class/tsync/debug_pts_checkin'
+#alias acoon='echo 1 > /sys/class/tsync/debug_audio_pts && echo 1 > /sys/class/tsync/debug_pts_checkout'
+#alias vcion='echo 1 > /sys/class/tsync/debug_video_pts && echo 1 > /sys/class/tsync/debug_pts_checkin'
+#alias vcoon='echo 1 > /sys/class/tsync/debug_video_pts && echo 1 > /sys/class/tsync/debug_pts_checkout'
+#alias acioff='echo 0 > /sys/class/tsync/debug_audio_pts && echo 0 > /sys/class/tsync/debug_pts_checkin'
+#alias acooff='echo 0 > /sys/class/tsync/debug_audio_pts && echo 0 > /sys/class/tsync/debug_pts_checkout'
+#alias vcioff='echo 0 > /sys/class/tsync/debug_video_pts && echo 0 > /sys/class/tsync/debug_pts_checkin'
+#alias vcooff='echo 0 > /sys/class/tsync/debug_video_pts && echo 0 > /sys/class/tsync/debug_pts_checkout'
+#alias vcicoon='vcion && vcoon'
+#alias vcicooff='vcioff && vcooff'
+#alias acicoon='acion && acoon'
+#alias acicooff='acioff && acooff'
+#alias avcioptson='acicoon && vcicoon'
+#alias avcioptsoff='acicooff && vcicooff'
+#alias osdon='echo "setprop media.omx.display_mode 0" && setprop media.omx.display_mode 0'
+#alias osdoff='echo "setprop media.omx.display_mode 1" && setprop media.omx.display_mode 1'
+#alias losd='echo "getprop media.omx.display_mode" && getprop media.omx.display_mode'
+#alias nuon='echo "setprop media.amnuplayer.localplay true" && setprop media.amnuplayer.localplay true'
+#alias nuoff='echo "setprop media.amnuplayer.localplay false" && setprop media.amnuplayer.localplay false'
+#alias sdon='echo "setprop media.omx.single_mode 1" && setprop media.omx.single_mode 1'
+#alias sdoff='echo "setprop media.omx.single_mode 0" && setprop media.omx.single_mode 0'
+#alias audiooff='echo "setprop media.amplayer.noaudio true" && setprop media.amplayer.noaudio true'
+#alias audioon='echo "setprop media.amplayer.noaudio false" && setprop media.amplayer.noaudio false'
 alias apts='echo "cat /sys/class/tsync/pts_audio" && cat /sys/class/tsync/pts_audio'
 alias vpts='echo "cat /sys/class/tsync/pts_video" && cat /sys/class/tsync/pts_video'
 alias pcr='echo "cat /sys/class/tsync/pts_pcrscr" && cat /sys/class/tsync/pts_pcrscr'
-alias rendqon='echo "setprop media.hls.ptsdebug 8" && setprop media.hls.ptsdebug 8'
-alias rendqoff='echo "setprop media.hls.ptsdebug 1" && setprop media.hls.ptsdebug 1'
-alias logsrender='echo "logcat -c && logcat -s NU-NuPlayerRenderer" && logcat -c && logcat -s NU-NuPlayerRenderer'
-alias logsamgensource='echo "logcat -c && logcat -s NU-GenericSource" && logcat -c && logcat -s NU-GenericSource'
-alias logsextractor='echo "logcat -c && logcat -s AmFFmpegExtractor" && logcat -c && logcat -s AmFFmpegExtractor'
-alias subton='echo "setprop media.amplayer.nosubtitle 0" && setprop media.amplayer.nosubtitle 0'
-alias subtoff='echo "setprop media.amplayer.nosubtitle 1" && setprop media.amplayer.nosubtitle 1'
-alias exfr12='echo 1 > /sys/module/amvideo/parameters/force_vskip_cnt'
-alias exfr34='echo 2 > /sys/module/amvideo/parameters/force_vskip_cnt'
-alias exfroff='echo 0 > /sys/module/amvideo/parameters/force_vskip_cnt'
-alias lexfr='cat /sys/module/amvideo/parameters/force_vskip_cnt'
-alias omxdbgon='echo "setprop media.omx.log_levels 255" && setprop media.omx.log_levels 255'
-alias omxdbgoff='echo "setprop media.omx.log_levels 0" && setprop media.omx.log_levels 0'
-alias nuffdbgon='echo "setprop media.ffmpegextractor.loglevel 255" && setprop media.ffmpegextractor.loglevel 255'
-alias nuffdbgoff='echo "setprop media.ffmpegextractor.loglevel 10" && setprop media.ffmpegextractor.loglevel 10'
-alias libffdbgon='setprop media.amplayer.loglevel 255'
-alias libffdbgoff='setprop media.amplayer.loglevel 10'
+#alias rendqon='echo "setprop media.hls.ptsdebug 8" && setprop media.hls.ptsdebug 8'
+#alias rendqoff='echo "setprop media.hls.ptsdebug 1" && setprop media.hls.ptsdebug 1'
+#alias logsrender='echo "logcat -c && logcat -s NU-NuPlayerRenderer" && logcat -c && logcat -s NU-NuPlayerRenderer'
+#alias logsamgensource='echo "logcat -c && logcat -s NU-GenericSource" && logcat -c && logcat -s NU-GenericSource'
+#alias logsextractor='echo "logcat -c && logcat -s AmFFmpegExtractor" && logcat -c && logcat -s AmFFmpegExtractor'
+#alias subton='echo "setprop media.amplayer.nosubtitle 0" && setprop media.amplayer.nosubtitle 0'
+#alias subtoff='echo "setprop media.amplayer.nosubtitle 1" && setprop media.amplayer.nosubtitle 1'
+#alias exfr12='echo 1 > /sys/module/amvideo/parameters/force_vskip_cnt'
+#alias exfr34='echo 2 > /sys/module/amvideo/parameters/force_vskip_cnt'
+#alias exfroff='echo 0 > /sys/module/amvideo/parameters/force_vskip_cnt'
+#alias lexfr='cat /sys/module/amvideo/parameters/force_vskip_cnt'
+alias omxdbgon='echo "setprop media.omx.log_levels 255; setprop vendor.media.omx.log_levels 255" && setprop media.omx.log_levels 255 && setprop vendor.media.omx.log_levels 255'
+alias omxdbgoff='echo "setprop media.omx.log_levels 0; setprop vendor.media.omx.log_levels 0" && setprop media.omx.log_levels 0 && setprop vendor.media.omx.log_levels 0'
+#alias nuffdbgon='echo "setprop media.ffmpegextractor.loglevel 255; setprop vendor.media.ffmpegextractor.loglevel 255" && setprop media.ffmpegextractor.loglevel 255 && setprop vendor.media.ffmpegextractor.loglevel 255'
+#alias nuffdbgoff='echo "setprop media.ffmpegextractor.loglevel 10; setprop media.ffmpegextractor.loglevel 10" && setprop media.ffmpegextractor.loglevel 10 && setprop vendor.media.ffmpegextractor.loglevel 10'
+#alias libffdbgon='setprop media.amplayer.loglevel 255'
+#alias libffdbgoff='setprop media.amplayer.loglevel 10'
 alias vpcrdbgon='echo 0x400000 > /sys/module/amvideo/parameters/debug_flag'
 alias vpcrdbgoff='echo 0 > /sys/module/amvideo/parameters/debug_flag'
 alias allpts='apts && vpts && pcr'
 alias logc='echo "logcat -c && logcat" && logcat -c && logcat'
 alias logs='echo "logcat -c && logcat -s" && logcat -c && logcat -s'
-alias killms='echo "kill $(busybox pidof mediaserver)" && kill $(busybox pidof mediaserver)'
-alias killme='kill $(busybox pidof media.extractor)'
-alias killmc='kill $(busybox pidof media.codec)'
+alias killms='echo "killall mediaserver" && killall mediaserver' 
+alias killme='echo "killall media.extractor" && killall media.extractor'
+alias killmc='echo "killall media.codec" && killall media.codec'
 alias debugms='echo "debuggerd $(busybox pidof mediaserver)" && debuggerd $(busybox pidof mediaserver)'
 alias debugme='echo "debuggerd $(busybox pidof media.extractor)" && debuggerd $(busybox pidof media.extractor)'
 alias debugsf='echo "debuggerd $(busybox pidof surfaceflinger)" && debuggerd $(busybox pidof surfaceflinger)'
@@ -219,16 +243,66 @@ alias dumpmc='debuggerd $(pidof media.codec)'
 alias dumpSF='dumpsys SurfaceFlinger'
 alias dibypass='echo 1 >/sys/module/di/parameters/bypass_all'
 alias dibypassstat='cat /sys/module/di/parameters/bypass_state'
-alias ntsstart='echo "am start -n com.netflix.ninja/com.netflix.ninja.MainActivity" && am start -n com.netflix.ninja/com.netflix.ninja.MainActivity'
+alias startnts='echo "am start -n com.netflix.ninja/com.netflix.ninja.MainActivity" && am start -n com.netflix.ninja/com.netflix.ninja.MainActivity'
 alias killnts='echo "killall com.netflix.ninja" && killall com.netflix.ninja'
 alias skipgg='pm disable com.google.android.tungsten.setupwraith;settings put secure user_setup_complete 1;settings put secure tv_user_setup_complete 1;settings put global device_provisioned 1'
-alias logf='((fpcnt=$fpcnt+1)); logcat -c; logcat > `date +%Y%m%d_%H-%M-%S`_${fpcnt}.log'
-alias dmsgclr='echo "dmesg -c > /dev/null" && dmesg -c > /dev/null'
+alias logf='((logcatfpcnt=$logcatfpcnt+1)); logcat -c; logcat > `date +%Y%m%d_%H-%M-%S`_logcat_${logcatfpcnt}.log'
+alias klogf='((kfpcnt=$kfpcnt+1)); dmesg > `date +%Y%m%d_%H-%M-%S`_k_${kfpcnt}.log'
+alias kdclr='echo "dmesg -c > /dev/null" && dmesg -c > /dev/null'
 alias bakboot='dd if=/dev/block/boot of=bootorg.img'
 alias remoteoff='echo "echo 0x02 > /sys/class/remote/amremote/protocol" && echo 0x02 > /sys/class/remote/amremote/protocol'
+#alias remoteon='echo "echo 0x01 > /sys/class/remote/amremote/protocol" && echo 0x01 > /sys/class/remote/amremote/protocol'
+#alias ffdemuxon='echo "setprop media.ffmpegextractor.force true; setprop vendor.media.ffmpegextractor.force true" && setprop media.ffmpegextractor.force true && setprop vendor.media.ffmpegextractor.force true'
+alias ffdemuxoff='setprop media.ffmpegextractor.force ""'
+alias resetlogcnt='kfpcnt=0;logcatfpcnt=0'
+alias underflow='echo "cat /sys/module/amvideo/parameters/underflow" && cat /sys/module/amvideo/parameters/underflow'
+alias trace_tagon='echo 0 > /sys/class/debug/atrace_tag; echo 1 > /sys/class/debug/atrace_tag; echo 2 > /sys/class/debug/atrace_tag; echo 3 > /sys/class/debug/atrace_tag;echo 4 > /sys/class/debug/atrace_tag; echo 5 > /sys/class/debug/atrace_tag'
+alias mytrace='file=/data/local/tmp/trace_`date +%Y%m%d_%H-%M-%S`; echo 1 > /sys/kernel/tracing/events/meson_atrace/enable;atrace -z -b 40000  video audio  ss freq binder_driver binder_lock gfx -t 10 -a \"*\"  -o $file; mv $file $PWD'
+alias alltrace="file1=/data/local/tmp/alltrace_`date +%Y%m%d_%H-%M-%S`;atrace -z -b 25000 gfx input view webview wm am sm audio  video camera hal res dalvik rs bionic power pm ss database network adb vibrator aidl pdx sched irq i2c freq idle disk mmc load sync workq memreclaim regulators binder_driver binder_lock pagecache ss -t 10 -a \"*\" -o $file1;mv $file1 $PWD"
+alias bakomx='cd /vendor/lib; tar cvfz omx-bak.tar.gz libOmxAudio.so libOmxCoreSw.so libOmxCore.so libOmxVideo.so libOmxBase.so libstagefrighthw.so libfpscalculator_alt.so libomx_av_core_alt.so libomx_worker_peer_alt.so libomx_timed_task_queue_alt.so libomx_framework_alt.so libomx_clock_utils_alt.so libthreadworker_alt.so libdatachunkqueue_alt.so; mv omx-bak.tar.gz /data/test; cd -; echo "bak omx so to /data/test/omx-bak.tar.gz"'
+alias ptson='echo "echo 0x400000 > /sys/module/amvideo/parameters/debug_flag" && echo 0x400000 > /sys/module/amvideo/parameters/debug_flag'
+alias ptsoff='echo "echo 0x0 > /sys/module/amvideo/parameters/debug_flag" && echo 0x0 > /sys/module/amvideo/parameters/debug_flag'
+alias vfm='echo "cat /sys/class/vfm/map" && cat /sys/class/vfm/map'
+alias toggle='echo "echo 0x400000 > /sys/module/amvideo/parameters/debug_flag" && echo 0x400000 > /sys/module/amvideo/parameters/debug_flag; echo 0x20 > /sys/class/video_composer/print_flag'
+alias untoggle='echo "echo 0 > /sys/module/amvideo/parameters/debug_flag" && echo 0 > /sys/module/amvideo/parameters/debug_flag; echo 0 > /sys/class/video_composer/print_flag;'
+alias myname='echo "input text shuanglong.wang@amlogic.com" && input text shuanglong.wang@amlogic.com'
+alias mypasswd='echo "input text Rpoc4MiZ1" && input text Rpoc4MiZ1'
+alias myntsname='echo "input text tester_shuanglong.wang@netflix.com" && input text tester_shuanglong.wang@netflix.com'
+alias myntspasswd='echo "input text Shuanglongwang123" && input text Amlogic@123'
+alias startyt='echo "am start -n com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity" && am start -n com.google.android.youtube.tv/com.google.android.apps.youtube.tv.activity.MainActivity'
+alias killyt='echo "killall com.google.android.youtube.tv" && killall com.google.android.youtube.tv'
+alias startexo='echo "am start com.droidlogic.exoplayer2.demo/com.droidlogic.combineplayer.ui.MainTabActivity" && am start com.droidlogic.exoplayer2.demo/com.droidlogic.combineplayer.ui.MainTabActivity'
+alias killexo='echo "killall com.droidlogic.exoplayer2.demo" && killall com.droidlogic.exoplayer2.demo'
+alias killomx='killall media.codec'
+alias killc2='killall android.hardware.media.c2@1.2-service'
+alias mhldbgon='setprop vendor.mediahal.loglevels 15;setprop vendor.mediasync.debug.level 2;setprop vendor.media.mediahal.mediasync.debug_level 2'
+alias mhldbgoff='setprop vendor.mediahal.loglevels 1;setprop vendor.mediasync.debug.level 1;setprop vendor.media.mediahal.mediasync.debug_level 1'
+alias c2dbgon='setprop debug.vendor.media.c2.vdec.loglevels 15'
+alias c2dbgoff='setprop debug.vendor.media.c2.vdec.loglevels 1'
+alias vcdbgon='echo 0x20 > /sys/class/video_composer/print_flag'
+alias vcdbgoff='echo 0 > /sys/class/video_composer/print_flag'
+alias dropdbgon='c2dbgon; mhldbgon;vcdbgon'
+alias dropdbgoff='c2dbgoff; mhldbgoff;vcdbgoff'
+alias droplog='export logdir=/data;dmesg -c > /dev/null;echo 0 > /proc/sys/kernel/printk;dropdbgon;rm -rf $logdir/logcat.log; rm -rf $logdir/kernel.log;logcat -c; logcat -G 4M; logcat > $logdir/logcat.log & dmesg -w > $logdir/kernel.log&'
+alias u='input keyevent 19'
+alias d='input keyevent 20'
+alias l='input keyevent 21'
+alias r='input keyevent 22'
+alias b='input keyevent 4'
+alias e='input keyevent 66'
+alias p='input keyevent 26'
+alias h='input keyevent 3'
+alias vu='input keyevent 24'
+alias vd='input keyevent 25'
+alias zone8time='setprop persist.sys.timezone GMT+08'
+alias startmulti='am start com.presentation.videoplay/com.presentation.videoplay.ui.MainActivity'
+alias killmulti='killall com.presentation.videoplay'
 
+mount -o remount,rw -t ext4 /dev/root /
 mount -o rw,remount /dev/block/system  /system
 mount -o remount,rw /vendor
+mount -t debugfs nondev /sys/kernel/debug
+setprop persist.sys.timezone GMT+08
 #pm disable com.android.bluetooth
 
 if [ ! -d "/data/test" ]
